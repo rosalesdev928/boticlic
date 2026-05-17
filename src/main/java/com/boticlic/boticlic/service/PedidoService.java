@@ -15,6 +15,7 @@ public class PedidoService {
 
     private final PedidoRepository pedidoRepository;
     private final ProductoRepository productoRepository;
+    private final NotificacionService notificacionService;
 
     public Pedido crearPedido(Pedido pedido) {
         double total = 0;
@@ -32,7 +33,13 @@ public class PedidoService {
         }
         pedido.setTotal(total);
         pedido.setEstado("PENDIENTE");
-        return pedidoRepository.save(pedido);
+        Pedido pedidoGuardado = pedidoRepository.save(pedido);
+        notificacionService.notificarPedidoConfirmado(
+                pedido.getUsuario().getEmail(),
+                pedidoGuardado.getId(),
+                pedidoGuardado.getTotal()
+        );
+        return pedidoGuardado;
     }
 
     public List<Pedido> listarPorUsuario(Long usuarioId) {
@@ -47,11 +54,21 @@ public class PedidoService {
         Pedido pedido = pedidoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Pedido no encontrado"));
         pedido.setEstado(estado);
-        return pedidoRepository.save(pedido);
+        Pedido actualizado = pedidoRepository.save(pedido);
+        notificacionService.notificarCambioDEstado(
+                pedido.getUsuario().getEmail(),
+                String.valueOf(pedido.getId()),
+                estado
+        );
+        return actualizado;
     }
 
     public Pedido buscarPorId(Long id) {
         return pedidoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Pedido no encontrado"));
+    }
+
+    public List<Pedido> historialPorUsuario(Long usuarioId) {
+        return pedidoRepository.findByUsuarioId(usuarioId);
     }
 }
