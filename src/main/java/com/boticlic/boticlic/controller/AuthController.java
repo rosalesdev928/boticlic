@@ -30,7 +30,8 @@ public class AuthController {
                 .map(u -> ResponseEntity.ok(Map.of(
                         "token",  jwtUtil.generarToken(u.getEmail(), u.getRol()),
                         "rol",    u.getRol(),
-                        "nombre", u.getNombre()
+                        "nombre", u.getNombre(),
+                        "id",     u.getId()
                 )))
                 .orElse(ResponseEntity.status(401).build());
     }

@@ -4,163 +4,165 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BotiClic - Iniciar Sesión</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-
         body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #1a237e 0%, #283593 50%, #1565c0 100%);
+            font-family: 'DM Sans', Arial, sans-serif;
+            background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 50%, #388e3c 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
         }
-
-        .login-container {
+        .login-box {
             background: white;
-            border-radius: 16px;
-            padding: 40px;
+            border-radius: 20px;
+            padding: 45px 40px;
             width: 100%;
-            max-width: 400px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 420px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.3);
         }
-
         .logo {
             text-align: center;
             margin-bottom: 30px;
         }
-
-        .logo h1 {
-            font-size: 32px;
-            color: #1a237e;
-            font-weight: bold;
+        .logo h1 { font-size: 30px; color: #1b5e20; font-weight: 700; }
+        .logo p { color: #888; font-size: 14px; margin-top: 4px; }
+        .tabs {
+            display: flex;
+            background: #f5f5f5;
+            border-radius: 10px;
+            padding: 4px;
+            margin-bottom: 24px;
         }
-
-        .logo p {
-            color: #666;
-            font-size: 14px;
-            margin-top: 5px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #333;
-            font-size: 14px;
-            font-weight: bold;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background: transparent;
             border-radius: 8px;
-            font-size: 15px;
-            transition: border-color 0.3s;
-            outline: none;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: 'DM Sans', sans-serif;
+            cursor: pointer;
+            color: #888;
+            transition: all 0.2s;
         }
-
-        .form-group input:focus {
-            border-color: #1a237e;
+        .tab-btn.activo {
+            background: white;
+            color: #1b5e20;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
-
-        .btn-login {
+        .form-section { display: none; }
+        .form-section.activo { display: block; }
+        label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+        input {
             width: 100%;
-            padding: 14px;
-            background: #1a237e;
+            padding: 12px 14px;
+            margin-bottom: 16px;
+            border: 1.5px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: 'DM Sans', sans-serif;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        input:focus { border-color: #2e7d32; }
+        .btn-primary {
+            width: 100%;
+            padding: 13px;
+            background: #2e7d32;
             color: white;
             border: none;
             border-radius: 8px;
-            font-size: 16px;
-            font-weight: bold;
+            font-size: 15px;
+            font-weight: 700;
+            font-family: 'DM Sans', sans-serif;
             cursor: pointer;
-            transition: background 0.3s;
-            margin-top: 10px;
+            transition: background 0.2s;
         }
-
-        .btn-login:hover {
-            background: #283593;
-        }
-
-        .btn-login:disabled {
-            background: #9e9e9e;
-            cursor: not-allowed;
-        }
-
-        .error-msg {
+        .btn-primary:hover { background: #1b5e20; }
+        .btn-primary:disabled { background: #aaa; cursor: not-allowed; }
+        .error-box {
             background: #ffebee;
             color: #c62828;
-            padding: 12px;
+            padding: 10px 14px;
             border-radius: 8px;
-            font-size: 14px;
-            margin-top: 15px;
-            text-align: center;
+            font-size: 13px;
+            margin-bottom: 14px;
             display: none;
         }
-
-        .loading {
-            text-align: center;
-            color: #666;
-            font-size: 14px;
-            margin-top: 15px;
+        .success-box {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-bottom: 14px;
             display: none;
         }
-
         .volver {
             text-align: center;
             margin-top: 20px;
+            font-size: 13px;
+            color: #888;
         }
-
-        .volver a {
-            color: #1a237e;
-            text-decoration: none;
-            font-size: 14px;
-        }
-
-        .volver a:hover {
-            text-decoration: underline;
-        }
-
-        /* Indicador de rol */
-        .rol-badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: bold;
-            margin-top: 8px;
-        }
+        .volver a { color: #2e7d32; font-weight: 600; text-decoration: none; }
+        .volver a:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
 
-<div class="login-container">
+<div class="login-box">
     <div class="logo">
         <h1>💊 BotiClic</h1>
-        <p>Farmacia Digital</p>
+        <p>Tu farmacia digital de confianza</p>
     </div>
 
-    <div class="form-group">
+    <!-- TABS -->
+    <div class="tabs">
+        <button class="tab-btn activo" onclick="cambiarTab('login', this)">Iniciar Sesión</button>
+        <button class="tab-btn" onclick="cambiarTab('registro', this)">Crear Cuenta</button>
+    </div>
+
+    <!-- LOGIN -->
+    <div class="form-section activo" id="secLogin">
+        <div class="error-box" id="loginError"></div>
+        <div class="success-box" id="loginSuccess"></div>
         <label>Correo electrónico</label>
-        <input type="email" id="email" placeholder="tu@email.com" />
-    </div>
-
-    <div class="form-group">
+        <input type="email" id="loginEmail" placeholder="tu@email.com"
+               onkeypress="if(event.key==='Enter') iniciarSesion()">
         <label>Contraseña</label>
-        <input type="password" id="password" placeholder="••••••••"
-               onkeypress="if(event.key==='Enter') login()" />
+        <input type="password" id="loginPassword" placeholder="••••••••"
+               onkeypress="if(event.key==='Enter') iniciarSesion()">
+        <button class="btn-primary" id="btnLogin" onclick="iniciarSesion()">
+            Iniciar Sesión
+        </button>
     </div>
 
-    <button class="btn-login" id="btnLogin" onclick="login()">
-        Iniciar Sesión
-    </button>
-
-    <div class="error-msg" id="errorMsg"></div>
-    <div class="loading" id="loading">⏳ Verificando credenciales...</div>
+    <!-- REGISTRO -->
+    <div class="form-section" id="secRegistro">
+        <div class="error-box" id="regError"></div>
+        <div class="success-box" id="regSuccess"></div>
+        <label>Nombre completo</label>
+        <input type="text" id="regNombre" placeholder="Juan Pérez">
+        <label>Correo electrónico</label>
+        <input type="email" id="regEmail" placeholder="tu@email.com">
+        <label>Contraseña</label>
+        <input type="password" id="regPassword" placeholder="Mínimo 6 caracteres">
+        <button class="btn-primary" id="btnRegistro" onclick="registrarse()">
+            Crear Cuenta
+        </button>
+    </div>
 
     <div class="volver">
         <a href="/index.html">← Volver a la tienda</a>
@@ -170,92 +172,153 @@
 <script>
     const API = 'http://localhost:8081/api';
 
-    // Si ya hay sesión activa, redirigir directamente
+    // Si ya hay sesión activa, redirigir
     window.onload = function() {
         const token = localStorage.getItem('token');
         const rol   = localStorage.getItem('rol');
-        if (token && rol) {
-            redirigirSegunRol(rol);
+        const usuario = localStorage.getItem('usuario');
+        if (token) {
+            const rolReal = rol || (usuario ? JSON.parse(usuario).rol : null);
+            if (rolReal) redirigirSegunRol(rolReal);
         }
     };
 
-    async function login() {
-        const email    = document.getElementById('email').value.trim();
-        const password = document.getElementById('password').value;
-        const btnLogin = document.getElementById('btnLogin');
-        const errorMsg = document.getElementById('errorMsg');
-        const loading  = document.getElementById('loading');
+    function cambiarTab(tab, btn) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('activo'));
+        document.querySelectorAll('.form-section').forEach(s => s.classList.remove('activo'));
+        btn.classList.add('activo');
+        document.getElementById(tab === 'login' ? 'secLogin' : 'secRegistro').classList.add('activo');
+    }
 
-        // Validar campos
+    async function iniciarSesion() {
+        const email    = document.getElementById('loginEmail').value.trim();
+        const password = document.getElementById('loginPassword').value;
+        const errEl    = document.getElementById('loginError');
+        const sucEl    = document.getElementById('loginSuccess');
+        const btn      = document.getElementById('btnLogin');
+        errEl.style.display = 'none';
+        sucEl.style.display = 'none';
+
         if (!email || !password) {
-            mostrarError('Por favor ingresa tu correo y contraseña.');
+            errEl.textContent = '⚠️ Completa todos los campos.';
+            errEl.style.display = 'block';
             return;
         }
 
-        // Mostrar cargando
-        btnLogin.disabled = true;
-        btnLogin.textContent = 'Iniciando sesión...';
-        loading.style.display = 'block';
-        errorMsg.style.display = 'none';
+        btn.disabled = true;
+        btn.textContent = 'Iniciando sesión...';
 
         try {
-            const response = await fetch(`${API}/auth/login`, {
+            const res = await fetch(`${API}/auth/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password })
             });
 
-            if (response.ok) {
-                const data = await response.json();
+            if (res.ok) {
+                const data = await res.json();
 
-                // Guardar token y datos en localStorage
+                // Guardar token y datos
                 localStorage.setItem('token',  data.token);
                 localStorage.setItem('rol',    data.rol);
                 localStorage.setItem('nombre', data.nombre);
                 localStorage.setItem('email',  email);
 
-                // Redirigir según el rol
-                redirigirSegunRol(data.rol);
+                // ✅ Guardar objeto usuario completo (con id) para el index.html
+                localStorage.setItem('usuario', JSON.stringify({
+                    id:     data.id,
+                    nombre: data.nombre,
+                    email:  email,
+                    rol:    data.rol
+                }));
 
-            } else if (response.status === 401) {
-                mostrarError('Correo o contraseña incorrectos.');
+                sucEl.textContent = `✅ ¡Bienvenido, ${data.nombre}! Redirigiendo...`;
+                sucEl.style.display = 'block';
+
+                setTimeout(() => redirigirSegunRol(data.rol), 800);
+
+            } else if (res.status === 401) {
+                errEl.textContent = '❌ Correo o contraseña incorrectos.';
+                errEl.style.display = 'block';
             } else {
-                mostrarError('Error del servidor. Intenta de nuevo.');
+                errEl.textContent = '❌ Error del servidor. Intenta de nuevo.';
+                errEl.style.display = 'block';
             }
-
-        } catch (error) {
-            mostrarError('No se pudo conectar al servidor. ¿Está corriendo el backend?');
+        } catch(e) {
+            errEl.textContent = '❌ No se pudo conectar al servidor. ¿Está corriendo el backend?';
+            errEl.style.display = 'block';
         } finally {
-            btnLogin.disabled = false;
-            btnLogin.textContent = 'Iniciar Sesión';
-            loading.style.display = 'none';
+            btn.disabled = false;
+            btn.textContent = 'Iniciar Sesión';
+        }
+    }
+
+    async function registrarse() {
+        const nombre   = document.getElementById('regNombre').value.trim();
+        const email    = document.getElementById('regEmail').value.trim();
+        const password = document.getElementById('regPassword').value;
+        const errEl    = document.getElementById('regError');
+        const sucEl    = document.getElementById('regSuccess');
+        const btn      = document.getElementById('btnRegistro');
+        errEl.style.display = 'none';
+        sucEl.style.display = 'none';
+
+        if (!nombre || !email || !password) {
+            errEl.textContent = '⚠️ Completa todos los campos.';
+            errEl.style.display = 'block';
+            return;
+        }
+        if (password.length < 6) {
+            errEl.textContent = '⚠️ La contraseña debe tener mínimo 6 caracteres.';
+            errEl.style.display = 'block';
+            return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = 'Creando cuenta...';
+
+        try {
+            const res = await fetch(`${API}/usuarios/registrar`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nombre, email, password, rol: 'CLIENTE' })
+            });
+
+            if (res.ok) {
+                sucEl.textContent = '✅ ¡Cuenta creada! Iniciando sesión...';
+                sucEl.style.display = 'block';
+                // Auto-login
+                document.getElementById('loginEmail').value = email;
+                document.getElementById('loginPassword').value = password;
+                setTimeout(async () => {
+                    cambiarTab('login', document.querySelector('.tab-btn'));
+                    await iniciarSesion();
+                }, 1200);
+            } else {
+                const txt = await res.text();
+                errEl.textContent = txt.includes('registrado')
+                    ? '❌ Este correo ya está registrado.'
+                    : '❌ Error al crear cuenta.';
+                errEl.style.display = 'block';
+            }
+        } catch(e) {
+            errEl.textContent = '❌ Error de conexión.';
+            errEl.style.display = 'block';
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Crear Cuenta';
         }
     }
 
     function redirigirSegunRol(rol) {
-        switch (rol) {
-            case 'ADMIN':
-                window.location.href = '/admin.html';
-                break;
-            case 'FARMACEUTICO':
-                window.location.href = '/farmaceutico.html';
-                break;
-            case 'DELIVERY':
-                window.location.href = '/delivery.html';
-                break;
-            case 'CLIENTE':
-            default:
-                window.location.href = '/index.html';
-                break;
-        }
-    }
-
-    function mostrarError(mensaje) {
-        const errorMsg = document.getElementById('errorMsg');
-        errorMsg.textContent = mensaje;
-        errorMsg.style.display = 'block';
+        const rutas = {
+            'ADMIN':         '/admin.html',
+            'FARMACEUTICO':  '/farmaceutico.html',
+            'DELIVERY':      '/delivery.html',
+            'CLIENTE':       '/index.html'
+        };
+        window.location.href = rutas[rol] || '/index.html';
     }
 </script>
-
 </body>
 </html>

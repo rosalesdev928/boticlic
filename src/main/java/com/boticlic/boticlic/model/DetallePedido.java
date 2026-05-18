@@ -1,5 +1,7 @@
 package com.boticlic.boticlic.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -12,21 +14,25 @@ public class DetallePedido {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // ✅ Ignora el pedido al serializar (corta el ciclo Pedido → Detalle → Pedido)
+    @JsonIgnore
     @ManyToOne
-    @JoinColumn(name = "pedido_id", nullable = false)
+    @JoinColumn(name = "pedido_id")
     private Pedido pedido;
 
+    // ✅ Solo serializa datos básicos del producto
+    @JsonIgnoreProperties({"descripcion", "stock", "stockMinimo", "disponible", "imagen"})
     @ManyToOne
-    @JoinColumn(name = "producto_id", nullable = false)
+    @JoinColumn(name = "producto_id")
     private Producto producto;
 
-    @Column(nullable = false)
     private Integer cantidad;
-
-    @Column(nullable = false)
     private Double precioUnitario;
 
     public Double getSubtotal() {
-        return cantidad * precioUnitario;
+        if (cantidad != null && precioUnitario != null) {
+            return cantidad * precioUnitario;
+        }
+        return 0.0;
     }
 }

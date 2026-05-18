@@ -19,7 +19,6 @@ public class SecurityConfig {
 
     private final JwtFiltro jwtFiltro;
 
-    // ✅ Bean que faltaba - encriptación de contraseñas
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -32,32 +31,35 @@ public class SecurityConfig {
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
 
-                        // ✅ Rutas públicas
+                        // ✅ PÚBLICAS — sin token
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/usuarios/registrar").permitAll() // ← AGREGAR ESTA LÍNEA
+                        .requestMatchers("/api/usuarios/registrar").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/productos/**").permitAll()
                         .requestMatchers(
-                                "/", "/index.html", "/admin.html",
-                                "/farmaceutico.html", "/delivery.html", "/login.html",
-                                "/*.css", "/*.js", "/images/**"
+                                "/", "/index.html", "/admin.html", "/farmaceutico.html",
+                                "/delivery.html", "/login.html", "/Login.html",
+                                "/*.css", "/*.js", "/Auth guard.js", "/images/**"
                         ).permitAll()
 
-                        // ✅ Ver productos es público
-                        .requestMatchers(HttpMethod.GET, "/api/productos/**").permitAll()
+                        // ✅ CLIENTE — ver y crear SUS pedidos (PRIMERO, antes de las reglas de admin)
+                        .requestMatchers(HttpMethod.POST, "/api/pedidos").hasAnyRole("CLIENTE", "ADMIN", "FARMACEUTICO")
+                        .requestMatchers(HttpMethod.GET, "/api/pedidos/usuario/**").hasAnyRole("CLIENTE", "ADMIN")
 
-                        // 🔒 Solo ADMIN gestiona usuarios
+                        // ✅ ADMIN y FARMACEUTICO — gestión completa de pedidos
+                        .requestMatchers(HttpMethod.GET, "/api/pedidos/estado/**").hasAnyRole("ADMIN", "FARMACEUTICO")
+                        .requestMatchers(HttpMethod.GET, "/api/pedidos/**").hasAnyRole("ADMIN", "FARMACEUTICO")
+                        .requestMatchers(HttpMethod.PUT, "/api/pedidos/**").hasAnyRole("ADMIN", "FARMACEUTICO")
+
+                        // ✅ ADMIN — gestión de usuarios
                         .requestMatchers("/api/usuarios/**").hasRole("ADMIN")
 
-                        // 🔒 Solo FARMACEUTICO crea/edita/elimina productos
-                        .requestMatchers(HttpMethod.POST,   "/api/productos/**").hasRole("FARMACEUTICO")
-                        .requestMatchers(HttpMethod.PUT,    "/api/productos/**").hasRole("FARMACEUTICO")
+                        // ✅ FARMACEUTICO — gestión de productos
+                        .requestMatchers(HttpMethod.POST, "/api/productos/**").hasRole("FARMACEUTICO")
+                        .requestMatchers(HttpMethod.PUT, "/api/productos/**").hasRole("FARMACEUTICO")
                         .requestMatchers(HttpMethod.DELETE, "/api/productos/**").hasRole("FARMACEUTICO")
 
-                        // 🔒 Solo DELIVERY ve sus pedidos
-                        .requestMatchers("/api/delivery/**").hasRole("DELIVERY")
-
-                        // 🔒 ADMIN y FARMACEUTICO cambian estado de pedidos
-                        .requestMatchers(HttpMethod.PUT, "/api/pedidos/*/estado")
-                        .hasAnyRole("ADMIN", "FARMACEUTICO")
+                        // ✅ DELIVERY
+                        .requestMatchers("/api/delivery/**").hasAnyRole("DELIVERY", "ADMIN")
 
                         // 🔒 Todo lo demás requiere autenticación
                         .anyRequest().authenticated()
