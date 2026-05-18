@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BotiClic — Panel Farmacéutico</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'DM Sans', Arial, sans-serif; background: #f0f4f8; color: #1a2332; }
+    header { background: linear-gradient(135deg, #00695c 0%, #00897b 100%); color: white; padding: 0 30px; height: 60px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 12px rgba(0,105,92,0.3); }
+    .header-left { display: flex; align-items: center; gap: 12px; }
+    .header-left h1 { font-size: 18px; font-weight: 700; }
+    .rol-badge { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
+    .header-right { display: flex; align-items: center; gap: 15px; }
+    .header-right .usuario { font-size: 13px; color: rgba(255,255,255,0.85); }
+    .btn-logout { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 7px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-family: 'DM Sans', sans-serif; transition: background 0.2s; }
+    .btn-logout:hover { background: rgba(255,255,255,0.25); }
+    .tabs { background: #004d40; display: flex; padding: 0 30px; gap: 2px; }
+    .tab { padding: 14px 22px; color: rgba(255,255,255,0.65); cursor: pointer; font-size: 13px; font-weight: 500; border-bottom: 3px solid transparent; transition: all 0.2s; display: flex; align-items: center; gap: 8px; }
+    .tab:hover { color: white; background: rgba(255,255,255,0.05); }
+    .tab.activo { color: #69f0ae; border-bottom-color: #69f0ae; }
+    .tab-count { background: rgba(255,255,255,0.2); color: white; border-radius: 10px; font-size: 11px; padding: 1px 7px; font-weight: 700; }
+    .tab.activo .tab-count { background: rgba(105,240,174,0.25); color: #69f0ae; }
+    .alerta-stock { background: #fff3e0; border-left: 4px solid #f57c00; color: #e65100; padding: 12px 20px; margin: 20px 30px 0; border-radius: 6px; font-size: 13px; display: none; align-items: center; gap: 10px; }
+    .alerta-stock.visible { display: flex; }
+    .contenido { max-width: 1300px; margin: 25px auto; padding: 0 25px; }
+    .seccion { display: none; }
+    .seccion.activo { display: block; }
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 25px; }
+    .stat { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); display: flex; align-items: center; gap: 15px; }
+    .stat-icon { width: 46px; height: 46px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+    .stat-icon.verde { background: #e8f5e9; }
+    .stat-icon.naranja { background: #fff3e0; }
+    .stat-icon.rojo { background: #ffebee; }
+    .stat-icon.azul { background: #e3f2fd; }
+    .stat-info h2 { font-size: 26px; font-weight: 700; color: #1a2332; line-height: 1; }
+    .stat-info p { font-size: 12px; color: #6b7a8d; margin-top: 3px; }
+    .card { background: white; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); margin-bottom: 20px; overflow: hidden; }
+    .card-header { padding: 16px 20px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; }
+    .card-header h3 { font-size: 15px; font-weight: 600; color: #1a2332; }
+    .card-body { padding: 20px; }
+    .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 14px; }
+    .form-group label { display: block; font-size: 12px; font-weight: 600; color: #6b7a8d; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.4px; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 9px 12px; border: 1.5px solid #e0e4ea; border-radius: 7px; font-size: 14px; font-family: 'DM Sans', sans-serif; color: #1a2332; background: #fafbfc; outline: none; transition: border-color 0.2s; }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #00897b; background: white; }
+    .form-group textarea { resize: vertical; min-height: 70px; }
+    table { width: 100%; border-collapse: collapse; }
+    th { background: #f7f9fc; color: #6b7a8d; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; padding: 11px 14px; text-align: left; border-bottom: 2px solid #eef0f4; }
+    td { padding: 12px 14px; border-bottom: 1px solid #f4f5f7; font-size: 13px; vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #fafbfc; }
+    .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+    .badge-verde { background: #e8f5e9; color: #2e7d32; }
+    .badge-rojo { background: #ffebee; color: #c62828; }
+    .badge-naranja { background: #fff3e0; color: #e65100; }
+    .badge-azul { background: #e3f2fd; color: #1565c0; }
+    .badge-gris { background: #f4f5f7; color: #6b7a8d; }
+    .badge-morado { background: #f3e5f5; color: #6a1b9a; }
+    .stock-bar-wrap { min-width: 100px; }
+    .stock-bar { height: 6px; background: #eef0f4; border-radius: 3px; overflow: hidden; margin-bottom: 3px; }
+    .stock-bar-fill { height: 100%; border-radius: 3px; }
+    .stock-bar-fill.alto { background: #43a047; }
+    .stock-bar-fill.medio { background: #fb8c00; }
+    .stock-bar-fill.bajo { background: #e53935; }
+    .stock-num { font-size: 11px; color: #6b7a8d; font-family: 'DM Mono', monospace; }
+    .btn { padding: 7px 14px; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-family: 'DM Sans', sans-serif; font-weight: 600; transition: all 0.15s; display: inline-flex; align-items: center; gap: 5px; }
+    .btn-primary { background: #00897b; color: white; }
+    .btn-primary:hover { background: #00695c; }
+    .btn-danger { background: #e53935; color: white; }
+    .btn-danger:hover { background: #c62828; }
+    .btn-warning { background: #fb8c00; color: white; }
+    .btn-warning:hover { background: #e65100; }
+    .btn-info { background: #1e88e5; color: white; }
+    .btn-info:hover { background: #1565c0; }
+    .btn-ghost { background: transparent; border: 1.5px solid #e0e4ea; color: #6b7a8d; }
+    .btn-ghost:hover { border-color: #00897b; color: #00897b; }
+    .btn-sm { padding: 5px 10px; font-size: 11px; }
+    .search-bar { display: flex; gap: 10px; margin-bottom: 16px; align-items: center; padding: 16px 16px 0; }
+    .search-bar input { flex: 1; padding: 9px 14px; border: 1.5px solid #e0e4ea; border-radius: 7px; font-size: 13px; font-family: 'DM Sans', sans-serif; outline: none; background: white; }
+    .search-bar input:focus { border-color: #00897b; }
+    .search-bar select { padding: 9px 14px; border: 1.5px solid #e0e4ea; border-radius: 7px; font-size: 13px; font-family: 'DM Sans', sans-serif; outline: none; background: white; }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 1000; display: none; align-items: center; justify-content: center; }
+    .modal-overlay.visible { display: flex; }
+    .modal { background: white; border-radius: 12px; width: 560px; max-width: 95vw; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+    .modal-header { padding: 20px 24px 16px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; }
+    .modal-header h3 { font-size: 16px; font-weight: 700; }
+    .modal-close { background: none; border: none; font-size: 22px; cursor: pointer; color: #6b7a8d; line-height: 1; padding: 0; }
+    .modal-body { padding: 20px 24px; }
+    .modal-footer { padding: 16px 24px; border-top: 1px solid #f0f0f0; display: flex; justify-content: flex-end; gap: 10px; }
+    .info-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f4f5f7; font-size: 13px; }
+    .info-row:last-child { border-bottom: none; }
+    .info-row span:first-child { color: #6b7a8d; font-weight: 500; }
+    .info-row span:last-child { color: #1a2332; font-weight: 600; }
+    .receta-sin-img { width: 100%; height: 160px; background: #f7f9fc; border: 2px dashed #e0e4ea; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #b0b8c4; font-size: 13px; margin-bottom: 15px; text-align: center; gap: 6px; }
+    .detalle-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #f4f5f7; font-size: 13px; }
+    .detalle-item:last-child { border-bottom: none; }
+    .cat-pill { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; background: #e8f5e9; color: #2e7d32; }
+    .acciones { display: flex; gap: 6px; flex-wrap: wrap; }
+    .empty-state { text-align: center; padding: 50px 20px; color: #b0b8c4; }
+    .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+    .empty-state p { font-size: 14px; }
+    .loading-row td { text-align: center; padding: 30px; color: #b0b8c4; font-size: 13px; }
+    .toast { position: fixed; bottom: 24px; right: 24px; padding: 12px 20px; border-radius: 8px; color: white; font-size: 13px; font-weight: 500; z-index: 9999; display: none; align-items: center; gap: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+    .toast.visible { display: flex; }
+    .toast.exito { background: #43a047; }
+    .toast.error { background: #e53935; }
+    .toast.info { background: #1e88e5; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <h1>💊 BotiClic</h1>
+    <span class="rol-badge">Farmacéutico</span>
+  </div>
+  <div class="header-right">
+    <span class="usuario" id="usuarioNombre">—</span>
+    <button class="btn-logout" onclick="cerrarSesion()">🚪 Cerrar sesión</button>
+  </div>
+</header>
+
+<div class="tabs">
+  <div class="tab activo" onclick="mostrarTab('inventario', this)">📦 Inventario <span class="tab-count" id="cntInventario">0</span></div>
+  <div class="tab" onclick="mostrarTab('pedidos', this)">🛒 Pedidos <span class="tab-count" id="cntPedidos">0</span></div>
+  <div class="tab" onclick="mostrarTab('recetas', this)">📋 Recetas <span class="tab-count" id="cntRecetas">0</span></div>
+  <div class="tab" onclick="mostrarTab('stockbajo', this)">⚠️ Stock Bajo <span class="tab-count" id="cntStockBajo">0</span></div>
+</div>
+
+<div class="alerta-stock" id="alertaStock">
+  ⚠️ <span id="alertaStockMsg">Hay productos con stock bajo.</span>
+</div>
+
+<div class="contenido">
+
+  <!-- INVENTARIO -->
+  <div class="seccion activo" id="inventario">
+    <div class="card">
+      <div class="card-header">
+        <h3 id="formTitulo">➕ Nuevo Producto</h3>
+        <button class="btn btn-ghost btn-sm" id="btnCancelar" onclick="cancelarEdicion()" style="display:none">✕ Cancelar</button>
+      </div>
+      <div class="card-body">
+        <input type="hidden" id="productoId">
+        <div class="form-grid">
+          <div class="form-group"><label>Nombre *</label><input type="text" id="pNombre" placeholder="Ej: Paracetamol 500mg"></div>
+          <div class="form-group"><label>Categoría</label>
+            <select id="pCategoria">
+              <option value="">Sin categoría</option>
+              <option value="Analgésico">Analgésico</option>
+              <option value="Antibiótico">Antibiótico</option>
+              <option value="Antiinflamatorio">Antiinflamatorio</option>
+              <option value="Vitaminas">Vitaminas</option>
+              <option value="Suplemento">Suplemento</option>
+              <option value="Antihistamínico">Antihistamínico</option>
+              <option value="Cuidado Personal">Cuidado Personal</option>
+              <option value="Otro">Otro</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Precio (S/) *</label><input type="number" id="pPrecio" placeholder="0.00" min="0" step="0.01"></div>
+        </div>
+        <div class="form-grid">
+          <div class="form-group"><label>Stock actual *</label><input type="number" id="pStock" placeholder="0" min="0"></div>
+          <div class="form-group"><label>Stock mínimo</label><input type="number" id="pStockMinimo" placeholder="5" value="5" min="0"></div>
+          <div class="form-group"><label>URL Imagen</label><input type="text" id="pImagen" placeholder="https://..."></div>
+        </div>
+        <div class="form-group" style="margin-bottom:14px">
+          <label>Descripción</label>
+          <textarea id="pDescripcion" placeholder="Descripción breve..."></textarea>
+        </div>
+        <button class="btn btn-primary" onclick="guardarProducto()"><span id="btnGuardarTxt">✅ Guardar Producto</span></button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <h3>🗂️ Catálogo de Productos</h3>
+        <button class="btn btn-ghost btn-sm" onclick="cargarProductos()">🔄 Actualizar</button>
+      </div>
+      <div class="card-body" style="padding:0">
+        <div class="search-bar">
+          <input type="text" id="buscarProducto" placeholder="🔍 Buscar por nombre..." oninput="filtrarProductos()">
+          <select id="filtroCategoria" onchange="filtrarProductos()">
+            <option value="">Todas las categorías</option>
+            <option value="Analgésico">Analgésico</option>
+            <option value="Antibiótico">Antibiótico</option>
+            <option value="Antiinflamatorio">Antiinflamatorio</option>
+            <option value="Vitaminas">Vitaminas</option>
+            <option value="Suplemento">Suplemento</option>
+            <option value="Cuidado Personal">Cuidado Personal</option>
+          </select>
+        </div>
+        <table>
+          <thead><tr><th>ID</th><th>Producto</th><th>Categoría</th><th>Precio</th><th>Stock</th><th>Estado</th><th>Acciones</th></tr></thead>
+          <tbody id="tablaProductos"><tr class="loading-row"><td colspan="7">⏳ Cargando productos...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- PEDIDOS -->
+  <div class="seccion" id="pedidos">
+    <div class="card">
+      <div class="card-header">
+        <h3>🛒 Gestión de Pedidos</h3>
+        <div style="display:flex;gap:8px;align-items:center">
+          <select id="filtroPedidoEstado" onchange="cargarPedidos()" style="padding:7px 12px;border:1.5px solid #e0e4ea;border-radius:6px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;background:white;">
+            <option value="todos">Todos los estados</option>
+            <option value="PENDIENTE">Pendiente</option>
+            <option value="CONFIRMADO">Confirmado</option>
+            <option value="EN_PREPARACION">En preparación</option>
+            <option value="EN_CAMINO">En camino</option>
+            <option value="ENTREGADO">Entregado</option>
+          </select>
+          <button class="btn btn-ghost btn-sm" onclick="cargarPedidos()">🔄</button>
+        </div>
+      </div>
+      <div class="card-body" style="padding:0">
+        <table>
+          <thead><tr><th>ID</th><th>Cliente</th><th>Dirección</th><th>Total</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr></thead>
+          <tbody id="tablaPedidos"><tr class="loading-row"><td colspan="7">⏳ Cargando pedidos...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- RECETAS -->
+  <div class="seccion" id="recetas">
+    <div class="card">
+      <div class="card-header">
+        <h3>📋 Validación de Recetas Médicas</h3>
+        <span style="font-size:12px;color:#6b7a8d">HU-08 — Pedidos PENDIENTE esperando aprobación</span>
+      </div>
+      <div class="card-body" style="padding:0">
+        <table>
+          <thead><tr><th>Pedido</th><th>Cliente</th><th>Productos</th><th>Total</th><th>Estado</th><th>Acciones</th></tr></thead>
+          <tbody id="tablaRecetas"><tr class="loading-row"><td colspan="6">⏳ Cargando...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- STOCK BAJO -->
+  <div class="seccion" id="stockbajo">
+    <div class="card">
+      <div class="card-header">
+        <h3>⚠️ Productos con Stock Bajo</h3>
+        <button class="btn btn-ghost btn-sm" onclick="cargarStockBajo()">🔄 Actualizar</button>
+      </div>
+      <div class="card-body" style="padding:0">
+        <table>
+          <thead><tr><th>Producto</th><th>Categoría</th><th>Stock actual</th><th>Stock mínimo</th><th>Urgencia</th><th>Acciones</th></tr></thead>
+          <tbody id="tablaStockBajo"><tr class="loading-row"><td colspan="6">⏳ Cargando...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- MODAL Pedido -->
+<div class="modal-overlay" id="modalPedido">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modalPedidoTitulo">Detalle del Pedido</h3>
+      <button class="modal-close" onclick="cerrarModal('modalPedido')">×</button>
+    </div>
+    <div class="modal-body" id="modalPedidoBody"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="cerrarModal('modalPedido')">Cerrar</button>
+      <button class="btn btn-primary" onclick="cambiarEstadoModal()">🔄 Cambiar estado</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL Receta -->
+<div class="modal-overlay" id="modalReceta">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>📋 Validar Receta — Pedido <span id="recetaPedidoId"></span></h3>
+      <button class="modal-close" onclick="cerrarModal('modalReceta')">×</button>
+    </div>
+    <div class="modal-body" id="modalRecetaBody"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="cerrarModal('modalReceta')">Cerrar</button>
+      <button class="btn btn-danger" onclick="rechazarReceta()">❌ Rechazar</button>
+      <button class="btn btn-primary" onclick="aprobarReceta()">✅ Aprobar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const API = 'http://localhost:8081/api';
+  const token  = localStorage.getItem('token');
+  const rol    = localStorage.getItem('rol');
+  const nombre = localStorage.getItem('nombre');
+
+  if (!token || !rol) { window.location.href = '/login.html'; }
+  else if (rol !== 'FARMACEUTICO') { alert('Acceso denegado.'); window.location.href = '/login.html'; }
+
+  document.getElementById('usuarioNombre').textContent = '👤 ' + (nombre || 'Farmacéutico');
+
+  function getHeaders() { return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }; }
+  function cerrarSesion() { localStorage.clear(); window.location.href = '/login.html'; }
+  function cerrarModal(id) { document.getElementById(id).classList.remove('visible'); }
+
+  function toast(msg, tipo = 'exito') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = `toast visible ${tipo}`;
+    setTimeout(() => t.classList.remove('visible'), 3500);
+  }
+
+  function mostrarTab(tab, el) {
+    document.querySelectorAll('.seccion').forEach(s => s.classList.remove('activo'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('activo'));
+    document.getElementById(tab).classList.add('activo');
+    el.classList.add('activo');
+    if (tab === 'inventario') cargarProductos();
+    if (tab === 'pedidos')    cargarPedidos();
+    if (tab === 'recetas')    cargarRecetas();
+    if (tab === 'stockbajo')  cargarStockBajo();
+  }
+
+  function formatFecha(str) {
+    if (!str) return '—';
+    try { return new Date(str).toLocaleString('es-PE', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' }); }
+    catch { return str; }
+  }
+
+  function badgePedido(estado) {
+    const cls = { PENDIENTE:'badge-naranja', CONFIRMADO:'badge-azul', EN_PREPARACION:'badge-morado', EN_CAMINO:'badge-azul', ENTREGADO:'badge-verde' };
+    const ico = { PENDIENTE:'⏳', CONFIRMADO:'✅', EN_PREPARACION:'🔬', EN_CAMINO:'🚚', ENTREGADO:'🏠' };
+    return `<span class="badge ${cls[estado]||'badge-gris'}">${ico[estado]||'•'} ${estado}</span>`;
+  }
+
+  // ===== INVENTARIO =====
+  let todosProductos = [];
+
+  async function cargarProductos() {
+    try {
+      const res = await fetch(`${API}/productos`, { headers: getHeaders() });
+      todosProductos = await res.json();
+      document.getElementById('cntInventario').textContent = todosProductos.length;
+      const bajos = todosProductos.filter(p => p.stock <= (p.stockMinimo || 5));
+      document.getElementById('cntStockBajo').textContent = bajos.length;
+      if (bajos.length > 0) {
+        document.getElementById('alertaStockMsg').textContent = `⚠️ ${bajos.length} producto(s) con stock bajo. Revisa la pestaña "Stock Bajo".`;
+        document.getElementById('alertaStock').classList.add('visible');
+      } else { document.getElementById('alertaStock').classList.remove('visible'); }
+      renderProductos(todosProductos);
+    } catch(e) {
+      document.getElementById('tablaProductos').innerHTML = '<tr class="loading-row"><td colspan="7">❌ Error de conexión</td></tr>';
+    }
+  }
+
+  function renderProductos(lista) {
+    const tbody = document.getElementById('tablaProductos');
+    if (!lista.length) {
+      tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><div class="icon">📦</div><p>No hay productos.</p></div></td></tr>';
+      return;
+    }
+    tbody.innerHTML = lista.map(p => {
+      const max = Math.max(p.stock, (p.stockMinimo||5)*5, 1);
+      const pct = Math.min(100, Math.round((p.stock/max)*100));
+      const cls = p.stock <= 0 ? 'bajo' : p.stock <= (p.stockMinimo||5) ? 'medio' : 'alto';
+      return `<tr>
+            <td style="font-family:'DM Mono',monospace;font-size:12px;color:#6b7a8d">#${p.id}</td>
+            <td><div style="font-weight:600">${p.nombre}</div>${p.descripcion?`<div style="font-size:11px;color:#6b7a8d;margin-top:2px">${p.descripcion.substring(0,50)}${p.descripcion.length>50?'…':''}</div>`:''}</td>
+            <td>${p.categoria?`<span class="cat-pill">${p.categoria}</span>`:'<span style="color:#b0b8c4;font-size:12px">—</span>'}</td>
+            <td style="font-family:'DM Mono',monospace;font-weight:600">S/ ${p.precio?.toFixed(2)}</td>
+            <td><div class="stock-bar-wrap"><div class="stock-bar"><div class="stock-bar-fill ${cls}" style="width:${pct}%"></div></div><span class="stock-num">${p.stock} uds.</span></div></td>
+            <td>${p.disponible?'<span class="badge badge-verde">● Activo</span>':'<span class="badge badge-rojo">● Inactivo</span>'}</td>
+            <td><div class="acciones">
+                <button class="btn btn-info btn-sm" onclick="editarProducto(${p.id})">✏️ Editar</button>
+                <button class="btn btn-warning btn-sm" onclick="ajustarStock(${p.id},'${p.nombre.replace(/'/g,"\\'")}',${p.stock})">📦 Stock</button>
+                <button class="btn btn-danger btn-sm" onclick="eliminarProducto(${p.id},'${p.nombre.replace(/'/g,"\\'")}')">🗑️</button>
+            </div></td>
+        </tr>`;
+    }).join('');
+  }
+
+  function filtrarProductos() {
+    const txt = document.getElementById('buscarProducto').value.toLowerCase();
+    const cat = document.getElementById('filtroCategoria').value;
+    renderProductos(todosProductos.filter(p => p.nombre.toLowerCase().includes(txt) && (!cat || p.categoria===cat)));
+  }
+
+  async function guardarProducto() {
+    const id     = document.getElementById('productoId').value;
+    const nombre = document.getElementById('pNombre').value.trim();
+    const precio = parseFloat(document.getElementById('pPrecio').value);
+    const stock  = parseInt(document.getElementById('pStock').value);
+    if (!nombre || isNaN(precio) || isNaN(stock)) { toast('Completa nombre, precio y stock.','error'); return; }
+    const body = { nombre, descripcion: document.getElementById('pDescripcion').value.trim(), precio, stock, categoria: document.getElementById('pCategoria').value, imagen: document.getElementById('pImagen').value.trim(), stockMinimo: parseInt(document.getElementById('pStockMinimo').value)||5, disponible: true };
+    try {
+      const url  = id ? `${API}/productos/${id}` : `${API}/productos`;
+      const meth = id ? 'PUT' : 'POST';
+      const res  = await fetch(url, { method: meth, headers: getHeaders(), body: JSON.stringify(body) });
+      if (res.ok) { toast(id ? '✅ Producto actualizado' : '✅ Producto creado'); cancelarEdicion(); cargarProductos(); }
+      else toast('❌ Error al guardar','error');
+    } catch(e) { toast('❌ Error de conexión','error'); }
+  }
+
+  async function editarProducto(id) {
+    const p = todosProductos.find(x => x.id===id); if (!p) return;
+    document.getElementById('productoId').value = id;
+    document.getElementById('pNombre').value = p.nombre;
+    document.getElementById('pPrecio').value = p.precio;
+    document.getElementById('pStock').value = p.stock;
+    document.getElementById('pCategoria').value = p.categoria||'';
+    document.getElementById('pDescripcion').value = p.descripcion||'';
+    document.getElementById('pImagen').value = p.imagen||'';
+    document.getElementById('pStockMinimo').value = p.stockMinimo||5;
+    document.getElementById('formTitulo').textContent = `✏️ Editando: ${p.nombre}`;
+    document.getElementById('btnGuardarTxt').textContent = '💾 Actualizar Producto';
+    document.getElementById('btnCancelar').style.display = 'inline-flex';
+    window.scrollTo({ top:0, behavior:'smooth' });
+  }
+
+  function cancelarEdicion() {
+    document.getElementById('productoId').value = '';
+    ['pNombre','pPrecio','pStock','pDescripcion','pImagen'].forEach(id => document.getElementById(id).value='');
+    document.getElementById('pCategoria').value = '';
+    document.getElementById('pStockMinimo').value = 5;
+    document.getElementById('formTitulo').textContent = '➕ Nuevo Producto';
+    document.getElementById('btnGuardarTxt').textContent = '✅ Guardar Producto';
+    document.getElementById('btnCancelar').style.display = 'none';
+  }
+
+  async function eliminarProducto(id, nombre) {
+    if (!confirm(`¿Desactivar "${nombre}"?`)) return;
+    const res = await fetch(`${API}/productos/${id}`, { method:'DELETE', headers:getHeaders() });
+    if (res.ok) { toast('🗑️ Producto desactivado'); cargarProductos(); }
+    else toast('❌ Error al eliminar','error');
+  }
+
+  async function ajustarStock(id, nombre, actual) {
+    const n = prompt(`Stock de "${nombre}"\nActual: ${actual}\nNuevo stock:`);
+    if (n===null || isNaN(parseInt(n))) return;
+    const p = todosProductos.find(x=>x.id===id); if(!p) return;
+    const res = await fetch(`${API}/productos/${id}`, { method:'PUT', headers:getHeaders(), body:JSON.stringify({...p,stock:parseInt(n)}) });
+    if (res.ok) { toast(`📦 Stock actualizado a ${n} uds.`); cargarProductos(); }
+    else toast('❌ Error al actualizar stock','error');
+  }
+
+  // ===== PEDIDOS =====
+  let todosPedidos = [];
+  let pedidoActual = null;
+
+  async function cargarPedidos() {
+    const filtro = document.getElementById('filtroPedidoEstado').value;
+    const estados = filtro==='todos' ? ['PENDIENTE','CONFIRMADO','EN_PREPARACION','EN_CAMINO','ENTREGADO'] : [filtro];
+    try {
+      let todos = [];
+      for (const e of estados) {
+        const res = await fetch(`${API}/pedidos/estado/${e}`, { headers:getHeaders() });
+        if (res.ok) { const d = await res.json(); todos = [...todos,...d]; }
+      }
+      todosPedidos = todos;
+      document.getElementById('cntPedidos').textContent = todos.length;
+      const tbody = document.getElementById('tablaPedidos');
+      if (!todos.length) { tbody.innerHTML='<tr><td colspan="7"><div class="empty-state"><div class="icon">🛒</div><p>No hay pedidos para mostrar.</p></div></td></tr>'; return; }
+      tbody.innerHTML = todos.map(p => `<tr>
+            <td style="font-family:'DM Mono',monospace;font-size:12px;color:#6b7a8d">#${p.id}</td>
+            <td style="font-weight:600">${p.usuario?.nombre||'—'}<br><span style="font-size:11px;color:#6b7a8d;font-weight:400">${p.usuario?.email||''}</span></td>
+            <td style="font-size:12px;color:#6b7a8d;max-width:130px">${p.direccionEntrega||'—'}</td>
+            <td style="font-family:'DM Mono',monospace;font-weight:600">S/ ${p.total?.toFixed(2)}</td>
+            <td>${badgePedido(p.estado)}</td>
+            <td style="font-size:12px;color:#6b7a8d">${formatFecha(p.fechaCreacion)}</td>
+            <td><div class="acciones">
+                <button class="btn btn-info btn-sm" onclick="verPedido(${p.id})">🔍 Ver</button>
+                <button class="btn btn-primary btn-sm" onclick="promptCambiarEstado(${p.id})">🔄 Estado</button>
+            </div></td>
+        </tr>`).join('');
+    } catch(e) { document.getElementById('tablaPedidos').innerHTML='<tr class="loading-row"><td colspan="7">❌ Error de conexión</td></tr>'; }
+  }
+
+  function verPedido(id) {
+    const p = todosPedidos.find(x=>x.id===id); if (!p) return;
+    pedidoActual = p;
+    document.getElementById('modalPedidoTitulo').textContent = `Pedido #${p.id}`;
+    document.getElementById('modalPedidoBody').innerHTML = `
+        <div class="info-row"><span>Cliente</span><span>${p.usuario?.nombre||'—'}</span></div>
+        <div class="info-row"><span>Email</span><span>${p.usuario?.email||'—'}</span></div>
+        <div class="info-row"><span>Dirección</span><span>${p.direccionEntrega||'—'}</span></div>
+        <div class="info-row"><span>Método de pago</span><span>${p.metodoPago||'—'}</span></div>
+        <div class="info-row"><span>Estado</span><span>${badgePedido(p.estado)}</span></div>
+        <div class="info-row"><span>Fecha</span><span>${formatFecha(p.fechaCreacion)}</span></div>
+        <div class="info-row"><span>Total</span><span style="font-size:16px;color:#00897b;font-weight:700">S/ ${p.total?.toFixed(2)}</span></div>
+        <hr style="margin:12px 0;border-color:#f0f0f0">
+        <strong style="font-size:12px;color:#6b7a8d;display:block;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px">Productos</strong>
+        ${(p.detalles||[]).length
+            ? (p.detalles||[]).map(d=>`<div class="detalle-item">
+                <div><div style="font-weight:600">${d.producto?.nombre||'—'}</div><div style="font-size:11px;color:#6b7a8d">x${d.cantidad} × S/ ${d.precioUnitario?.toFixed(2)}</div></div>
+                <div style="font-weight:700;font-family:'DM Mono',monospace">S/ ${(d.cantidad*d.precioUnitario).toFixed(2)}</div>
+            </div>`).join('')
+            : '<p style="color:#b0b8c4;font-size:13px;text-align:center;padding:15px">Sin detalles</p>'}`;
+    document.getElementById('modalPedido').classList.add('visible');
+  }
+
+  async function cambiarEstadoModal() {
+    if (!pedidoActual) return;
+    await promptCambiarEstado(pedidoActual.id);
+    cerrarModal('modalPedido');
+  }
+
+  async function promptCambiarEstado(id) {
+    const e = prompt('Nuevo estado:\nPENDIENTE | CONFIRMADO | EN_PREPARACION | EN_CAMINO | ENTREGADO');
+    if (!e) return;
+    const res = await fetch(`${API}/pedidos/${id}/estado?estado=${e.trim().toUpperCase()}`, { method:'PUT', headers:getHeaders() });
+    if (res.ok) { toast('✅ Estado actualizado'); cargarPedidos(); }
+    else toast('❌ Error','error');
+  }
+
+  // ===== RECETAS =====
+  let recetaId = null;
+
+  async function cargarRecetas() {
+    try {
+      const res = await fetch(`${API}/pedidos/estado/PENDIENTE`, { headers:getHeaders() });
+      const pedidos = await res.json();
+      document.getElementById('cntRecetas').textContent = pedidos.length;
+      const tbody = document.getElementById('tablaRecetas');
+      if (!pedidos.length) { tbody.innerHTML='<tr><td colspan="6"><div class="empty-state"><div class="icon">📋</div><p>No hay recetas pendientes.</p></div></td></tr>'; return; }
+      tbody.innerHTML = pedidos.map(p=>`<tr>
+            <td style="font-family:'DM Mono',monospace;font-size:12px;color:#6b7a8d">#${p.id}</td>
+            <td style="font-weight:600">${p.usuario?.nombre||'—'}</td>
+            <td style="font-size:12px;color:#6b7a8d">${p.detalles?.length||0} producto(s)</td>
+            <td style="font-family:'DM Mono',monospace;font-weight:600">S/ ${p.total?.toFixed(2)}</td>
+            <td><span class="badge badge-naranja">⏳ Pendiente</span></td>
+            <td><div class="acciones">
+                <button class="btn btn-primary btn-sm" onclick="abrirReceta(${p.id},'${(p.usuario?.nombre||'').replace(/'/g,"\\'")}',${p.total||0})">📋 Revisar</button>
+                <button class="btn btn-danger btn-sm" onclick="rechazarDirecto(${p.id})">❌ Rechazar</button>
+            </div></td>
+        </tr>`).join('');
+    } catch(e) { document.getElementById('tablaRecetas').innerHTML='<tr class="loading-row"><td colspan="6">❌ Error de conexión</td></tr>'; }
+  }
+
+  function abrirReceta(id, clienteNombre, total) {
+    recetaId = id;
+    document.getElementById('recetaPedidoId').textContent = `#${id}`;
+    document.getElementById('modalRecetaBody').innerHTML = `
+        <div class="receta-sin-img">📄 Imagen de receta médica<br><small>La integración de carga de imágenes va aquí (HU-08)</small></div>
+        <div class="info-row"><span>Pedido</span><span>#${id}</span></div>
+        <div class="info-row"><span>Cliente</span><span>${clienteNombre}</span></div>
+        <div class="info-row"><span>Total</span><span style="color:#00897b;font-weight:700">S/ ${parseFloat(total).toFixed(2)}</span></div>
+        <div style="margin-top:15px;padding:12px;background:#e8f5e9;border-radius:8px;font-size:13px;color:#2e7d32">
+            ✅ <strong>Aprobar:</strong> El pedido pasa a estado CONFIRMADO.<br>
+            ❌ <strong>Rechazar:</strong> El pedido permanece pendiente y se notifica al cliente.
+        </div>`;
+    document.getElementById('modalReceta').classList.add('visible');
+  }
+
+  async function aprobarReceta() {
+    if (!recetaId) return;
+    const res = await fetch(`${API}/pedidos/${recetaId}/estado?estado=CONFIRMADO`, { method:'PUT', headers:getHeaders() });
+    if (res.ok) { toast('✅ Receta aprobada — Pedido confirmado'); cerrarModal('modalReceta'); cargarRecetas(); }
+    else toast('❌ Error al aprobar','error');
+  }
+
+  async function rechazarReceta() {
+    if (!recetaId) return;
+    rechazarDirecto(recetaId);
+    cerrarModal('modalReceta');
+  }
+
+  async function rechazarDirecto(id) {
+    const motivo = prompt('Motivo de rechazo (se notificará al cliente):');
+    if (motivo===null) return;
+    toast('📩 Receta rechazada — Cliente notificado','info');
+    cargarRecetas();
+  }
+
+  // ===== STOCK BAJO =====
+  async function cargarStockBajo() {
+    try {
+      const res = await fetch(`${API}/productos/stock-bajo`, { headers:getHeaders() });
+      const prods = await res.json();
+      document.getElementById('cntStockBajo').textContent = prods.length;
+      const tbody = document.getElementById('tablaStockBajo');
+      if (!prods.length) { tbody.innerHTML='<tr><td colspan="6"><div class="empty-state"><div class="icon">✅</div><p>¡Todo en orden! Sin stock bajo.</p></div></td></tr>'; return; }
+      tbody.innerHTML = prods.map(p=>{
+        const urg = p.stock===0 ? '<span class="badge badge-rojo">🔴 Agotado</span>' : p.stock<=2 ? '<span class="badge badge-rojo">🔴 Crítico</span>' : '<span class="badge badge-naranja">🟠 Bajo</span>';
+        return `<tr>
+                <td style="font-weight:600">${p.nombre}</td>
+                <td>${p.categoria?`<span class="cat-pill">${p.categoria}</span>`:'—'}</td>
+                <td><span style="font-family:'DM Mono',monospace;font-size:15px;font-weight:700;color:${p.stock===0?'#c62828':'#e65100'}">${p.stock}</span> <span style="font-size:11px;color:#6b7a8d">uds.</span></td>
+                <td style="font-family:'DM Mono',monospace;color:#6b7a8d">${p.stockMinimo||5} uds.</td>
+                <td>${urg}</td>
+                <td><button class="btn btn-warning btn-sm" onclick="ajustarStock(${p.id},'${p.nombre.replace(/'/g,"\\'")}',${p.stock})">📦 Reponer stock</button></td>
+            </tr>`;
+      }).join('');
+    } catch(e) { document.getElementById('tablaStockBajo').innerHTML='<tr class="loading-row"><td colspan="6">❌ Error de conexión</td></tr>'; }
+  }
+
+  // INIT
+  cargarProductos();
+</script>
+</body>
+</html>

@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BotiClic - Panel Admin</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f5f5f5; }
+        header { background: #1a237e; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
+        header h1 { font-size: 22px; }
+        .header-right { display: flex; align-items: center; gap: 15px; }
+        .header-right span { font-size: 14px; color: #90caf9; }
+        .btn-logout { background: #c62828; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-size: 13px; }
+        .btn-logout:hover { background: #b71c1c; }
+        .tabs { display: flex; background: #283593; }
+        .tab { padding: 15px 25px; color: white; cursor: pointer; font-size: 14px; }
+        .tab.activo { background: #3949ab; border-bottom: 3px solid #ff6f00; }
+        .contenido { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
+        .seccion { display: none; }
+        .seccion.activo { display: block; }
+        .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px; }
+        .stat { background: white; padding: 20px; border-radius: 10px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .stat h2 { font-size: 36px; color: #1a237e; }
+        .stat p { color: #666; font-size: 14px; }
+        table { width: 100%; background: white; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-collapse: collapse; }
+        th { background: #1a237e; color: white; padding: 12px 15px; text-align: left; font-size: 14px; }
+        td { padding: 12px 15px; border-bottom: 1px solid #eee; font-size: 14px; }
+        tr:hover td { background: #f5f5f5; }
+        .badge { padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; }
+        .badge.ADMIN { background: #e3f2fd; color: #1565c0; }
+        .badge.CLIENTE { background: #e8f5e9; color: #2e7d32; }
+        .badge.FARMACEUTICO { background: #fff3e0; color: #e65100; }
+        .badge.DELIVERY { background: #f3e5f5; color: #6a1b9a; }
+        .badge.PENDIENTE { background: #fff9c4; color: #f57f17; }
+        .badge.CONFIRMADO { background: #e8f5e9; color: #2e7d32; }
+        .badge.EN_CAMINO { background: #e3f2fd; color: #1565c0; }
+        .badge.ENTREGADO { background: #e8f5e9; color: #1b5e20; }
+        .btn { padding: 6px 14px; border: none; border-radius: 5px; cursor: pointer; font-size: 13px; }
+        .btn-verde { background: #2e7d32; color: white; }
+        .btn-rojo { background: #c62828; color: white; }
+        .btn-azul { background: #1565c0; color: white; }
+        h3 { margin-bottom: 20px; color: #333; }
+        .form-card { background: white; padding: 25px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 25px; }
+        .form-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 15px; }
+        .form-row input, .form-row select { padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; }
+        .mensaje { position: fixed; top: 20px; right: 20px; background: #2e7d32; color: white; padding: 12px 20px; border-radius: 8px; z-index: 200; display: none; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>⚙️ BotiClic — Panel Administrador</h1>
+    <div class="header-right">
+        <span id="usuarioNombre"></span>
+        <button class="btn-logout" onclick="cerrarSesion()">🚪 Cerrar sesión</button>
+    </div>
+</header>
+
+<div class="tabs">
+    <div class="tab activo" onclick="mostrarTab('dashboard', event)">📊 Dashboard</div>
+    <div class="tab" onclick="mostrarTab('usuarios', event)">👥 Usuarios</div>
+    <div class="tab" onclick="mostrarTab('pedidos', event)">📦 Pedidos</div>
+</div>
+
+<div class="contenido">
+
+    <!-- Dashboard -->
+    <div class="seccion activo" id="dashboard">
+        <div class="stats">
+            <div class="stat">
+                <h2 id="totalUsuarios">-</h2>
+                <p>Usuarios registrados</p>
+            </div>
+            <div class="stat">
+                <h2 id="totalProductos">-</h2>
+                <p>Productos disponibles</p>
+            </div>
+            <div class="stat">
+                <h2 id="totalPedidos">-</h2>
+                <p>Pedidos totales</p>
+            </div>
+            <div class="stat">
+                <h2 id="pedidosPendientes">-</h2>
+                <p>Pedidos pendientes</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Usuarios -->
+    <div class="seccion" id="usuarios">
+        <h3>👥 Gestión de Usuarios</h3>
+        <div class="form-card">
+            <h4 style="margin-bottom:15px">Nuevo Usuario</h4>
+            <div class="form-row">
+                <input type="text" id="nuevoNombre" placeholder="Nombre completo">
+                <input type="email" id="nuevoEmail" placeholder="Email">
+                <input type="password" id="nuevoPassword" placeholder="Contraseña">
+            </div>
+            <div class="form-row">
+                <select id="nuevoRol">
+                    <option value="CLIENTE">Cliente</option>
+                    <option value="ADMIN">Administrador</option>
+                    <option value="FARMACEUTICO">Farmacéutico</option>
+                    <option value="DELIVERY">Delivery</option>
+                </select>
+                <button class="btn btn-verde" onclick="crearUsuario()">+ Crear Usuario</button>
+            </div>
+        </div>
+        <table>
+            <thead>
+            <tr><th>ID</th><th>Nombre</th><th>Email</th><th>Rol</th><th>Estado</th><th>Acciones</th></tr>
+            </thead>
+            <tbody id="tablaUsuarios"></tbody>
+        </table>
+    </div>
+
+    <!-- Pedidos -->
+    <div class="seccion" id="pedidos">
+        <h3>📦 Gestión de Pedidos</h3>
+        <table>
+            <thead>
+            <tr><th>ID</th><th>Usuario</th><th>Total</th><th>Estado</th><th>Acciones</th></tr>
+            </thead>
+            <tbody id="tablaPedidos"></tbody>
+        </table>
+    </div>
+
+</div>
+
+<div class="mensaje" id="mensaje"></div>
+
+<script>
+    const API = 'http://localhost:8081/api';
+
+    // ============================================
+    // SEGURIDAD - Verificar sesión y rol ADMIN
+    // ============================================
+    const token  = localStorage.getItem('token');
+    const rol    = localStorage.getItem('rol');
+    const nombre = localStorage.getItem('nombre');
+
+    if (!token || !rol) {
+        window.location.href = '/login.html';
+    } else if (rol !== 'ADMIN') {
+        alert('Acceso denegado. Solo administradores.');
+        window.location.href = '/login.html';
+    }
+
+    // Mostrar nombre del usuario en el header
+    document.getElementById('usuarioNombre').textContent = `👤 ${nombre} (${rol})`;
+
+    // Headers con JWT para todas las peticiones protegidas
+    function getHeaders() {
+        return {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        };
+    }
+
+    // Cerrar sesión
+    function cerrarSesion() {
+        localStorage.clear();
+        window.location.href = '/login.html';
+    }
+
+    // ============================================
+    // TABS
+    // ============================================
+    function mostrarTab(tab, event) {
+        document.querySelectorAll('.seccion').forEach(s => s.classList.remove('activo'));
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('activo'));
+        document.getElementById(tab).classList.add('activo');
+        if (event) event.target.classList.add('activo');
+        if (tab === 'usuarios') cargarUsuarios();
+        if (tab === 'pedidos') cargarPedidos();
+    }
+
+    // ============================================
+    // DASHBOARD
+    // ============================================
+    async function cargarDashboard() {
+        try {
+            const [usuarios, productos, pedidos] = await Promise.all([
+                fetch(`${API}/usuarios`, { headers: getHeaders() }).then(r => r.json()),
+                fetch(`${API}/productos`).then(r => r.json()),
+                fetch(`${API}/pedidos/estado/PENDIENTE`, { headers: getHeaders() }).then(r => r.json())
+            ]);
+            document.getElementById('totalUsuarios').textContent = usuarios.length;
+            document.getElementById('totalProductos').textContent = productos.length;
+            document.getElementById('pedidosPendientes').textContent = pedidos.length;
+            document.getElementById('totalPedidos').textContent = '-';
+        } catch(e) {
+            console.error('Error cargando dashboard:', e);
+        }
+    }
+
+    // ============================================
+    // USUARIOS
+    // ============================================
+    async function cargarUsuarios() {
+        try {
+            const res = await fetch(`${API}/usuarios`, { headers: getHeaders() });
+            if (res.status === 401 || res.status === 403) {
+                cerrarSesion(); return;
+            }
+            const usuarios = await res.json();
+            document.getElementById('tablaUsuarios').innerHTML = usuarios.map(u => `
+                <tr>
+                    <td>${u.id}</td>
+                    <td>${u.nombre}</td>
+                    <td>${u.email}</td>
+                    <td><span class="badge ${u.rol}">${u.rol}</span></td>
+                    <td>${u.activo ? '✅ Activo' : '❌ Inactivo'}</td>
+                    <td>
+                        <button class="btn btn-azul" onclick="cambiarRol(${u.id}, '${u.nombre}', '${u.rol}')">Editar rol</button>
+                    </td>
+                </tr>
+            `).join('');
+        } catch(e) {
+            console.error('Error cargando usuarios:', e);
+        }
+    }
+
+    async function crearUsuario() {
+        const nombre   = document.getElementById('nuevoNombre').value;
+        const email    = document.getElementById('nuevoEmail').value;
+        const password = document.getElementById('nuevoPassword').value;
+        const rol      = document.getElementById('nuevoRol').value;
+        if (!nombre || !email || !password) { mostrarMensaje('Completa todos los campos'); return; }
+        const res = await fetch(`${API}/usuarios/registrar`, {
+            method: 'POST',
+            headers: getHeaders(),
+            body: JSON.stringify({ nombre, email, password, rol })
+        });
+        if (res.ok) { mostrarMensaje('✅ Usuario creado'); cargarUsuarios(); }
+        else mostrarMensaje('❌ Error: email ya registrado');
+    }
+
+    async function cambiarRol(id, nombre, rolActual) {
+        const nuevoRol = prompt(`Cambiar rol de ${nombre}.\nRol actual: ${rolActual}\nNuevo rol (ADMIN, CLIENTE, FARMACEUTICO, DELIVERY):`);
+        if (!nuevoRol) return;
+        await fetch(`${API}/usuarios/${id}`, {
+            method: 'PUT',
+            headers: getHeaders(),
+            body: JSON.stringify({ nombre, rol: nuevoRol.toUpperCase(), activo: true })
+        });
+        mostrarMensaje('✅ Rol actualizado');
+        cargarUsuarios();
+    }
+
+    // ============================================
+    // PEDIDOS
+    // ============================================
+    async function cargarPedidos() {
+        try {
+            const estados = ['PENDIENTE', 'CONFIRMADO', 'EN_CAMINO', 'ENTREGADO'];
+            let todosPedidos = [];
+            for (const estado of estados) {
+                const res = await fetch(`${API}/pedidos/estado/${estado}`, { headers: getHeaders() });
+                const pedidos = await res.json();
+                todosPedidos = [...todosPedidos, ...pedidos];
+            }
+            document.getElementById('tablaPedidos').innerHTML = todosPedidos.map(p => `
+                <tr>
+                    <td>#${p.id}</td>
+                    <td>${p.usuario?.nombre || '-'}</td>
+                    <td>S/ ${p.total?.toFixed(2) || '0.00'}</td>
+                    <td><span class="badge ${p.estado}">${p.estado}</span></td>
+                    <td>
+                        <button class="btn btn-verde" onclick="cambiarEstadoPedido(${p.id})">Cambiar estado</button>
+                    </td>
+                </tr>
+            `).join('');
+        } catch(e) {
+            console.error('Error cargando pedidos:', e);
+        }
+    }
+
+    async function cambiarEstadoPedido(id) {
+        const estado = prompt('Nuevo estado:\nPENDIENTE, CONFIRMADO, EN_PREPARACION, EN_CAMINO, ENTREGADO');
+        if (!estado) return;
+        await fetch(`${API}/pedidos/${id}/estado?estado=${estado}`, {
+            method: 'PUT',
+            headers: getHeaders()
+        });
+        mostrarMensaje('✅ Estado actualizado');
+        cargarPedidos();
+    }
+
+    // ============================================
+    // UTILIDADES
+    // ============================================
+    function mostrarMensaje(texto) {
+        const m = document.getElementById('mensaje');
+        m.textContent = texto;
+        m.style.display = 'block';
+        setTimeout(() => m.style.display = 'none', 3000);
+    }
+
+    // Iniciar
+    cargarDashboard();
+</script>
+</body>
+</html>

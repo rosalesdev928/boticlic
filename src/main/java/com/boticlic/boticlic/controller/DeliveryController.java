@@ -10,6 +10,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/delivery")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*")
 public class DeliveryController {
 
     private final DeliveryService deliveryService;

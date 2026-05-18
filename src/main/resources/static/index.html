@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BotiClic - Farmacia Online</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f5f5f5; }
+        header { background: #2e7d32; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
+        header h1 { font-size: 24px; }
+        nav a { color: white; text-decoration: none; margin-left: 20px; font-size: 15px; }
+        nav a:hover { text-decoration: underline; }
+        .carrito-btn { background: #ff6f00; border: none; color: white; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 14px; }
+        .hero { background: linear-gradient(135deg, #2e7d32, #66bb6a); color: white; text-align: center; padding: 60px 20px; }
+        .hero h2 { font-size: 36px; margin-bottom: 10px; }
+        .hero p { font-size: 18px; margin-bottom: 20px; }
+        .buscador { display: flex; justify-content: center; gap: 10px; margin-top: 20px; }
+        .buscador input { padding: 12px 20px; width: 350px; border-radius: 25px; border: none; font-size: 15px; }
+        .buscador button { padding: 12px 25px; background: #ff6f00; color: white; border: none; border-radius: 25px; cursor: pointer; font-size: 15px; }
+        .contenido { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+        h3 { font-size: 22px; margin-bottom: 20px; color: #333; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
+        .card { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center; }
+        .card h4 { font-size: 16px; margin-bottom: 8px; color: #222; }
+        .card p { font-size: 13px; color: #666; margin-bottom: 8px; }
+        .card .precio { font-size: 20px; font-weight: bold; color: #2e7d32; margin-bottom: 5px; }
+        .card .stock { font-size: 12px; color: #888; margin-bottom: 12px; }
+        .card button { background: #2e7d32; color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; width: 100%; font-size: 14px; }
+        .card button:hover { background: #1b5e20; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 100; justify-content: center; align-items: center; }
+        .modal.activo { display: flex; }
+        .modal-content { background: white; padding: 30px; border-radius: 10px; width: 400px; max-width: 90%; }
+        .modal-content h3 { margin-bottom: 20px; color: #2e7d32; }
+        .modal-content input { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; }
+        .modal-content button { width: 100%; padding: 12px; background: #2e7d32; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 15px; }
+        .modal-content .cerrar { background: #ccc; margin-top: 10px; color: #333; }
+        .carrito-lateral { position: fixed; right: -400px; top: 0; width: 380px; height: 100%; background: white; box-shadow: -2px 0 10px rgba(0,0,0,0.2); transition: right 0.3s; z-index: 99; padding: 20px; overflow-y: auto; }
+        .carrito-lateral.abierto { right: 0; }
+        .carrito-lateral h3 { margin-bottom: 20px; color: #2e7d32; }
+        .item-carrito { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; font-size: 14px; }
+        .item-carrito button { background: #e53935; color: white; border: none; padding: 4px 10px; border-radius: 5px; cursor: pointer; }
+        .total { font-size: 18px; font-weight: bold; margin-top: 20px; color: #2e7d32; }
+        .btn-pagar { width: 100%; padding: 15px; background: #ff6f00; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; margin-top: 15px; }
+        .mensaje { position: fixed; top: 20px; right: 20px; background: #2e7d32; color: white; padding: 12px 20px; border-radius: 8px; z-index: 200; display: none; }
+        .categoria-filtro { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+        .categoria-filtro button { padding: 8px 16px; border: 2px solid #2e7d32; border-radius: 20px; background: white; color: #2e7d32; cursor: pointer; font-size: 13px; }
+        .categoria-filtro button.activo { background: #2e7d32; color: white; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>💊 BotiClic</h1>
+    <nav>
+        <a href="#" onclick="mostrarModal('modalLogin')">Iniciar Sesión</a>
+        <a href="#" onclick="mostrarModal('modalRegistro')">Registrarse</a>
+        <button class="carrito-btn" onclick="toggleCarrito()">🛒 Carrito (<span id="contadorCarrito">0</span>)</button>
+    </nav>
+</header>
+
+<div class="hero">
+    <h2>Tu farmacia online de confianza</h2>
+    <p>Medicamentos y productos de salud a tu puerta</p>
+    <div class="buscador">
+        <input type="text" id="inputBuscar" placeholder="Buscar medicamento..." onkeyup="buscarProducto()">
+        <button onclick="buscarProducto()">🔍 Buscar</button>
+    </div>
+</div>
+
+<div class="contenido">
+    <h3>Nuestros Productos</h3>
+    <div class="categoria-filtro" id="categorias"></div>
+    <div class="grid" id="listaProductos">
+        <p>Cargando productos...</p>
+    </div>
+</div>
+
+<!-- Modal Login -->
+<div class="modal" id="modalLogin">
+    <div class="modal-content">
+        <h3>Iniciar Sesión</h3>
+        <input type="email" id="loginEmail" placeholder="Correo electrónico">
+        <input type="password" id="loginPassword" placeholder="Contraseña">
+        <button onclick="iniciarSesion()">Entrar</button>
+        <button class="cerrar" onclick="cerrarModal('modalLogin')">Cancelar</button>
+    </div>
+</div>
+
+<!-- Modal Registro -->
+<div class="modal" id="modalRegistro">
+    <div class="modal-content">
+        <h3>Crear Cuenta</h3>
+        <input type="text" id="regNombre" placeholder="Nombre completo">
+        <input type="email" id="regEmail" placeholder="Correo electrónico">
+        <input type="password" id="regPassword" placeholder="Contraseña">
+        <button onclick="registrarse()">Crear Cuenta</button>
+        <button class="cerrar" onclick="cerrarModal('modalRegistro')">Cancelar</button>
+    </div>
+</div>
+
+<!-- Carrito lateral -->
+<div class="carrito-lateral" id="carritoLateral">
+    <h3>🛒 Mi Carrito</h3>
+    <div id="itemsCarrito"></div>
+    <div class="total">Total: S/ <span id="totalCarrito">0.00</span></div>
+    <button class="btn-pagar" onclick="realizarPedido()">Realizar Pedido</button>
+    <button style="width:100%;padding:10px;margin-top:10px;background:#ccc;border:none;border-radius:5px;cursor:pointer" onclick="toggleCarrito()">Cerrar</button>
+</div>
+
+<div class="mensaje" id="mensaje"></div>
+
+<script>
+    const API = 'http://localhost:8081/api';
+    let productos = [];
+    let carrito = [];
+    let usuarioActual = null;
+
+    async function cargarProductos() {
+        try {
+            const res = await fetch(`${API}/productos`);
+            productos = await res.json();
+            mostrarProductos(productos);
+            cargarCategorias(productos);
+        } catch(e) {
+            document.getElementById('listaProductos').innerHTML = '<p>Error al cargar productos</p>';
+        }
+    }
+
+    function cargarCategorias(prods) {
+        const cats = [...new Set(prods.map(p => p.categoria))];
+        const div = document.getElementById('categorias');
+        div.innerHTML = '<button class="activo" onclick="filtrarCategoria(null, this)">Todos</button>';
+        cats.forEach(c => {
+            div.innerHTML += `<button onclick="filtrarCategoria('${c}', this)">${c}</button>`;
+        });
+    }
+
+    function filtrarCategoria(cat, btn) {
+        document.querySelectorAll('.categoria-filtro button').forEach(b => b.classList.remove('activo'));
+        btn.classList.add('activo');
+        if (!cat) mostrarProductos(productos);
+        else mostrarProductos(productos.filter(p => p.categoria === cat));
+    }
+
+    function mostrarProductos(lista) {
+        const div = document.getElementById('listaProductos');
+        if (lista.length === 0) { div.innerHTML = '<p>No se encontraron productos</p>'; return; }
+        div.innerHTML = lista.map(p => `
+            <div class="card">
+                <h4>${p.nombre}</h4>
+                <p>${p.descripcion || ''}</p>
+                <div class="precio">S/ ${p.precio.toFixed(2)}</div>
+                <div class="stock">Stock: ${p.stock} unidades</div>
+                <button onclick="agregarAlCarrito(${p.id}, '${p.nombre}', ${p.precio})">🛒 Agregar</button>
+            </div>
+        `).join('');
+    }
+
+    function buscarProducto() {
+        const termino = document.getElementById('inputBuscar').value.toLowerCase();
+        const filtrados = productos.filter(p => p.nombre.toLowerCase().includes(termino));
+        mostrarProductos(filtrados);
+    }
+
+    function agregarAlCarrito(id, nombre, precio) {
+        const existe = carrito.find(i => i.id === id);
+        if (existe) existe.cantidad++;
+        else carrito.push({ id, nombre, precio, cantidad: 1 });
+        actualizarCarrito();
+        mostrarMensaje(`${nombre} agregado al carrito`);
+    }
+
+    function actualizarCarrito() {
+        document.getElementById('contadorCarrito').textContent = carrito.reduce((a, i) => a + i.cantidad, 0);
+        const total = carrito.reduce((a, i) => a + i.precio * i.cantidad, 0);
+        document.getElementById('totalCarrito').textContent = total.toFixed(2);
+        document.getElementById('itemsCarrito').innerHTML = carrito.map((i, idx) => `
+            <div class="item-carrito">
+                <span>${i.nombre} x${i.cantidad}</span>
+                <span>S/ ${(i.precio * i.cantidad).toFixed(2)}</span>
+                <button onclick="quitarDelCarrito(${idx})">✕</button>
+            </div>
+        `).join('');
+    }
+
+    function quitarDelCarrito(idx) {
+        carrito.splice(idx, 1);
+        actualizarCarrito();
+    }
+
+    function toggleCarrito() {
+        document.getElementById('carritoLateral').classList.toggle('abierto');
+    }
+
+    async function registrarse() {
+        const nombre = document.getElementById('regNombre').value;
+        const email = document.getElementById('regEmail').value;
+        const password = document.getElementById('regPassword').value;
+        if (!nombre || !email || !password) { mostrarMensaje('Completa todos los campos'); return; }
+        try {
+            const res = await fetch(`${API}/usuarios/registrar`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nombre, email, password })
+            });
+            if (res.ok) {
+                mostrarMensaje('¡Cuenta creada exitosamente!');
+                cerrarModal('modalRegistro');
+            } else {
+                mostrarMensaje('Error: El correo ya está registrado');
+            }
+        } catch(e) { mostrarMensaje('Error al registrarse'); }
+    }
+
+    async function iniciarSesion() {
+        const email = document.getElementById('loginEmail').value;
+        const password = document.getElementById('loginPassword').value;
+        try {
+            const res = await fetch(`${API}/usuarios`);
+            const usuarios = await res.json();
+            const usuario = usuarios.find(u => u.email === email);
+            if (usuario) {
+                usuarioActual = usuario;
+                mostrarMensaje(`Bienvenido, ${usuario.nombre}`);
+                cerrarModal('modalLogin');
+            } else {
+                mostrarMensaje('Usuario no encontrado');
+            }
+        } catch(e) { mostrarMensaje('Error al iniciar sesión'); }
+    }
+
+    async function realizarPedido() {
+        if (!usuarioActual) { mostrarMensaje('Inicia sesión para realizar un pedido'); mostrarModal('modalLogin'); return; }
+        if (carrito.length === 0) { mostrarMensaje('El carrito está vacío'); return; }
+        const pedido = {
+            usuario: { id: usuarioActual.id },
+            detalles: carrito.map(i => ({ producto: { id: i.id }, cantidad: i.cantidad })),
+            direccionEntrega: 'Lima, Perú',
+            metodoPago: 'EFECTIVO'
+        };
+        try {
+            const res = await fetch(`${API}/pedidos`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(pedido)
+            });
+            if (res.ok) {
+                carrito = [];
+                actualizarCarrito();
+                toggleCarrito();
+                mostrarMensaje('¡Pedido realizado exitosamente!');
+            } else {
+                mostrarMensaje('Error al realizar el pedido');
+            }
+        } catch(e) { mostrarMensaje('Error al realizar el pedido'); }
+    }
+
+    function mostrarModal(id) { document.getElementById(id).classList.add('activo'); }
+    function cerrarModal(id) { document.getElementById(id).classList.remove('activo'); }
+    function mostrarMensaje(texto) {
+        const m = document.getElementById('mensaje');
+        m.textContent = texto;
+        m.style.display = 'block';
+        setTimeout(() => m.style.display = 'none', 3000);
+    }
+
+    cargarProductos();
+</script>
+</body>
+</html>

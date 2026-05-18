@@ -20,7 +20,10 @@ public class UsuarioService {
             throw new RuntimeException("El correo ya se encuentra registrado");
         }
         usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
-        usuario.setRol("CLIENTE");
+        // Solo asignar CLIENTE si no viene un rol
+        if (usuario.getRol() == null || usuario.getRol().isBlank()) {
+            usuario.setRol("CLIENTE");
+        }
         return usuarioRepository.save(usuario);
     }
 
