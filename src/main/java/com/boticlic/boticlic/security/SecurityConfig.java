@@ -38,7 +38,15 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/", "/index.html", "/admin.html", "/farmaceutico.html",
                                 "/delivery.html", "/login.html", "/Login.html",
-                                "/*.css", "/*.js", "/Auth guard.js", "/images/**"
+
+                                "/*.css",
+                                "/*.js",
+
+                                "/Auth guard.js",
+
+                                "/images/**",
+                                "/img/**",
+                                "/favicon.png"
                         ).permitAll()
 
                         // ✅ CLIENTE — ver y crear SUS pedidos (PRIMERO, antes de las reglas de admin)
