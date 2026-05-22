@@ -5,281 +5,388 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BotiClic — Panel Delivery</title>
     <link rel="icon" type="image/png" href="/img/favicon.png">
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'DM Sans', Arial, sans-serif; background: #f0f4f8; color: #1a2332; }
-        header { background: linear-gradient(135deg, #1565c0 0%, #1e88e5 100%); color: white; padding: 0 30px; height: 60px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 12px rgba(21,101,192,0.3); }
-        .header-left { display: flex; align-items: center; gap: 12px; }
-        .header-left h1 { font-size: 18px; font-weight: 700; }
-        .rol-badge { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
-        .header-right { display: flex; align-items: center; gap: 15px; }
-        .header-right .usuario { font-size: 13px; color: rgba(255,255,255,0.85); }
-        .btn-logout { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 7px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-family: 'DM Sans', sans-serif; transition: background 0.2s; }
-        .btn-logout:hover { background: rgba(255,255,255,0.25); }
-        .tabs { background: #0d47a1; display: flex; padding: 0 30px; gap: 2px; }
-        .tab { padding: 14px 22px; color: rgba(255,255,255,0.65); cursor: pointer; font-size: 13px; font-weight: 500; border-bottom: 3px solid transparent; transition: all 0.2s; display: flex; align-items: center; gap: 8px; }
-        .tab:hover { color: white; background: rgba(255,255,255,0.05); }
-        .tab.activo { color: #82b1ff; border-bottom-color: #82b1ff; }
-        .tab-count { background: rgba(255,255,255,0.2); color: white; border-radius: 10px; font-size: 11px; padding: 1px 7px; font-weight: 700; }
-        .tab.activo .tab-count { background: rgba(130,177,255,0.3); color: #82b1ff; }
-        .contenido { max-width: 1300px; margin: 25px auto; padding: 0 25px; }
-        .seccion { display: none; }
-        .seccion.activo { display: block; }
-
-        /* STATS */
-        .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 25px; }
-        .stat { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); display: flex; align-items: center; gap: 15px; }
-        .stat-icon { width: 46px; height: 46px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
-        .stat-icon.azul { background: #e3f2fd; }
-        .stat-icon.verde { background: #e8f5e9; }
-        .stat-icon.naranja { background: #fff3e0; }
-        .stat-icon.morado { background: #f3e5f5; }
-        .stat-info h2 { font-size: 26px; font-weight: 700; color: #1a2332; line-height: 1; }
-        .stat-info p { font-size: 12px; color: #6b7a8d; margin-top: 3px; }
-
-        .card { background: white; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); margin-bottom: 20px; overflow: hidden; }
-        .card-header { padding: 16px 20px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; }
-        .card-header h3 { font-size: 15px; font-weight: 600; color: #1a2332; }
-        .card-body { padding: 20px; }
-
-        table { width: 100%; border-collapse: collapse; }
-        th { background: #f7f9fc; color: #6b7a8d; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; padding: 11px 14px; text-align: left; border-bottom: 2px solid #eef0f4; }
-        td { padding: 12px 14px; border-bottom: 1px solid #f4f5f7; font-size: 13px; vertical-align: middle; }
-        tr:last-child td { border-bottom: none; }
-        tr:hover td { background: #fafbfc; }
-
-        .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
-        .badge-verde { background: #e8f5e9; color: #2e7d32; }
-        .badge-rojo { background: #ffebee; color: #c62828; }
-        .badge-naranja { background: #fff3e0; color: #e65100; }
-        .badge-azul { background: #e3f2fd; color: #1565c0; }
-        .badge-gris { background: #f4f5f7; color: #6b7a8d; }
-        .badge-morado { background: #f3e5f5; color: #6a1b9a; }
-        .badge-teal { background: #e0f2f1; color: #00695c; }
-
-        .btn { padding: 7px 14px; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-family: 'DM Sans', sans-serif; font-weight: 600; transition: all 0.15s; display: inline-flex; align-items: center; gap: 5px; }
-        .btn-primary { background: #1e88e5; color: white; }
-        .btn-primary:hover { background: #1565c0; }
-        .btn-success { background: #43a047; color: white; }
-        .btn-success:hover { background: #2e7d32; }
-        .btn-danger { background: #e53935; color: white; }
-        .btn-warning { background: #fb8c00; color: white; }
-        .btn-ghost { background: transparent; border: 1.5px solid #e0e4ea; color: #6b7a8d; }
-        .btn-ghost:hover { border-color: #1e88e5; color: #1e88e5; }
-        .btn-sm { padding: 5px 10px; font-size: 11px; }
-        .acciones { display: flex; gap: 6px; flex-wrap: wrap; }
-
-        .empty-state { text-align: center; padding: 50px 20px; color: #b0b8c4; }
-        .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
-        .empty-state p { font-size: 14px; }
-        .loading-row td { text-align: center; padding: 30px; color: #b0b8c4; font-size: 13px; }
-
-        /* DELIVERY CARDS */
-        .entregas-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 16px; }
-        .entrega-card {
-            background: white;
-            border-radius: 10px;
-            border: 1.5px solid #eef0f4;
-            padding: 20px;
-            position: relative;
-            transition: box-shadow 0.2s, border-color 0.2s;
+        :root {
+            --bg: #0b0e16;
+            --surface: #131720;
+            --surface2: #191e2c;
+            --border: #222840;
+            --blue: #3b82f6;
+            --blue-dim: rgba(59,130,246,0.12);
+            --green: #22c55e;
+            --green-dim: rgba(34,197,94,0.12);
+            --orange: #f59e0b;
+            --orange-dim: rgba(245,158,11,0.12);
+            --red: #ef4444;
+            --red-dim: rgba(239,68,68,0.12);
+            --purple: #a855f7;
+            --purple-dim: rgba(168,85,247,0.12);
+            --text: #e2e8f0;
+            --text2: #64748b;
+            --sidebar: 200px;
         }
-        .entrega-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.1); border-color: #bbdefb; }
-        .entrega-card.urgente { border-left: 4px solid #e53935; }
-        .entrega-card.camino { border-left: 4px solid #1e88e5; }
-        .entrega-card.entregado { border-left: 4px solid #43a047; opacity: 0.75; }
-        .entrega-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
-        .entrega-id { font-family: 'DM Mono', monospace; font-size: 12px; color: #6b7a8d; font-weight: 500; }
-        .entrega-cliente { font-size: 15px; font-weight: 700; color: #1a2332; margin-bottom: 4px; }
-        .entrega-email { font-size: 12px; color: #6b7a8d; margin-bottom: 12px; }
-        .entrega-dir { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; color: #1a2332; margin-bottom: 12px; background: #f7f9fc; padding: 10px; border-radius: 7px; }
-        .entrega-dir .map-pin { font-size: 16px; flex-shrink: 0; }
-        .entrega-total { font-family: 'DM Mono', monospace; font-size: 16px; font-weight: 700; color: #1565c0; margin-bottom: 14px; }
-        .entrega-fecha { font-size: 11px; color: #b0b8c4; margin-bottom: 14px; }
-        .entrega-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-        .progress-track { display: flex; align-items: center; gap: 0; margin-bottom: 14px; }
-        .progress-step { flex: 1; text-align: center; position: relative; }
-        .progress-step .dot { width: 22px; height: 22px; border-radius: 50%; background: #eef0f4; border: 2px solid #dde1e7; display: flex; align-items: center; justify-content: center; font-size: 10px; margin: 0 auto 4px; color: #b0b8c4; }
-        .progress-step .label { font-size: 9px; color: #b0b8c4; font-weight: 600; text-transform: uppercase; }
-        .progress-step.done .dot { background: #e3f2fd; border-color: #1e88e5; color: #1e88e5; }
-        .progress-step.done .label { color: #1565c0; }
-        .progress-step.active .dot { background: #1e88e5; border-color: #1565c0; color: white; font-size: 11px; }
-        .progress-step.active .label { color: #1565c0; font-weight: 700; }
-        .progress-step.completed .dot { background: #43a047; border-color: #2e7d32; color: white; }
-        .progress-step.completed .label { color: #2e7d32; }
-        .progress-line { height: 2px; background: #eef0f4; flex: 1; margin-bottom: 16px; }
-        .progress-line.done { background: #1e88e5; }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; display:flex; }
 
-        /* MODAL */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 1000; display: none; align-items: center; justify-content: center; }
-        .modal-overlay.visible { display: flex; }
-        .modal { background: white; border-radius: 12px; width: 580px; max-width: 95vw; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
-        .modal-header { padding: 20px 24px 16px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; }
-        .modal-header h3 { font-size: 16px; font-weight: 700; }
-        .modal-close { background: none; border: none; font-size: 22px; cursor: pointer; color: #6b7a8d; padding: 0; }
-        .modal-body { padding: 20px 24px; }
-        .modal-footer { padding: 16px 24px; border-top: 1px solid #f0f0f0; display: flex; justify-content: flex-end; gap: 10px; }
-        .info-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f4f5f7; font-size: 13px; }
-        .info-row:last-child { border-bottom: none; }
-        .info-row span:first-child { color: #6b7a8d; font-weight: 500; }
-        .info-row span:last-child { color: #1a2332; font-weight: 600; }
-        .detalle-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #f4f5f7; font-size: 13px; }
-        .detalle-item:last-child { border-bottom: none; }
+        /* SIDEBAR */
+        .sidebar {
+            width:var(--sidebar); background:var(--surface);
+            border-right:1px solid var(--border);
+            display:flex; flex-direction:column;
+            position:fixed; top:0; left:0; bottom:0; z-index:100;
+        }
+        .logo { padding:22px 18px 18px; border-bottom:1px solid var(--border); }
+        .logo h1 { font-family:'Syne',sans-serif; font-size:19px; font-weight:800; color:var(--blue); }
+        .logo span { font-size:10px; color:var(--text2); }
+        .nav-label { padding:14px 14px 6px; font-size:9px; font-weight:700; color:var(--text2); text-transform:uppercase; letter-spacing:1.2px; }
+        .nav-btn {
+            display:flex; align-items:center; gap:9px;
+            padding:9px 14px; margin:2px 8px; border-radius:7px;
+            cursor:pointer; font-size:13px; font-weight:500; color:var(--text2);
+            border:none; background:none; width:calc(100% - 16px); text-align:left;
+            transition:all 0.15s; font-family:'DM Sans',sans-serif;
+        }
+        .nav-btn:hover { background:var(--surface2); color:var(--text); }
+        .nav-btn.active { background:var(--blue-dim); color:var(--blue); font-weight:600; }
+        .nav-btn .ico { font-size:15px; width:18px; text-align:center; }
+        .nav-btn .cnt {
+            margin-left:auto; background:var(--blue); color:#fff;
+            font-size:10px; font-weight:700; padding:1px 6px; border-radius:8px;
+            min-width:18px; text-align:center;
+        }
+        .nav-btn.active .cnt { background:var(--blue); }
+        .sidebar-bottom { margin-top:auto; padding:14px; border-top:1px solid var(--border); }
+        .user-row { display:flex; align-items:center; gap:9px; margin-bottom:10px; }
+        .user-av {
+            width:32px; height:32px; border-radius:7px; flex-shrink:0;
+            background:linear-gradient(135deg,var(--blue),var(--purple));
+            display:flex; align-items:center; justify-content:center;
+            font-weight:700; font-size:13px; color:#fff;
+        }
+        .user-name { font-size:12px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .user-role { font-size:10px; color:var(--blue); }
+        .btn-out {
+            width:100%; padding:7px; background:var(--red-dim);
+            border:1px solid rgba(239,68,68,0.2); border-radius:7px;
+            color:var(--red); font-size:12px; font-weight:600;
+            cursor:pointer; font-family:'DM Sans',sans-serif; transition:all 0.15s;
+        }
+        .btn-out:hover { background:rgba(239,68,68,0.2); }
+
+        /* MAIN */
+        .main { margin-left:var(--sidebar); flex:1; display:flex; flex-direction:column; }
+        .topbar {
+            background:var(--surface); border-bottom:1px solid var(--border);
+            padding:14px 24px; display:flex; align-items:center; justify-content:space-between;
+            position:sticky; top:0; z-index:50;
+        }
+        .topbar-title { font-family:'Syne',sans-serif; font-size:17px; font-weight:700; }
+        .topbar-sub { font-size:11px; color:var(--text2); margin-top:1px; }
+        .live-badge {
+            display:inline-flex; align-items:center; gap:6px; font-size:11px;
+            color:var(--green); padding:5px 11px; background:var(--green-dim);
+            border-radius:16px; border:1px solid rgba(34,197,94,0.18);
+        }
+        .live-badge::before { content:''; width:6px; height:6px; background:var(--green); border-radius:50%; animation:pulse 2s infinite; }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+        .content { padding:22px; flex:1; }
+        .section { display:none; }
+        .section.active { display:block; }
+
+        /* KPIS */
+        .kpi-row { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:20px; }
+        .kpi { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:18px; }
+        .kpi-ico { font-size:20px; margin-bottom:10px; }
+        .kpi-val { font-family:'Syne',sans-serif; font-size:30px; font-weight:800; line-height:1; }
+        .kpi.blue  .kpi-val { color:var(--blue); }
+        .kpi.orange .kpi-val { color:var(--orange); }
+        .kpi.green  .kpi-val { color:var(--green); }
+        .kpi.purple .kpi-val { color:var(--purple); }
+        .kpi-lbl { font-size:11px; color:var(--text2); margin-top:3px; }
+
+        /* FILTER BAR */
+        .filter-bar { display:flex; gap:7px; margin-bottom:16px; flex-wrap:wrap; align-items:center; }
+        .fbtn {
+            padding:6px 13px; border-radius:16px; border:1px solid var(--border);
+            background:var(--surface); color:var(--text2); font-size:12px; font-weight:500;
+            cursor:pointer; font-family:'DM Sans',sans-serif; transition:all 0.15s;
+        }
+        .fbtn:hover { color:var(--text); border-color:rgba(255,255,255,0.12); }
+        .fbtn.active { background:var(--blue-dim); border-color:rgba(59,130,246,0.35); color:var(--blue); }
+        .fbtn.refresh { margin-left:auto; }
+
+        /* CARDS GRID */
+        .cards-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(310px,1fr)); gap:14px; }
+        .ecard {
+            background:var(--surface); border:1px solid var(--border); border-radius:10px;
+            padding:18px; transition:border-color 0.2s; position:relative;
+            border-left:3px solid var(--border);
+        }
+        .ecard.asignado  { border-left-color:var(--orange); }
+        .ecard.en_camino { border-left-color:var(--blue); }
+        .ecard.entregado { border-left-color:var(--green); opacity:.75; }
+        .ecard:hover { border-color:rgba(255,255,255,0.1); }
+        .ecard-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; }
+        .ecard-id { font-family:'DM Mono',monospace; font-size:11px; color:var(--text2); }
+        .ecard-name { font-weight:600; font-size:14px; margin-bottom:2px; }
+        .ecard-email { font-size:11px; color:var(--text2); margin-bottom:10px; }
+        .ecard-dir {
+            display:flex; gap:7px; font-size:12px; padding:9px 10px;
+            background:var(--surface2); border-radius:7px; margin-bottom:10px; line-height:1.4;
+        }
+        .ecard-dir span { flex-shrink:0; }
+        .ecard-total { font-family:'DM Mono',monospace; font-size:17px; font-weight:700; color:var(--blue); margin-bottom:6px; }
+        .ecard-date { font-size:10px; color:var(--text2); margin-bottom:12px; font-family:'DM Mono',monospace; }
+        .ecard-actions { display:flex; gap:7px; flex-wrap:wrap; }
+
+        /* PROGRESS TRACK */
+        .track { display:flex; align-items:center; margin-bottom:12px; }
+        .track-step { flex:1; text-align:center; }
+        .track-dot {
+            width:20px; height:20px; border-radius:50%; background:var(--surface2);
+            border:2px solid var(--border); display:flex; align-items:center; justify-content:center;
+            font-size:9px; margin:0 auto 3px; color:var(--text2);
+        }
+        .track-step.done .track-dot  { background:var(--blue-dim); border-color:var(--blue); color:var(--blue); }
+        .track-step.cur .track-dot   { background:var(--blue); border-color:var(--blue); color:#fff; font-size:10px; }
+        .track-step.done2 .track-dot { background:var(--green-dim); border-color:var(--green); color:var(--green); }
+        .track-lbl { font-size:9px; color:var(--text2); font-weight:600; text-transform:uppercase; letter-spacing:.5px; }
+        .track-step.done .track-lbl  { color:var(--blue); }
+        .track-step.cur .track-lbl   { color:var(--blue); font-weight:700; }
+        .track-step.done2 .track-lbl { color:var(--green); font-weight:700; }
+        .track-line { height:2px; flex:1; background:var(--border); margin-bottom:12px; }
+        .track-line.filled { background:var(--blue); }
+        .track-line.green  { background:var(--green); }
+
+        /* BADGE */
+        .badge { display:inline-flex; align-items:center; gap:4px; padding:3px 9px; border-radius:5px; font-size:11px; font-weight:700; }
+        .badge.ASIGNADO  { background:var(--orange-dim); color:var(--orange); }
+        .badge.EN_CAMINO { background:var(--blue-dim);   color:var(--blue); }
+        .badge.ENTREGADO { background:var(--green-dim);  color:var(--green); }
+
+        /* TABLE (historial) */
+        .card { background:var(--surface); border:1px solid var(--border); border-radius:10px; overflow:hidden; }
+        .card-head {
+            display:flex; align-items:center; justify-content:space-between;
+            padding:16px 18px; border-bottom:1px solid var(--border);
+        }
+        .card-head h3 { font-family:'Syne',sans-serif; font-size:14px; font-weight:700; }
+        table { width:100%; border-collapse:collapse; }
+        th { font-size:10px; color:var(--text2); font-weight:700; text-transform:uppercase;
+            letter-spacing:.7px; padding:10px 14px; text-align:left; border-bottom:1px solid var(--border); }
+        td { padding:10px 14px; font-size:12px; border-bottom:1px solid rgba(34,40,64,0.5); vertical-align:middle; }
+        tr:last-child td { border-bottom:none; }
+        tr:hover td { background:rgba(255,255,255,0.015); }
+        .mono { font-family:'DM Mono',monospace; }
+
+        /* BUTTONS */
+        .btn { padding:6px 13px; border:none; border-radius:6px; font-size:12px; font-weight:600;
+            cursor:pointer; font-family:'DM Sans',sans-serif; transition:all 0.15s; display:inline-flex; align-items:center; gap:5px; }
+        .btn-blue   { background:var(--blue); color:#fff; }
+        .btn-blue:hover { background:#2563eb; }
+        .btn-green  { background:var(--green-dim); color:var(--green); border:1px solid rgba(34,197,94,0.25); }
+        .btn-green:hover { background:rgba(34,197,94,0.2); }
+        .btn-orange { background:var(--orange-dim); color:var(--orange); border:1px solid rgba(245,158,11,0.25); }
+        .btn-orange:hover { background:rgba(245,158,11,0.2); }
+        .btn-ghost  { background:transparent; border:1px solid var(--border); color:var(--text2); }
+        .btn-ghost:hover { border-color:rgba(255,255,255,0.15); color:var(--text); }
+        .btn-sm { padding:4px 10px; font-size:11px; }
 
         /* MAPA */
-        .mapa-container { width: 100%; height: 320px; border-radius: 8px; background: #e8f4fc; border: 1px solid #bbdefb; display: flex; align-items: center; justify-content: center; margin-bottom: 15px; overflow: hidden; position: relative; }
-        .mapa-placeholder { text-align: center; color: #6b7a8d; }
-        .mapa-placeholder .icon { font-size: 40px; margin-bottom: 8px; }
-        .mapa-placeholder p { font-size: 13px; }
-        .mapa-placeholder small { font-size: 11px; color: #b0b8c4; }
-        .mapa-iframe { width: 100%; height: 100%; border: none; }
+        .mapa-select { width:100%; padding:9px 12px; background:var(--surface2); border:1px solid var(--border);
+            border-radius:7px; color:var(--text); font-size:13px; font-family:'DM Sans',sans-serif;
+            outline:none; margin-bottom:14px; }
+        .mapa-select option { background:var(--surface2); }
+        .mapa-box { width:100%; height:340px; border-radius:9px; background:var(--surface2); border:1px solid var(--border);
+            display:flex; align-items:center; justify-content:center; overflow:hidden; margin-bottom:14px; }
+        .mapa-box iframe { width:100%; height:100%; border:none; }
+        .mapa-placeholder { text-align:center; color:var(--text2); }
+        .mapa-placeholder .big { font-size:40px; margin-bottom:8px; }
+        .mapa-info { background:var(--blue-dim); border:1px solid rgba(59,130,246,0.2); border-radius:8px; padding:14px; }
+        .mapa-info-title { font-size:12px; font-weight:700; color:var(--blue); margin-bottom:8px; }
+        .mapa-info p { font-size:12px; line-height:1.7; }
+        .mapa-btns { display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
 
-        /* HISTORIAL */
-        .historial-item { display: flex; gap: 14px; padding: 14px 0; border-bottom: 1px solid #f4f5f7; }
-        .historial-item:last-child { border-bottom: none; }
-        .hist-timeline { display: flex; flex-direction: column; align-items: center; gap: 0; }
-        .hist-dot { width: 12px; height: 12px; border-radius: 50%; background: #1e88e5; flex-shrink: 0; margin-top: 3px; }
-        .hist-dot.entregado { background: #43a047; }
-        .hist-line { width: 2px; flex: 1; background: #eef0f4; margin: 3px 0; min-height: 20px; }
-        .hist-content { flex: 1; }
-        .hist-pedido { font-weight: 600; font-size: 13px; }
-        .hist-info { font-size: 12px; color: #6b7a8d; margin-top: 2px; }
-        .hist-fecha { font-size: 11px; color: #b0b8c4; margin-top: 3px; font-family: 'DM Mono', monospace; }
+        /* MODAL */
+        .overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:200; align-items:center; justify-content:center; }
+        .overlay.open { display:flex; }
+        .modal { background:var(--surface); border:1px solid var(--border); border-radius:12px;
+            width:520px; max-width:93vw; max-height:88vh; overflow-y:auto; }
+        .modal-head { display:flex; justify-content:space-between; align-items:center; padding:18px 22px 14px; border-bottom:1px solid var(--border); }
+        .modal-head h3 { font-family:'Syne',sans-serif; font-size:15px; font-weight:700; }
+        .modal-close { background:none; border:none; font-size:20px; cursor:pointer; color:var(--text2); }
+        .modal-body { padding:18px 22px; }
+        .modal-foot { padding:14px 22px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:8px; }
+        .info-row { display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px solid var(--border); font-size:12px; }
+        .info-row:last-child { border-bottom:none; }
+        .info-row .lbl { color:var(--text2); }
+        .info-row .val { font-weight:600; }
+        .det-row { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid rgba(34,40,64,0.5); font-size:12px; }
+        .det-row:last-child { border-bottom:none; }
 
-        .toast { position: fixed; bottom: 24px; right: 24px; padding: 12px 20px; border-radius: 8px; color: white; font-size: 13px; font-weight: 500; z-index: 9999; display: none; align-items: center; gap: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
-        .toast.visible { display: flex; }
-        .toast.exito { background: #43a047; }
-        .toast.error { background: #e53935; }
-        .toast.info { background: #1e88e5; }
+        /* TOAST */
+        .toast { position:fixed; bottom:22px; right:22px; padding:11px 16px; border-radius:8px; font-size:12px; font-weight:600;
+            z-index:999; display:none; align-items:center; gap:8px; border-left:3px solid;
+            background:var(--surface2); box-shadow:0 6px 24px rgba(0,0,0,.4); }
+        .toast.show { display:flex; animation:tin .22s ease; }
+        .toast.ok   { border-left-color:var(--green); color:var(--green); }
+        .toast.err  { border-left-color:var(--red); color:var(--red); }
+        .toast.info { border-left-color:var(--blue); color:var(--blue); }
+        @keyframes tin { from{transform:translateX(16px);opacity:0} to{transform:translateX(0);opacity:1} }
 
-        /* ESTADO SELECTOR */
-        .estado-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
-        .estado-btn { padding: 9px 16px; border: 2px solid #e0e4ea; border-radius: 8px; cursor: pointer; font-size: 13px; font-family: 'DM Sans', sans-serif; font-weight: 500; background: white; transition: all 0.15s; color: #6b7a8d; }
-        .estado-btn:hover { border-color: #1e88e5; color: #1565c0; }
-        .estado-btn.selected { background: #1e88e5; border-color: #1565c0; color: white; }
+        .empty { text-align:center; padding:44px; color:var(--text2); font-size:13px; }
+        .loading { text-align:center; padding:30px; color:var(--text2); font-size:12px; }
     </style>
 </head>
 <body>
 
-<header>
-    <div class="header-left">
+<!-- SIDEBAR -->
+<aside class="sidebar">
+    <div class="logo">
         <h1>💊 BotiClic</h1>
-        <span class="rol-badge">Delivery</span>
+        <span>Panel Delivery</span>
     </div>
-    <div class="header-right">
-        <span class="usuario" id="usuarioNombre">—</span>
-        <button class="btn-logout" onclick="cerrarSesion()">🚪 Cerrar sesión</button>
+    <div class="nav-label">Entregas</div>
+    <button class="nav-btn active" onclick="goSection('entregas',this)">
+        <span class="ico">🚚</span> Mis Entregas
+        <span class="cnt" id="cntNav">0</span>
+    </button>
+    <button class="nav-btn" onclick="goSection('historial',this)">
+        <span class="ico">📜</span> Historial
+    </button>
+    <button class="nav-btn" onclick="goSection('mapa',this)">
+        <span class="ico">🗺️</span> Mapa
+    </button>
+    <div class="sidebar-bottom">
+        <div class="user-row">
+            <div class="user-av" id="avIni">D</div>
+            <div>
+                <div class="user-name" id="uNombre">Repartidor</div>
+                <div class="user-role">DELIVERY</div>
+            </div>
+        </div>
+        <button class="btn-out" onclick="logout()">🚪 Cerrar sesión</button>
     </div>
-</header>
+</aside>
 
-<div class="tabs">
-    <div class="tab activo" onclick="mostrarTab('misEntregas', this)">🚚 Mis Entregas <span class="tab-count" id="cntEntregas">0</span></div>
-    <div class="tab" onclick="mostrarTab('historial', this)">📜 Historial <span class="tab-count" id="cntHistorial">0</span></div>
-    <div class="tab" onclick="mostrarTab('mapa', this)">🗺️ Mapa</div>
-</div>
+<!-- MAIN -->
+<div class="main">
+    <div class="topbar">
+        <div>
+            <div class="topbar-title" id="tTitle">Mis Entregas</div>
+            <div class="topbar-sub" id="tSub">Entregas activas y pendientes</div>
+        </div>
+        <div class="live-badge">En línea</div>
+    </div>
 
-<div class="contenido">
+    <div class="content">
 
-    <!-- MIS ENTREGAS (HU-10 + HU-13) -->
-    <div class="seccion activo" id="misEntregas">
-
-        <!-- Stats -->
-        <div class="stats">
-            <div class="stat">
-                <div class="stat-icon azul">📦</div>
-                <div class="stat-info"><h2 id="statAsignados">0</h2><p>Asignados</p></div>
+        <!-- ENTREGAS -->
+        <div class="section active" id="sec-entregas">
+            <div class="kpi-row">
+                <div class="kpi blue">
+                    <div class="kpi-ico">📦</div>
+                    <div class="kpi-val" id="kAsignado">0</div>
+                    <div class="kpi-lbl">Asignados</div>
+                </div>
+                <div class="kpi orange">
+                    <div class="kpi-ico">🚚</div>
+                    <div class="kpi-val" id="kCamino">0</div>
+                    <div class="kpi-lbl">En camino</div>
+                </div>
+                <div class="kpi green">
+                    <div class="kpi-ico">✅</div>
+                    <div class="kpi-val" id="kEntregado">0</div>
+                    <div class="kpi-lbl">Entregados</div>
+                </div>
+                <div class="kpi purple">
+                    <div class="kpi-ico">📋</div>
+                    <div class="kpi-val" id="kTotal">0</div>
+                    <div class="kpi-lbl">Total asignados</div>
+                </div>
             </div>
-            <div class="stat">
-                <div class="stat-icon naranja">🚚</div>
-                <div class="stat-info"><h2 id="statEnCamino">0</h2><p>En camino</p></div>
+
+            <div class="filter-bar">
+                <button class="fbtn active" onclick="filtrar('TODOS',this)">Todos</button>
+                <button class="fbtn" onclick="filtrar('ASIGNADO',this)">📦 Asignado</button>
+                <button class="fbtn" onclick="filtrar('EN_CAMINO',this)">🚚 En camino</button>
+                <button class="fbtn" onclick="filtrar('ENTREGADO',this)">✅ Entregado</button>
+                <button class="fbtn refresh" onclick="cargarEntregas()">↻ Actualizar</button>
             </div>
-            <div class="stat">
-                <div class="stat-icon verde">✅</div>
-                <div class="stat-info"><h2 id="statEntregados">0</h2><p>Entregados hoy</p></div>
-            </div>
-            <div class="stat">
-                <div class="stat-icon morado">⏱️</div>
-                <div class="stat-info"><h2 id="statPendientes">0</h2><p>Pendientes</p></div>
+
+            <div class="cards-grid" id="entregasGrid">
+                <div class="loading">⏳ Cargando entregas...</div>
             </div>
         </div>
 
-        <!-- Filtros rápidos -->
-        <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
-            <button class="btn btn-primary btn-sm" onclick="filtrarDelivery('todos')">Todos</button>
-            <button class="btn btn-ghost btn-sm" onclick="filtrarDelivery('ASIGNADO')">📦 Asignados</button>
-            <button class="btn btn-ghost btn-sm" onclick="filtrarDelivery('EN_CAMINO')">🚚 En camino</button>
-            <button class="btn btn-ghost btn-sm" onclick="filtrarDelivery('ENTREGADO')">✅ Entregados</button>
-            <button class="btn btn-ghost btn-sm" style="margin-left:auto" onclick="cargarEntregas()">🔄 Actualizar</button>
-        </div>
-
-        <div class="entregas-grid" id="entregasGrid">
-            <p style="color:#b0b8c4;font-size:13px;text-align:center;padding:40px">⏳ Cargando entregas...</p>
-        </div>
-    </div>
-
-    <!-- HISTORIAL -->
-    <div class="seccion" id="historial">
-        <div class="card">
-            <div class="card-header">
-                <h3>📜 Historial de Entregas</h3>
-                <button class="btn btn-ghost btn-sm" onclick="cargarHistorial()">🔄 Actualizar</button>
-            </div>
-            <div class="card-body" style="padding:0">
+        <!-- HISTORIAL -->
+        <div class="section" id="sec-historial">
+            <div class="card">
+                <div class="card-head">
+                    <h3>📜 Historial completo</h3>
+                    <button class="btn btn-ghost btn-sm" onclick="cargarHistorial()">↻ Actualizar</button>
+                </div>
                 <table>
-                    <thead><tr><th>Delivery</th><th>Pedido</th><th>Cliente</th><th>Dirección</th><th>Estado</th><th>Fecha asignación</th><th>Fecha entrega</th><th>Acciones</th></tr></thead>
-                    <tbody id="tablaHistorial"><tr class="loading-row"><td colspan="8">⏳ Cargando historial...</td></tr></tbody>
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Pedido</th>
+                        <th>Cliente</th>
+                        <th>Dirección</th>
+                        <th>Estado</th>
+                        <th>Asignado</th>
+                        <th>Entregado</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody id="tblHistorial">
+                    <tr><td colspan="8" class="loading">⏳ Cargando...</td></tr>
+                    </tbody>
                 </table>
             </div>
         </div>
-    </div>
 
-    <!-- MAPA (HU-13) -->
-    <div class="seccion" id="mapa">
-        <div class="card">
-            <div class="card-header">
-                <h3>🗺️ Mapa de Entregas — Geolocalización</h3>
-                <span style="font-size:12px;color:#6b7a8d">HU-13 — Rutas optimizadas para delivery</span>
-            </div>
-            <div class="card-body">
-                <div id="mapaSeleccion" style="margin-bottom:16px">
-                    <label style="font-size:12px;font-weight:600;color:#6b7a8d;text-transform:uppercase;letter-spacing:0.4px;display:block;margin-bottom:8px">Selecciona una entrega para ver la ruta:</label>
-                    <select id="selectEntregaMapa" onchange="actualizarMapa()" style="width:100%;padding:9px 12px;border:1.5px solid #e0e4ea;border-radius:7px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;background:white;margin-bottom:12px">
+        <!-- MAPA -->
+        <div class="section" id="sec-mapa">
+            <div class="card">
+                <div class="card-head">
+                    <h3>🗺️ Mapa de entregas</h3>
+                    <span style="font-size:11px;color:var(--text2)">Rutas y geolocalización</span>
+                </div>
+                <div style="padding:18px">
+                    <label style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:8px">Selecciona una entrega:</label>
+                    <select class="mapa-select" id="mapaSelect" onchange="actualizarMapa()">
                         <option value="">— Selecciona una entrega —</option>
                     </select>
-                </div>
-                <div class="mapa-container" id="mapaContainer">
-                    <div class="mapa-placeholder">
-                        <div class="icon">🗺️</div>
-                        <p>Selecciona una entrega para ver la ruta</p>
-                        <small>Integración con Google Maps API (HU-13)</small>
+                    <div class="mapa-box" id="mapaBox">
+                        <div class="mapa-placeholder">
+                            <div class="big">🗺️</div>
+                            <p>Selecciona una entrega</p>
+                        </div>
                     </div>
-                </div>
-                <div id="mapaInfo" style="display:none;margin-top:14px;padding:14px;background:#e3f2fd;border-radius:8px">
-                    <div style="font-weight:600;font-size:13px;color:#1565c0;margin-bottom:8px">📍 Información de la entrega</div>
-                    <div id="mapaInfoBody" style="font-size:13px;color:#1a2332"></div>
-                    <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
-                        <a id="linkMaps" href="#" target="_blank" class="btn btn-primary btn-sm">🗺️ Abrir en Google Maps</a>
-                        <button class="btn btn-success btn-sm" onclick="marcarEnCaminoDesadeMapa()">🚚 Marcar En Camino</button>
-                        <button class="btn btn-success btn-sm" onclick="marcarEntregadoDesdeMapa()">✅ Marcar Entregado</button>
+                    <div id="mapaInfo" style="display:none" class="mapa-info">
+                        <div class="mapa-info-title">📍 Información de entrega</div>
+                        <p id="mapaInfoTxt"></p>
+                        <div class="mapa-btns" id="mapaBtns"></div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
+    </div>
 </div>
 
-<!-- MODAL Detalle Entrega -->
-<div class="modal-overlay" id="modalEntrega">
+<!-- MODAL DETALLE -->
+<div class="overlay" id="modalDetalle">
     <div class="modal">
-        <div class="modal-header">
-            <h3 id="modalEntregaTitulo">Detalle de Entrega</h3>
-            <button class="modal-close" onclick="cerrarModal('modalEntrega')">×</button>
+        <div class="modal-head">
+            <h3 id="modalTitulo">Detalle de entrega</h3>
+            <button class="modal-close" onclick="closeModal()">×</button>
         </div>
-        <div class="modal-body" id="modalEntregaBody"></div>
-        <div class="modal-footer" id="modalEntregaFooter">
-            <button class="btn btn-ghost" onclick="cerrarModal('modalEntrega')">Cerrar</button>
+        <div class="modal-body" id="modalBody"></div>
+        <div class="modal-foot">
+            <button class="btn btn-ghost btn-sm" onclick="closeModal()">Cerrar</button>
         </div>
     </div>
 </div>
@@ -287,346 +394,368 @@
 <div class="toast" id="toast"></div>
 
 <script>
-    const API = 'http://localhost:8081/api';
+    const API    = 'http://localhost:8081/api';
     const token  = localStorage.getItem('token');
     const rol    = localStorage.getItem('rol');
-    const nombre = localStorage.getItem('nombre');
-    const email  = localStorage.getItem('email');
+    const nombre = localStorage.getItem('nombre') || 'Repartidor';
+    const email  = localStorage.getItem('email') || '';
 
+    // ── AUTH ──────────────────────────────────────────
     if (!token || !rol) { window.location.href = '/login.html'; }
-    else if (rol !== 'DELIVERY') { alert('Acceso denegado. Solo repartidores.'); window.location.href = '/login.html'; }
+    if (rol !== 'DELIVERY') { alert('Acceso denegado. Solo repartidores.'); window.location.href = '/login.html'; }
 
-    document.getElementById('usuarioNombre').textContent = '👤 ' + (nombre || 'Repartidor');
+    document.getElementById('uNombre').textContent = nombre;
+    document.getElementById('avIni').textContent   = nombre.charAt(0).toUpperCase();
 
-    function getHeaders() { return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }; }
-    function cerrarSesion() { localStorage.clear(); window.location.href = '/login.html'; }
-    function cerrarModal(id) { document.getElementById(id).classList.remove('visible'); }
+    function logout() { localStorage.clear(); window.location.href = '/login.html'; }
+    function H() { return { 'Content-Type':'application/json', 'Authorization':'Bearer '+token }; }
 
-    function toast(msg, tipo = 'exito') {
-        const t = document.getElementById('toast');
-        t.textContent = msg;
-        t.className = `toast visible ${tipo}`;
-        setTimeout(() => t.classList.remove('visible'), 3500);
+    // ── NAV ───────────────────────────────────────────
+    const navTitles = {
+        entregas: ['Mis Entregas',  'Entregas activas y pendientes'],
+        historial:['Historial',     'Registro completo de entregas'],
+        mapa:     ['Mapa de Rutas', 'Visualización geográfica']
+    };
+    function goSection(id, btn) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('sec-'+id).classList.add('active');
+        btn.classList.add('active');
+        const [t,s] = navTitles[id];
+        document.getElementById('tTitle').textContent = t;
+        document.getElementById('tSub').textContent   = s;
+        if (id === 'entregas')  cargarEntregas();
+        if (id === 'historial') cargarHistorial();
+        if (id === 'mapa')      cargarMapa();
     }
 
-    function mostrarTab(tab, el) {
-        document.querySelectorAll('.seccion').forEach(s => s.classList.remove('activo'));
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('activo'));
-        document.getElementById(tab).classList.add('activo');
-        el.classList.add('activo');
-        if (tab === 'misEntregas') cargarEntregas();
-        if (tab === 'historial')   cargarHistorial();
-        if (tab === 'mapa')        cargarEntregasMapa();
+    // ── TOAST ─────────────────────────────────────────
+    function toast(msg, type='ok') {
+        const el = document.getElementById('toast');
+        el.textContent = msg;
+        el.className = 'toast show ' + type;
+        setTimeout(() => el.classList.remove('show'), 3200);
     }
 
-    function formatFecha(str) {
-        if (!str) return '—';
-        try { return new Date(str).toLocaleString('es-PE', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' }); }
-        catch { return str; }
-    }
-
-    function badgeDelivery(estado) {
-        const cls = { ASIGNADO:'badge-azul', EN_CAMINO:'badge-naranja', ENTREGADO:'badge-verde' };
-        const ico = { ASIGNADO:'📦', EN_CAMINO:'🚚', ENTREGADO:'✅' };
-        return `<span class="badge ${cls[estado]||'badge-gris'}">${ico[estado]||'•'} ${estado}</span>`;
-    }
-
-    function progressEstado(estado) {
-        const steps = ['ASIGNADO','EN_CAMINO','ENTREGADO'];
-        const idx   = steps.indexOf(estado);
-        return steps.map((s, i) => {
-            const cls = i < idx ? 'done' : i === idx ? 'active' : '';
-            const ico = i < idx ? '✓' : i === idx ? (i===0?'📦':i===1?'🚚':'✅') : i+1;
-            const lbl = s === 'ASIGNADO' ? 'Asignado' : s === 'EN_CAMINO' ? 'En camino' : 'Entregado';
-            return `<div class="progress-step ${cls} ${i===steps.length-1&&estado==='ENTREGADO'?'completed':''}">
-            <div class="dot">${ico}</div><div class="label">${lbl}</div>
-        </div>${i < steps.length-1 ? `<div class="progress-line ${i < idx ? 'done' : ''}"></div>` : ''}`;
-        }).join('');
-    }
-
-    // ===== MIS ENTREGAS =====
-    let todasEntregas = [];
-    let repartidorId  = null;
-
-    async function obtenerRepartidorId() {
-        // Intentamos obtener el ID del repartidor por email
-        if (repartidorId) return repartidorId;
+    // ── OBTENER ID REPARTIDOR ─────────────────────────
+    let myId = null;
+    async function getMyId() {
+        if (myId) return myId;
+        // Intentar desde el objeto usuario guardado
         try {
-            const res = await fetch(`${API}/usuarios`, { headers: getHeaders() });
-            if (!res.ok) return null;
-            const usuarios = await res.json();
-            const yo = usuarios.find(u => u.email === email || u.nombre === nombre);
-            repartidorId = yo?.id || null;
-            return repartidorId;
-        } catch { return null; }
+            const u = JSON.parse(localStorage.getItem('usuario') || '{}');
+            if (u.id) { myId = u.id; return myId; }
+        } catch {}
+        // Fallback: buscar en lista de usuarios
+        try {
+            const res = await fetch(API+'/usuarios', { headers: H() });
+            if (res.ok) {
+                const lista = await res.json();
+                const yo = lista.find(u => u.email === email || u.nombre === nombre);
+                myId = yo?.id || null;
+            }
+        } catch {}
+        return myId;
     }
+
+    // ── ENTREGAS ──────────────────────────────────────
+    let todasEntregas = [];
+    let entregaMapaActual = null;
 
     async function cargarEntregas() {
         const grid = document.getElementById('entregasGrid');
-        grid.innerHTML = '<p style="color:#b0b8c4;font-size:13px;text-align:center;padding:40px">⏳ Cargando entregas...</p>';
+        grid.innerHTML = '<div class="loading">⏳ Cargando entregas...</div>';
         try {
-            const rid = await obtenerRepartidorId();
-            let entregas = [];
+            const rid = await getMyId();
+            let data = [];
             if (rid) {
-                const res = await fetch(`${API}/delivery/repartidor/${rid}`, { headers: getHeaders() });
-                if (res.ok) entregas = await res.json();
+                const res = await fetch(`${API}/delivery/repartidor/${rid}`, { headers: H() });
+                if (res.ok) data = await res.json();
             }
-            // Si no encontramos por repartidor, cargamos todas
-            if (!entregas.length) {
-                const estados = ['ASIGNADO','EN_CAMINO'];
-                for (const e of estados) {
-                    const res = await fetch(`${API}/delivery/estado/${e}`, { headers: getHeaders() });
-                    if (res.ok) { const d = await res.json(); entregas = [...entregas, ...d]; }
-                }
+            // Si no tiene id o no trajo datos, cargar estados activos
+            if (!data.length) {
+                const [r1, r2] = await Promise.all([
+                    fetch(`${API}/delivery/estado/ASIGNADO`,  { headers: H() }),
+                    fetch(`${API}/delivery/estado/EN_CAMINO`, { headers: H() })
+                ]);
+                const [a, c] = await Promise.all([r1.json(), r2.json()]);
+                data = [...a, ...c];
             }
-            todasEntregas = entregas;
-            actualizarStats(entregas);
-            renderEntregas(entregas);
+            todasEntregas = data;
+            actualizarKpis(data);
+            renderCards(data);
         } catch(e) {
-            grid.innerHTML = '<p style="color:#e53935;font-size:13px;text-align:center;padding:40px">❌ Error de conexión al servidor</p>';
+            grid.innerHTML = '<div class="empty">❌ Error conectando al servidor</div>';
         }
     }
 
-    function actualizarStats(lista) {
-        document.getElementById('cntEntregas').textContent = lista.length;
-        document.getElementById('statAsignados').textContent = lista.filter(e=>e.estado==='ASIGNADO').length;
-        document.getElementById('statEnCamino').textContent  = lista.filter(e=>e.estado==='EN_CAMINO').length;
-        document.getElementById('statEntregados').textContent= lista.filter(e=>e.estado==='ENTREGADO').length;
-        document.getElementById('statPendientes').textContent= lista.filter(e=>e.estado!=='ENTREGADO').length;
+    function actualizarKpis(lista) {
+        const a = lista.filter(e => e.estado === 'ASIGNADO').length;
+        const c = lista.filter(e => e.estado === 'EN_CAMINO').length;
+        const en = lista.filter(e => e.estado === 'ENTREGADO').length;
+        document.getElementById('kAsignado').textContent  = a;
+        document.getElementById('kCamino').textContent    = c;
+        document.getElementById('kEntregado').textContent = en;
+        document.getElementById('kTotal').textContent     = lista.length;
+        document.getElementById('cntNav').textContent     = a + c;
     }
 
-    function filtrarDelivery(filtro) {
-        document.querySelectorAll('.tabs ~ .contenido .btn-ghost, .tabs ~ .contenido .btn-primary').forEach(b => b.classList.replace('btn-primary','btn-ghost'));
-        const filtrados = filtro==='todos' ? todasEntregas : todasEntregas.filter(e=>e.estado===filtro);
-        renderEntregas(filtrados);
+    function track(estado) {
+        const steps = ['ASIGNADO','EN_CAMINO','ENTREGADO'];
+        const labels = ['Asignado','En camino','Entregado'];
+        const icons  = ['📦','🚚','✅'];
+        const idx = steps.indexOf(estado);
+        let html = '';
+        steps.forEach((s, i) => {
+            let cls = '';
+            if (i < idx) cls = s === 'ENTREGADO' ? 'done2' : 'done';
+            else if (i === idx) cls = s === 'ENTREGADO' ? 'done2' : 'cur';
+            html += `<div class="track-step ${cls}"><div class="track-dot">${i<=idx ? icons[i] : i+1}</div><div class="track-lbl">${labels[i]}</div></div>`;
+            if (i < steps.length-1) {
+                const filled = i < idx ? (s === 'ENTREGADO' ? 'green' : 'filled') : '';
+                html += `<div class="track-line ${filled}"></div>`;
+            }
+        });
+        return html;
     }
 
-    function renderEntregas(lista) {
+    function renderCards(lista) {
         const grid = document.getElementById('entregasGrid');
         if (!lista.length) {
-            grid.innerHTML = `<div style="grid-column:1/-1"><div class="empty-state"><div class="icon">📦</div><p>No tienes entregas ${lista===todasEntregas?'asignadas':'para este filtro'}.</p></div></div>`;
+            grid.innerHTML = '<div class="empty" style="grid-column:1/-1">📦 No hay entregas para mostrar</div>';
             return;
         }
         grid.innerHTML = lista.map(e => {
             const p = e.pedido || {};
             const u = p.usuario || {};
-            const esUrgente = e.estado === 'ASIGNADO';
-            const esCamino  = e.estado === 'EN_CAMINO';
-            const esEntregado = e.estado === 'ENTREGADO';
-            const clsCard = esEntregado ? 'entregado' : esCamino ? 'camino' : esUrgente ? 'urgente' : '';
+            const dir = e.direccionEntrega || p.direccionEntrega || 'Sin dirección';
+            const est = (e.estado || '').toUpperCase();
+            const clsCard = est === 'ASIGNADO' ? 'asignado' : est === 'EN_CAMINO' ? 'en_camino' : 'entregado';
+            const fecha = e.fechaAsignacion ? fmtFecha(e.fechaAsignacion) : '—';
+            const fechaEnt = e.fechaEntrega ? '<br>🏁 '+fmtFecha(e.fechaEntrega) : '';
             return `
-        <div class="entrega-card ${clsCard}">
-            <div class="entrega-header">
-                <div class="entrega-id">Delivery #${e.id} · Pedido #${p.id||'—'}</div>
-                ${badgeDelivery(e.estado)}
-            </div>
-            <div style="display:flex;margin-bottom:10px;">${progressEstado(e.estado)}</div>
-            <div class="entrega-cliente">${u.nombre||'Cliente no disponible'}</div>
-            <div class="entrega-email">${u.email||''}</div>
-            <div class="entrega-dir">
-                <span class="map-pin">📍</span>
-                <span>${e.direccionEntrega || p.direccionEntrega || 'Dirección no especificada'}</span>
-            </div>
-            <div class="entrega-total">S/ ${p.total?.toFixed(2)||'0.00'}</div>
-            <div class="entrega-fecha">📅 Asignado: ${formatFecha(e.fechaAsignacion)}${e.fechaEntrega?'<br>🏁 Entregado: '+formatFecha(e.fechaEntrega):''}</div>
-            <div class="entrega-actions">
-                <button class="btn btn-primary btn-sm" onclick="verDetalleEntrega(${e.id})">🔍 Ver detalle</button>
-                ${e.estado==='ASIGNADO' ? `<button class="btn btn-warning btn-sm" onclick="cambiarEstadoEntrega(${e.id},'EN_CAMINO')">🚚 Iniciar ruta</button>` : ''}
-                ${e.estado==='EN_CAMINO' ? `<button class="btn btn-success btn-sm" onclick="cambiarEstadoEntrega(${e.id},'ENTREGADO')">✅ Marcar entregado</button>` : ''}
-                <button class="btn btn-ghost btn-sm" onclick="abrirEnMaps('${(e.direccionEntrega||p.direccionEntrega||'Lima, Peru').replace(/'/g,"\\'")}')" title="Abrir en Maps">🗺️</button>
-            </div>
-        </div>`;
+      <div class="ecard ${clsCard}">
+        <div class="ecard-top">
+          <span class="ecard-id mono">Delivery #${e.id} · Pedido #${p.id||'?'}</span>
+          <span class="badge ${est}">${est==='ASIGNADO'?'📦':est==='EN_CAMINO'?'🚚':'✅'} ${est}</span>
+        </div>
+        <div class="track">${track(e.estado)}</div>
+        <div class="ecard-name">${u.nombre || 'Cliente'}</div>
+        <div class="ecard-email">${u.email || ''}</div>
+        <div class="ecard-dir"><span>📍</span>${dir}</div>
+        <div class="ecard-total">S/ ${(p.total||0).toFixed(2)}</div>
+        <div class="ecard-date">📅 ${fecha}${fechaEnt}</div>
+        <div class="ecard-actions">
+          <button class="btn btn-ghost btn-sm" onclick="verDetalle(${e.id})">🔍 Detalle</button>
+          ${est==='ASIGNADO'  ? `<button class="btn btn-orange btn-sm" onclick="cambiarEstado(${e.id},'EN_CAMINO')">🚚 Iniciar ruta</button>` : ''}
+          ${est==='EN_CAMINO' ? `<button class="btn btn-green  btn-sm" onclick="cambiarEstado(${e.id},'ENTREGADO')">✅ Entregado</button>` : ''}
+          <button class="btn btn-ghost btn-sm" onclick="abrirMaps('${dir.replace(/'/g,"\\'")}')" title="Maps">🗺️</button>
+        </div>
+      </div>`;
         }).join('');
     }
 
-    async function verDetalleEntrega(id) {
-        const e = todasEntregas.find(x=>x.id===id); if (!e) return;
-        const p = e.pedido||{};
-        const u = p.usuario||{};
-        document.getElementById('modalEntregaTitulo').textContent = `Entrega #${e.id} — Pedido #${p.id||'?'}`;
-        document.getElementById('modalEntregaBody').innerHTML = `
-        <div style="display:flex;margin-bottom:16px;">${progressEstado(e.estado)}</div>
-        <div class="info-row"><span>Estado</span><span>${badgeDelivery(e.estado)}</span></div>
-        <div class="info-row"><span>Cliente</span><span>${u.nombre||'—'}</span></div>
-        <div class="info-row"><span>Email</span><span>${u.email||'—'}</span></div>
-        <div class="info-row"><span>Dirección</span><span>${e.direccionEntrega||p.direccionEntrega||'—'}</span></div>
-        <div class="info-row"><span>Método de pago</span><span>${p.metodoPago||'—'}</span></div>
-        <div class="info-row"><span>Total</span><span style="font-size:16px;color:#1565c0;font-weight:700">S/ ${p.total?.toFixed(2)||'0.00'}</span></div>
-        <div class="info-row"><span>Fecha asignación</span><span>${formatFecha(e.fechaAsignacion)}</span></div>
-        ${e.fechaEntrega?`<div class="info-row"><span>Fecha entrega</span><span style="color:#2e7d32">${formatFecha(e.fechaEntrega)}</span></div>`:''}
-        ${e.latitud?`<div class="info-row"><span>Última ubicación</span><span style="font-family:'DM Mono',monospace;font-size:12px">${e.latitud?.toFixed(4)}, ${e.longitud?.toFixed(4)}</span></div>`:''}
-        <hr style="margin:12px 0;border-color:#f0f0f0">
-        <strong style="font-size:12px;color:#6b7a8d;display:block;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px">Productos del pedido</strong>
-        ${(p.detalles||[]).length
-            ? (p.detalles||[]).map(d=>`<div class="detalle-item">
-                <div><div style="font-weight:600">${d.producto?.nombre||'—'}</div>
-                <div style="font-size:11px;color:#6b7a8d">x${d.cantidad} × S/ ${d.precioUnitario?.toFixed(2)}</div></div>
-                <div style="font-weight:700;font-family:'DM Mono',monospace">S/ ${(d.cantidad*d.precioUnitario).toFixed(2)}</div>
-            </div>`).join('')
-            : '<p style="color:#b0b8c4;font-size:13px;text-align:center;padding:12px">Sin detalle de productos</p>'}
-        ${e.estado!=='ENTREGADO'?`
-        <hr style="margin:12px 0;border-color:#f0f0f0">
-        <strong style="font-size:12px;color:#6b7a8d;display:block;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px">Cambiar estado</strong>
-        <div class="estado-btns">
-            ${e.estado==='ASIGNADO'?`<button class="estado-btn" onclick="cambiarEstadoEntrega(${e.id},'EN_CAMINO');cerrarModal('modalEntrega')">🚚 Iniciar ruta</button>`:''}
-            ${e.estado==='EN_CAMINO'?`<button class="estado-btn" onclick="cambiarEstadoEntrega(${e.id},'ENTREGADO');cerrarModal('modalEntrega')">✅ Marcar como entregado</button>`:''}
-        </div>`:''}
-        <div style="margin-top:14px">
-            <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(e.direccionEntrega||p.direccionEntrega||'Lima')}" target="_blank" class="btn btn-primary btn-sm" style="text-decoration:none">🗺️ Abrir en Google Maps</a>
-        </div>`;
-        document.getElementById('modalEntregaFooter').innerHTML = `<button class="btn btn-ghost" onclick="cerrarModal('modalEntrega')">Cerrar</button>`;
-        document.getElementById('modalEntrega').classList.add('visible');
+    function filtrar(estado, btn) {
+        document.querySelectorAll('.fbtn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const lista = estado === 'TODOS' ? todasEntregas : todasEntregas.filter(e => e.estado === estado);
+        renderCards(lista);
     }
 
-    async function cambiarEstadoEntrega(id, estado) {
-        // Intentar obtener ubicación GPS
+    async function cambiarEstado(id, estado) {
         let lat = null, lng = null;
+        // Intentar obtener GPS
         try {
-            if (navigator.geolocation) {
-                await new Promise((res) => {
-                    navigator.geolocation.getCurrentPosition(
-                        pos => { lat = pos.coords.latitude; lng = pos.coords.longitude; res(); },
-                        () => res(), { timeout: 3000 }
-                    );
-                });
-            }
+            await new Promise(res => {
+                navigator.geolocation?.getCurrentPosition(
+                    p => { lat=p.coords.latitude; lng=p.coords.longitude; res(); },
+                    () => res(), { timeout:3500 }
+                );
+            });
         } catch {}
         const params = new URLSearchParams({ estado });
         if (lat) { params.append('latitud', lat); params.append('longitud', lng); }
         try {
-            const res = await fetch(`${API}/delivery/${id}/estado?${params}`, { method:'PUT', headers:getHeaders() });
+            const res = await fetch(`${API}/delivery/${id}/estado?${params}`, { method:'PUT', headers:H() });
             if (res.ok) {
-                const msgs = { EN_CAMINO:'🚚 ¡Ruta iniciada!', ENTREGADO:'✅ Pedido entregado exitosamente' };
-                toast(msgs[estado] || '✅ Estado actualizado');
-                cargarEntregas();
-            } else toast('❌ Error al actualizar estado','error');
-        } catch { toast('❌ Error de conexión','error'); }
+                toast(estado==='ENTREGADO' ? '✅ Pedido entregado' : '🚚 Ruta iniciada');
+                await cargarEntregas();
+            } else {
+                toast('❌ Error al actualizar', 'err');
+            }
+        } catch { toast('❌ Error de conexión', 'err'); }
     }
 
-    function abrirEnMaps(dir) {
+    function abrirMaps(dir) {
         window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(dir)}`, '_blank');
     }
 
-    // ===== HISTORIAL =====
+    // ── DETALLE MODAL ─────────────────────────────────
+    function verDetalle(id) {
+        const e = todasEntregas.find(x => x.id === id);
+        if (!e) return;
+        const p = e.pedido || {};
+        const u = p.usuario || {};
+        const dir = e.direccionEntrega || p.direccionEntrega || '—';
+        const est = (e.estado||'').toUpperCase();
+        document.getElementById('modalTitulo').textContent = `Entrega #${e.id} — Pedido #${p.id||'?'}`;
+        document.getElementById('modalBody').innerHTML = `
+    <div class="track" style="margin-bottom:16px">${track(e.estado)}</div>
+    <div class="info-row"><span class="lbl">Estado</span><span class="val"><span class="badge ${est}">${est}</span></span></div>
+    <div class="info-row"><span class="lbl">Cliente</span><span class="val">${u.nombre||'—'}</span></div>
+    <div class="info-row"><span class="lbl">Email</span><span class="val" style="font-size:11px">${u.email||'—'}</span></div>
+    <div class="info-row"><span class="lbl">Dirección</span><span class="val" style="text-align:right;max-width:260px">${dir}</span></div>
+    <div class="info-row"><span class="lbl">Método de pago</span><span class="val">${p.metodoPago||'—'}</span></div>
+    <div class="info-row"><span class="lbl">Total</span><span class="val mono" style="font-size:16px;color:var(--blue)">S/ ${(p.total||0).toFixed(2)}</span></div>
+    <div class="info-row"><span class="lbl">Fecha asignación</span><span class="val mono" style="font-size:11px">${fmtFecha(e.fechaAsignacion)}</span></div>
+    ${e.fechaEntrega ? `<div class="info-row"><span class="lbl">Fecha entrega</span><span class="val mono" style="font-size:11px;color:var(--green)">${fmtFecha(e.fechaEntrega)}</span></div>` : ''}
+    ${e.latitud ? `<div class="info-row"><span class="lbl">Última ubicación</span><span class="val mono" style="font-size:11px">${e.latitud.toFixed(5)}, ${e.longitud.toFixed(5)}</span></div>` : ''}
+    <div style="margin:14px 0;border-top:1px solid var(--border)"></div>
+    <div style="font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">Productos</div>
+    ${(p.detalles||[]).length
+            ? (p.detalles||[]).map(d=>`
+          <div class="det-row">
+            <div><div style="font-weight:600">${d.producto?.nombre||'—'}</div>
+            <div style="color:var(--text2);font-size:11px">x${d.cantidad} × S/ ${(d.precioUnitario||0).toFixed(2)}</div></div>
+            <div class="mono" style="font-weight:700">S/ ${(d.cantidad*(d.precioUnitario||0)).toFixed(2)}</div>
+          </div>`).join('')
+            : '<p style="color:var(--text2);font-size:12px;text-align:center;padding:10px">Sin detalle de productos</p>'}
+    ${est !== 'ENTREGADO' ? `
+    <div style="margin:14px 0;border-top:1px solid var(--border)"></div>
+    <div style="font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">Cambiar estado</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      ${est==='ASIGNADO'  ? `<button class="btn btn-orange" onclick="cambiarEstado(${e.id},'EN_CAMINO');closeModal()">🚚 Iniciar ruta</button>` : ''}
+      ${est==='EN_CAMINO' ? `<button class="btn btn-green"  onclick="cambiarEstado(${e.id},'ENTREGADO');closeModal()">✅ Marcar entregado</button>` : ''}
+    </div>` : ''}
+    <div style="margin-top:12px">
+      <button class="btn btn-ghost btn-sm" onclick="abrirMaps('${dir.replace(/'/g,"\\'")}')" style="text-decoration:none">🗺️ Abrir en Google Maps</button>
+    </div>`;
+        document.getElementById('modalDetalle').classList.add('open');
+    }
+    function closeModal() { document.getElementById('modalDetalle').classList.remove('open'); }
+    document.getElementById('modalDetalle').addEventListener('click', e => { if(e.target===e.currentTarget) closeModal(); });
+
+    // ── HISTORIAL ─────────────────────────────────────
     async function cargarHistorial() {
+        const tbody = document.getElementById('tblHistorial');
+        tbody.innerHTML = '<tr><td colspan="8" class="loading">⏳ Cargando...</td></tr>';
         try {
-            const rid = await obtenerRepartidorId();
-            let historial = [];
+            const rid = await getMyId();
+            let data = [];
             if (rid) {
-                const res = await fetch(`${API}/delivery/repartidor/${rid}`, { headers:getHeaders() });
-                if (res.ok) historial = await res.json();
+                const res = await fetch(`${API}/delivery/repartidor/${rid}`, { headers: H() });
+                if (res.ok) data = await res.json();
             }
-            if (!historial.length) {
-                const res = await fetch(`${API}/delivery/estado/ENTREGADO`, { headers:getHeaders() });
-                if (res.ok) historial = await res.json();
+            if (!data.length) {
+                // Si no hay por repartidor, traer ENTREGADO
+                const res = await fetch(`${API}/delivery/estado/ENTREGADO`, { headers: H() });
+                if (res.ok) data = await res.json();
             }
-            document.getElementById('cntHistorial').textContent = historial.length;
-            const tbody = document.getElementById('tablaHistorial');
-            if (!historial.length) {
-                tbody.innerHTML='<tr><td colspan="8"><div class="empty-state"><div class="icon">📜</div><p>Sin historial de entregas aún.</p></div></td></tr>';
+            if (!data.length) {
+                tbody.innerHTML = '<tr><td colspan="8" class="empty">📜 Sin registros de entregas</td></tr>';
                 return;
             }
-            tbody.innerHTML = historial.map(e => {
-                const p = e.pedido||{};
-                const u = p.usuario||{};
-                const r = e.repartidor||{};
+            tbody.innerHTML = data.map(e => {
+                const p = e.pedido || {};
+                const u = p.usuario || {};
+                const dir = e.direccionEntrega || p.direccionEntrega || '—';
+                const est = (e.estado||'').toUpperCase();
                 return `<tr>
-                <td style="font-family:'DM Mono',monospace;font-size:12px;color:#6b7a8d">#${e.id}</td>
-                <td style="font-family:'DM Mono',monospace;font-size:12px;color:#6b7a8d">#${p.id||'—'}</td>
-                <td style="font-weight:600">${u.nombre||'—'}<br><span style="font-size:11px;color:#6b7a8d;font-weight:400">${u.email||''}</span></td>
-                <td style="font-size:12px;color:#6b7a8d;max-width:130px">${e.direccionEntrega||p.direccionEntrega||'—'}</td>
-                <td>${badgeDelivery(e.estado)}</td>
-                <td style="font-size:12px;color:#6b7a8d">${formatFecha(e.fechaAsignacion)}</td>
-                <td style="font-size:12px;color:${e.fechaEntrega?'#2e7d32':'#b0b8c4'}">${e.fechaEntrega?formatFecha(e.fechaEntrega):'Pendiente'}</td>
-                <td><button class="btn btn-primary btn-sm" onclick="verDetalleEntrega(${e.id})">🔍 Ver</button></td>
-            </tr>`;
+        <td class="mono" style="color:var(--text2)">#${e.id}</td>
+        <td class="mono" style="color:var(--text2)">#${p.id||'—'}</td>
+        <td><b>${u.nombre||'—'}</b><br><span style="font-size:10px;color:var(--text2)">${u.email||''}</span></td>
+        <td style="font-size:11px;color:var(--text2);max-width:120px">${dir}</td>
+        <td><span class="badge ${est}">${est}</span></td>
+        <td class="mono" style="font-size:10px;color:var(--text2)">${fmtFecha(e.fechaAsignacion)}</td>
+        <td class="mono" style="font-size:10px;color:${e.fechaEntrega?'var(--green)':'var(--text2)'}">${e.fechaEntrega ? fmtFecha(e.fechaEntrega) : '—'}</td>
+        <td><button class="btn btn-ghost btn-sm" onclick="verDetalle(${e.id})">🔍</button></td>
+      </tr>`;
             }).join('');
-        } catch(e) {
-            document.getElementById('tablaHistorial').innerHTML='<tr class="loading-row"><td colspan="8">❌ Error de conexión</td></tr>';
-        }
+            // también rellenamos todasEntregas si estaba vacío
+            if (!todasEntregas.length) todasEntregas = data;
+        } catch { tbody.innerHTML = '<tr><td colspan="8" class="empty">❌ Error de conexión</td></tr>'; }
     }
 
-    // ===== MAPA (HU-13) =====
-    let entregasMapa = [];
-    let entregaMapaActual = null;
+    // ── MAPA ──────────────────────────────────────────
+    let mapaEntregas = [];
 
-    async function cargarEntregasMapa() {
-        const rid = await obtenerRepartidorId();
-        let entregas = [];
+    async function cargarMapa() {
+        const rid = await getMyId();
+        let data = [];
         if (rid) {
-            const res = await fetch(`${API}/delivery/repartidor/${rid}`, { headers:getHeaders() });
-            if (res.ok) entregas = await res.json();
+            const res = await fetch(`${API}/delivery/repartidor/${rid}`, { headers: H() });
+            if (res.ok) data = await res.json();
         }
-        if (!entregas.length) {
-            const estados = ['ASIGNADO','EN_CAMINO'];
-            for (const e of estados) {
-                const res = await fetch(`${API}/delivery/estado/${e}`, { headers:getHeaders() });
-                if (res.ok) { const d = await res.json(); entregas = [...entregas,...d]; }
-            }
+        if (!data.length) {
+            const [r1,r2] = await Promise.all([
+                fetch(`${API}/delivery/estado/ASIGNADO`,  { headers: H() }),
+                fetch(`${API}/delivery/estado/EN_CAMINO`, { headers: H() })
+            ]);
+            const [a,c] = await Promise.all([r1.json(), r2.json()]);
+            data = [...a, ...c];
         }
-        entregasMapa = entregas.filter(e => e.estado !== 'ENTREGADO');
-        const sel = document.getElementById('selectEntregaMapa');
+        mapaEntregas = data.filter(e => e.estado !== 'ENTREGADO');
+        const sel = document.getElementById('mapaSelect');
         sel.innerHTML = '<option value="">— Selecciona una entrega —</option>';
-        entregasMapa.forEach(e => {
-            const p = e.pedido||{};
-            const dir = e.direccionEntrega||p.direccionEntrega||'Sin dirección';
-            sel.innerHTML += `<option value="${e.id}">Entrega #${e.id} — ${dir.substring(0,40)}</option>`;
+        mapaEntregas.forEach(e => {
+            const p = e.pedido || {};
+            const dir = (e.direccionEntrega || p.direccionEntrega || 'Sin dirección').substring(0,45);
+            sel.innerHTML += `<option value="${e.id}">Delivery #${e.id} — ${dir}</option>`;
         });
     }
 
     function actualizarMapa() {
-        const id = parseInt(document.getElementById('selectEntregaMapa').value);
-        const e  = entregasMapa.find(x=>x.id===id);
-        const cont = document.getElementById('mapaContainer');
+        const id = parseInt(document.getElementById('mapaSelect').value);
+        const e = mapaEntregas.find(x => x.id === id);
+        const box  = document.getElementById('mapaBox');
         const info = document.getElementById('mapaInfo');
         if (!e) {
-            cont.innerHTML = `<div class="mapa-placeholder"><div class="icon">🗺️</div><p>Selecciona una entrega para ver la ruta</p><small>Integración con Google Maps API (HU-13)</small></div>`;
+            box.innerHTML = '<div class="mapa-placeholder"><div class="big">🗺️</div><p>Selecciona una entrega</p></div>';
             info.style.display = 'none';
             entregaMapaActual = null;
             return;
         }
         entregaMapaActual = e;
-        const p = e.pedido||{};
-        const u = p.usuario||{};
+        const p = e.pedido || {};
+        const u = p.usuario || {};
         const dir = e.direccionEntrega || p.direccionEntrega || 'Lima, Peru';
         const dirEnc = encodeURIComponent(dir);
-        // Google Maps embed con la dirección del cliente
-        cont.innerHTML = `<iframe class="mapa-iframe"
-        src="https://www.google.com/maps/embed/v1/place?key=AIzaSyD-9tSrke72PouQMnMX-a7eZSW0jkFMBWY&q=${dirEnc}&zoom=15"
-        allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>`;
-        // Si no carga (key inválida), mostrar mapa estático
-        cont.querySelector('iframe').onerror = function() {
-            cont.innerHTML = `<div class="mapa-placeholder">
-            <div class="icon">📍</div>
-            <p style="font-weight:600;color:#1565c0">${dir}</p>
-            <small>Activa la API Key de Google Maps para ver el mapa interactivo</small>
-        </div>`;
-        };
-        document.getElementById('mapaInfoBody').innerHTML = `
-        <b>Entrega #${e.id}</b> · Pedido #${p.id||'?'}<br>
-        👤 ${u.nombre||'—'} · ${u.email||''}<br>
-        📍 ${dir}<br>
-        💰 S/ ${p.total?.toFixed(2)||'0.00'}<br>
-        Estado: ${badgeDelivery(e.estado)}`;
-        document.getElementById('linkMaps').href = `https://www.google.com/maps/search/?api=1&query=${dirEnc}`;
+        // Google Maps embed
+        box.innerHTML = `<iframe
+    src="https://www.google.com/maps?q=${dirEnc}&output=embed"
+    allowfullscreen loading="lazy"></iframe>`;
+        document.getElementById('mapaInfoTxt').innerHTML =
+            `<b>Entrega #${e.id}</b> · Pedido #${p.id||'?'}<br>
+     👤 ${u.nombre||'—'} &nbsp;·&nbsp; ${u.email||''}<br>
+     📍 ${dir}<br>
+     💰 S/ ${(p.total||0).toFixed(2)} &nbsp;·&nbsp; <span class="badge ${(e.estado||'').toUpperCase()}" style="font-size:10px">${e.estado}</span>`;
+        document.getElementById('mapaBtns').innerHTML = `
+    <a href="https://www.google.com/maps/search/?api=1&query=${dirEnc}" target="_blank" class="btn btn-blue btn-sm" style="text-decoration:none">🗺️ Abrir en Maps</a>
+    ${e.estado==='ASIGNADO'  ? `<button class="btn btn-orange btn-sm" onclick="cambiarEstadoMapa(${e.id},'EN_CAMINO')">🚚 Iniciar ruta</button>` : ''}
+    ${e.estado==='EN_CAMINO' ? `<button class="btn btn-green  btn-sm" onclick="cambiarEstadoMapa(${e.id},'ENTREGADO')">✅ Marcar entregado</button>` : ''}`;
         info.style.display = 'block';
     }
 
-    async function marcarEnCaminoDesadeMapa() {
-        if (!entregaMapaActual) return;
-        await cambiarEstadoEntrega(entregaMapaActual.id, 'EN_CAMINO');
-        cargarEntregasMapa();
+    async function cambiarEstadoMapa(id, estado) {
+        await cambiarEstado(id, estado);
+        await cargarMapa();
+        document.getElementById('mapaSelect').value = '';
+        document.getElementById('mapaBox').innerHTML = '<div class="mapa-placeholder"><div class="big">✅</div><p>Estado actualizado</p></div>';
+        document.getElementById('mapaInfo').style.display = 'none';
+        entregaMapaActual = null;
     }
 
-    async function marcarEntregadoDesdeMapa() {
-        if (!entregaMapaActual) return;
-        await cambiarEstadoEntrega(entregaMapaActual.id, 'ENTREGADO');
-        cargarEntregasMapa();
-        document.getElementById('mapaInfo').style.display='none';
-        document.getElementById('mapaContainer').innerHTML=`<div class="mapa-placeholder"><div class="icon">✅</div><p>Entrega completada</p></div>`;
+    // ── UTIL ──────────────────────────────────────────
+    function fmtFecha(str) {
+        if (!str) return '—';
+        try {
+            return new Date(str).toLocaleString('es-PE', {
+                day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'
+            });
+        } catch { return str; }
     }
 
-    // INIT
+    // ── INIT ──────────────────────────────────────────
     cargarEntregas();
 </script>
 </body>

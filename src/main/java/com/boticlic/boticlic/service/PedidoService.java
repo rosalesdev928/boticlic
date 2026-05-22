@@ -22,7 +22,7 @@ public class PedidoService {
 
     public Pedido crearPedido(Pedido pedido) {
 
-        // ✅ Cargar el usuario completo desde BD (el frontend solo manda {id})
+        // ✅ Cargar el usuario completo desde BD
         Usuario usuarioCompleto = usuarioRepository.findById(pedido.getUsuario().getId())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
         pedido.setUsuario(usuarioCompleto);
@@ -37,28 +37,32 @@ public class PedidoService {
                         + " (disponible: " + producto.getStock() + ", solicitado: " + detalle.getCantidad() + ")");
             }
 
-            // Descontar stock
+            // Descontar stock atomicamente en el mismo pedido
             producto.setStock(producto.getStock() - detalle.getCantidad());
             productoRepository.save(producto);
 
-            // Establecer referencias
             detalle.setPedido(pedido);
             detalle.setPrecioUnitario(producto.getPrecio());
-
             total += detalle.getSubtotal();
         }
 
         pedido.setTotal(total);
-        pedido.setEstado("PENDIENTE");
+
+        // Si no viene con estado (pedido online) → PENDIENTE
+        if (pedido.getEstado() == null || pedido.getEstado().isBlank()) {
+            pedido.setEstado("PENDIENTE");
+        }
 
         Pedido pedidoGuardado = pedidoRepository.save(pedido);
 
-        // ✅ Ahora sí tenemos el email del usuario completo
-        notificacionService.notificarPedidoConfirmado(
-                usuarioCompleto.getEmail(),
-                pedidoGuardado.getId(),
-                pedidoGuardado.getTotal()
-        );
+        // Solo notificar si es pedido online (no venta en mostrador)
+        if (!"VENTA_MOSTRADOR".equals(pedidoGuardado.getEstado())) {
+            notificacionService.notificarPedidoConfirmado(
+                    usuarioCompleto.getEmail(),
+                    pedidoGuardado.getId(),
+                    pedidoGuardado.getTotal()
+            );
+        }
 
         return pedidoGuardado;
     }
@@ -77,7 +81,6 @@ public class PedidoService {
         pedido.setEstado(estado);
         Pedido actualizado = pedidoRepository.save(pedido);
 
-        // ✅ El pedido ya tiene el usuario completo cargado por JPA
         notificacionService.notificarCambioDEstado(
                 pedido.getUsuario().getEmail(),
                 String.valueOf(pedido.getId()),

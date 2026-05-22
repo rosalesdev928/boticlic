@@ -38,36 +38,35 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/", "/index.html", "/admin.html", "/farmaceutico.html",
                                 "/delivery.html", "/login.html", "/Login.html",
-
                                 "/*.css",
                                 "/*.js",
-
                                 "/Auth guard.js",
-
                                 "/images/**",
                                 "/img/**",
                                 "/favicon.png"
                         ).permitAll()
 
-                        // ✅ CLIENTE — ver y crear SUS pedidos (PRIMERO, antes de las reglas de admin)
+                        // ✅ CLIENTE — ver y crear SUS pedidos
                         .requestMatchers(HttpMethod.POST, "/api/pedidos").hasAnyRole("CLIENTE", "ADMIN", "FARMACEUTICO")
                         .requestMatchers(HttpMethod.GET, "/api/pedidos/usuario/**").hasAnyRole("CLIENTE", "ADMIN")
 
-                        // ✅ ADMIN y FARMACEUTICO — gestión completa de pedidos
+                        // ✅ ADMIN y FARMACEUTICO — gestión completa de pedidos (incluye VENTA_MOSTRADOR)
                         .requestMatchers(HttpMethod.GET, "/api/pedidos/estado/**").hasAnyRole("ADMIN", "FARMACEUTICO")
                         .requestMatchers(HttpMethod.GET, "/api/pedidos/**").hasAnyRole("ADMIN", "FARMACEUTICO")
                         .requestMatchers(HttpMethod.PUT, "/api/pedidos/**").hasAnyRole("ADMIN", "FARMACEUTICO")
 
-                        // ✅ ADMIN — gestión de usuarios
+                        // ✅ ADMIN — gestión completa de usuarios
+                        // ✅ FARMACEUTICO — solo lectura (necesita listar repartidores para delivery)
+                        .requestMatchers(HttpMethod.GET, "/api/usuarios").hasAnyRole("ADMIN", "FARMACEUTICO")
                         .requestMatchers("/api/usuarios/**").hasRole("ADMIN")
 
-                        // ✅ FARMACEUTICO — gestión de productos
+                        // ✅ FARMACEUTICO — gestión de productos y ventas mostrador
                         .requestMatchers(HttpMethod.POST, "/api/productos/**").hasRole("FARMACEUTICO")
                         .requestMatchers(HttpMethod.PUT, "/api/productos/**").hasRole("FARMACEUTICO")
                         .requestMatchers(HttpMethod.DELETE, "/api/productos/**").hasRole("FARMACEUTICO")
 
                         // ✅ DELIVERY
-                        .requestMatchers("/api/delivery/**").hasAnyRole("DELIVERY", "ADMIN")
+                        .requestMatchers("/api/delivery/**").hasAnyRole("DELIVERY", "ADMIN", "FARMACEUTICO")
 
                         // 🔒 Todo lo demás requiere autenticación
                         .anyRequest().authenticated()
