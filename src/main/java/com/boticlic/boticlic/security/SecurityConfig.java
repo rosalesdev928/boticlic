@@ -61,9 +61,11 @@ public class SecurityConfig {
                         .requestMatchers("/api/usuarios/**").hasRole("ADMIN")
 
                         // ✅ FARMACEUTICO — gestión de productos y ventas mostrador
-                        .requestMatchers(HttpMethod.POST, "/api/productos/**").hasRole("FARMACEUTICO")
-                        .requestMatchers(HttpMethod.PUT, "/api/productos/**").hasRole("FARMACEUTICO")
-                        .requestMatchers(HttpMethod.DELETE, "/api/productos/**").hasRole("FARMACEUTICO")
+                        .requestMatchers(HttpMethod.POST, "/api/productos/**").hasAnyRole("ADMIN", "FARMACEUTICO")
+                        .requestMatchers(HttpMethod.PUT, "/api/productos/**").hasAnyRole("ADMIN", "FARMACEUTICO")
+                        .requestMatchers(HttpMethod.DELETE, "/api/productos/**").hasAnyRole("ADMIN", "FARMACEUTICO")
+
+
 
                         // ✅ DELIVERY
                         .requestMatchers("/api/delivery/**").hasAnyRole("DELIVERY", "ADMIN", "FARMACEUTICO")
