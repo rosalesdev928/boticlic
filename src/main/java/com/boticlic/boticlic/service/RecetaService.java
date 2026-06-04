@@ -1,9 +1,12 @@
 package com.boticlic.boticlic.service;
 
+import com.boticlic.boticlic.model.DetallePedido;
 import com.boticlic.boticlic.model.Pedido;
+import com.boticlic.boticlic.model.Producto;
 import com.boticlic.boticlic.model.Receta;
 import com.boticlic.boticlic.model.Usuario;
 import com.boticlic.boticlic.repository.PedidoRepository;
+import com.boticlic.boticlic.repository.ProductoRepository;
 import com.boticlic.boticlic.repository.RecetaRepository;
 import com.boticlic.boticlic.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +24,7 @@ public class RecetaService {
     private final RecetaRepository recetaRepository;
     private final UsuarioRepository usuarioRepository;
     private final PedidoRepository pedidoRepository;
+    private final ProductoRepository productoRepository;
     private final NotificacionService notificacionService;
 
     public Receta guardarReceta(MultipartFile archivo, Long usuarioId, Long pedidoId, String notas) throws IOException {
@@ -66,7 +70,9 @@ public class RecetaService {
         receta.setFechaRevision(LocalDateTime.now());
 
         if (receta.getPedido() != null) {
-            Pedido pedido = receta.getPedido();
+            Long pedidoId = receta.getPedido().getId();
+            Pedido pedido = pedidoRepository.findById(pedidoId)
+                    .orElseThrow(() -> new RuntimeException("Pedido no encontrado"));
             pedido.setEstado("CONFIRMADO");
             pedidoRepository.save(pedido);
         }
@@ -83,6 +89,7 @@ public class RecetaService {
 
         return guardada;
     }
+
     public Receta rechazar(Long id, String motivo) {
         Receta receta = recetaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Receta no encontrada"));
@@ -91,16 +98,28 @@ public class RecetaService {
         receta.setFechaRevision(LocalDateTime.now());
         receta.setMotivoRechazo(motivo != null ? motivo : "Receta no válida");
 
-        // ✅ Cambiar el pedido a RECHAZADO
         if (receta.getPedido() != null) {
             Long pedidoId = receta.getPedido().getId();
             Pedido pedido = pedidoRepository.findById(pedidoId)
                     .orElseThrow(() -> new RuntimeException("Pedido no encontrado"));
+
+            // ✅ RESTAURAR STOCK de cada producto del pedido
+            for (DetallePedido detalle : pedido.getDetalles()) {
+                Producto producto = productoRepository.findById(detalle.getProducto().getId())
+                        .orElse(null);
+                if (producto != null) {
+                    producto.setStock(producto.getStock() + detalle.getCantidad());
+                    productoRepository.save(producto);
+                    System.out.println("✅ Stock restaurado: " + producto.getNombre()
+                            + " +"+detalle.getCantidad()+" = "+producto.getStock());
+                }
+            }
+
             pedido.setEstado("RECHAZADO");
             pedidoRepository.save(pedido);
             System.out.println("✅ Pedido #" + pedidoId + " cambiado a RECHAZADO");
         } else {
-            System.out.println("⚠️ La receta #" + id + " no tiene pedido asociado");
+            System.out.println("⚠️ Receta #" + id + " sin pedido asociado");
         }
 
         Receta guardada = recetaRepository.save(receta);
@@ -115,6 +134,7 @@ public class RecetaService {
 
         return guardada;
     }
+
     public Receta buscarPorId(Long id) {
         return recetaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Receta no encontrada"));

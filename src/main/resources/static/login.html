@@ -293,8 +293,13 @@
 
                 setTimeout(() => redirigirSegunRol(data.rol), 800);
 
-            } else if (res.status === 401) {
-                errEl.textContent = '❌ Correo o contraseña incorrectos.';
+            } else if (res.status === 401 || res.status === 403) {
+                try {
+                    const data = await res.json();
+                    errEl.textContent = '❌ ' + (data.error || 'Correo o contraseña incorrectos.');
+                } catch {
+                    errEl.textContent = '❌ Correo o contraseña incorrectos.';
+                }
                 errEl.style.display = 'block';
             } else {
                 errEl.textContent = '❌ Error del servidor. Intenta de nuevo.';

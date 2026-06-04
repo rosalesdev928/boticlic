@@ -1742,9 +1742,19 @@
 
     async function cargarClientesTop(){
         try{
-            const estados=['PENDIENTE','CONFIRMADO','EN_CAMINO','ENTREGADO'];
-            const arr=await Promise.all(estados.map(e=>fetch(`${API}/pedidos/estado/${e}`,{headers:H()}).then(r=>r.json())));
-            const todos=arr.flat();
+            // ✅ CORREGIDO: solo pedidos realmente completados
+            const [entregados, ventasMostrador] = await Promise.all([
+                fetch(`${API}/pedidos/estado/ENTREGADO`,{headers:H()}).then(r=>r.json()),
+                fetch(`${API}/pedidos/estado/VENTA_MOSTRADOR`,{headers:H()}).then(r=>r.json()).catch(()=>[]),
+            ]);
+
+            const todos=[...entregados, ...ventasMostrador];
+
+            if(!todos.length){
+                document.getElementById('tblClientesTop').innerHTML='<tr><td colspan="7" class="empty">Sin datos de ventas completadas</td></tr>';
+                return;
+            }
+
             const cliMap={};
             todos.forEach(p=>{
                 const id=p.usuario?.id||'?';
@@ -1753,9 +1763,16 @@
                 if(!cliMap[id]) cliMap[id]={id,nombre,email,pedidos:0,total:0,ultima:null};
                 cliMap[id].pedidos++;
                 cliMap[id].total+=(p.total||0);
-                if(!cliMap[id].ultima||new Date(p.fechaCreacion)>new Date(cliMap[id].ultima)) cliMap[id].ultima=p.fechaCreacion;
+                if(!cliMap[id].ultima||new Date(p.fechaCreacion)>new Date(cliMap[id].ultima))
+                    cliMap[id].ultima=p.fechaCreacion;
             });
-            const sorted=Object.values(cliMap).sort((a,b)=>b.total-a.total);
+
+            // ✅ Excluir ventas de mostrador del ranking de clientes
+            // (son ventas internas del farmacéutico, no clientes reales)
+            const sorted=Object.values(cliMap)
+                .filter(c => c.nombre !== '—')
+                .sort((a,b)=>b.total-a.total);
+
             const top10=sorted.slice(0,10);
 
             // Chart gasto
@@ -1763,10 +1780,16 @@
             if(chCliGasto) chCliGasto.destroy();
             chCliGasto=new Chart(ctxCG,{type:'bar',data:{
                     labels:top10.map(c=>c.nombre.split(' ')[0]),
-                    datasets:[{data:top10.map(c=>c.total.toFixed(2)),backgroundColor:'rgba(163,92,255,.6)',borderColor:'var(--purple)',borderWidth:2,borderRadius:5}]
-                },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
-                    scales:{x:{grid:{color:'rgba(255,255,255,.03)'},ticks:{color:'#7b839a',font:{size:9}}},
-                        y:{grid:{color:'rgba(255,255,255,.03)'},ticks:{color:'#7b839a',font:{size:9}},beginAtZero:true}}}});
+                    datasets:[{data:top10.map(c=>c.total.toFixed(2)),
+                        backgroundColor:'rgba(163,92,255,.6)',
+                        borderColor:'var(--purple)',
+                        borderWidth:2,borderRadius:5}]
+                },options:{responsive:true,maintainAspectRatio:false,
+                    plugins:{legend:{display:false}},
+                    scales:{
+                        x:{grid:{color:'rgba(255,255,255,.03)'},ticks:{color:'#7b839a',font:{size:9}}},
+                        y:{grid:{color:'rgba(255,255,255,.03)'},ticks:{color:'#7b839a',font:{size:9}},beginAtZero:true}
+                    }}});
 
             // Chart pedidos
             const sortedP=Object.values(cliMap).sort((a,b)=>b.pedidos-a.pedidos).slice(0,10);
@@ -1774,25 +1797,34 @@
             if(chCliPed) chCliPed.destroy();
             chCliPed=new Chart(ctxCP,{type:'doughnut',data:{
                     labels:sortedP.map(c=>c.nombre.split(' ')[0]),
-                    datasets:[{data:sortedP.map(c=>c.pedidos),backgroundColor:['rgba(0,229,160,.7)','rgba(59,127,255,.7)','rgba(245,166,35,.7)','rgba(163,92,255,.7)','rgba(255,107,107,.7)','rgba(255,149,0,.7)','rgba(0,229,160,.4)','rgba(59,127,255,.4)','rgba(245,166,35,.4)','rgba(163,92,255,.4)'],borderColor:'#151820',borderWidth:2}]
-                },options:{responsive:true,maintainAspectRatio:false,cutout:'50%',plugins:{legend:{position:'right',labels:{color:'#7b839a',font:{size:10},padding:8,boxWidth:10}}}}});
+                    datasets:[{data:sortedP.map(c=>c.pedidos),
+                        backgroundColor:[
+                            'rgba(0,229,160,.7)','rgba(59,127,255,.7)',
+                            'rgba(245,166,35,.7)','rgba(163,92,255,.7)',
+                            'rgba(255,107,107,.7)','rgba(255,149,0,.7)',
+                            'rgba(0,229,160,.4)','rgba(59,127,255,.4)',
+                            'rgba(245,166,35,.4)','rgba(163,92,255,.4)'
+                        ],
+                        borderColor:'#151820',borderWidth:2}]
+                },options:{responsive:true,maintainAspectRatio:false,cutout:'50%',
+                    plugins:{legend:{position:'right',labels:{color:'#7b839a',font:{size:10},padding:8,boxWidth:10}}}}});
 
             // Tabla
             document.getElementById('tblClientesTop').innerHTML=sorted.slice(0,20).map((c,i)=>{
                 const prom=c.pedidos?c.total/c.pedidos:0;
                 return `<tr>
-          <td><b style="color:${i<3?'var(--yellow)':'var(--text2)'}">${i<3?['🥇','🥈','🥉'][i]:'#'+(i+1)}</b></td>
-          <td><b>${c.nombre}</b></td>
-          <td style="font-size:11px;color:var(--text2)">${c.email}</td>
-          <td class="mono" style="font-weight:700;color:var(--blue)">${c.pedidos}</td>
-          <td class="mono" style="font-weight:700;color:var(--purple)">S/ ${c.total.toFixed(2)}</td>
-          <td class="mono" style="color:var(--text2)">S/ ${prom.toFixed(2)}</td>
-          <td style="font-size:11px;color:var(--text2)">${fmtFechaCorta(c.ultima)}</td>
-        </tr>`;
+                <td><b style="color:${i<3?'var(--yellow)':'var(--text2)'}">${i<3?['🥇','🥈','🥉'][i]:'#'+(i+1)}</b></td>
+                <td><b>${c.nombre}</b></td>
+                <td style="font-size:11px;color:var(--text2)">${c.email}</td>
+                <td class="mono" style="font-weight:700;color:var(--blue)">${c.pedidos}</td>
+                <td class="mono" style="font-weight:700;color:var(--purple)">S/ ${c.total.toFixed(2)}</td>
+                <td class="mono" style="color:var(--text2)">S/ ${prom.toFixed(2)}</td>
+                <td style="font-size:11px;color:var(--text2)">${fmtFechaCorta(c.ultima)}</td>
+            </tr>`;
             }).join('') || '<tr><td colspan="7" class="empty">Sin datos</td></tr>';
-        }catch(e){ toast('Error clientes top',false); }
-    }
 
+        }catch(e){ toast('Error clientes top',false); console.error(e); }
+    }
     // ══════════════════════════════════════════════════
     //  STATS DELIVERY
     // ══════════════════════════════════════════════════

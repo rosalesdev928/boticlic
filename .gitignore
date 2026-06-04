@@ -31,3 +31,8 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Proteger configuración sensible
+src/main/resources/application.properties
+src/main/resources/application-prod.properties
+*.env

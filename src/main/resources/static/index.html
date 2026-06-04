@@ -178,6 +178,7 @@
         .badge-entregado { background: #e8f5e9; color: #2e7d32; }
         .badge-receta-pendiente { background: #fff3e0; color: #f57c00; }
         .badge-RECHAZADO { background: #ffebee; color: #c62828; }
+        .badge-venta-mostrador { background: #e8f5e9; color: #2e7d32; }
         .badge-receta-aprobada { background: #e8f5e9; color: #2e7d32; }
         .badge-receta-rechazada { background: #ffebee; color: #c62828; }
         .pedido-productos { font-size: 13px; color: #444; margin-bottom: 8px; }
@@ -701,10 +702,32 @@
     });
 
     function cerrarSesion() {
-        localStorage.removeItem('token'); localStorage.removeItem('usuario');
-        usuarioActual = null; tokenActual = null;
+        // ✅ Limpiar token y usuario
+        localStorage.removeItem('token');
+        localStorage.removeItem('usuario');
+        localStorage.removeItem('email');
+
+        // ✅ Limpiar carrito completamente
+        localStorage.removeItem('carritoBoticlic');
+        localStorage.removeItem('recetasPendientes');
+        carrito = [];
+
+        // ✅ Resetear estado global
+        usuarioActual = null;
+        tokenActual = null;
+
+        // ✅ Cerrar carrito lateral si está abierto
+        document.getElementById('carritoLateral').classList.remove('abierto');
+
+        // ✅ Cerrar cualquier modal abierto
+        document.querySelectorAll('.modal.activo').forEach(m => m.classList.remove('activo'));
+        document.getElementById('checkoutOverlay').classList.remove('activo');
+
+        // ✅ Actualizar UI
+        actualizarCarrito();
         renderHeader();
-        toast('Sesión cerrada', 'info');
+
+        toast('Sesión cerrada correctamente', 'info');
     }
 
     // =============================================
@@ -1525,12 +1548,14 @@
 
     function badgeEstado(estado) {
         const map = {
-            'PENDIENTE':       { cls: 'badge badge-pendiente',   txt: '⏳ Pendiente' },
-            'CONFIRMADO':      { cls: 'badge badge-confirmado',  txt: '✅ Confirmado' },
-            'EN_PREPARACION':  { cls: 'badge badge-preparacion', txt: '🔬 En preparación' },
-            'EN_CAMINO':       { cls: 'badge badge-camino',      txt: '🚚 En camino' },
-            'ENTREGADO':       { cls: 'badge badge-entregado',   txt: '🏠 Entregado' },
-            'RECHAZADO':       { cls: 'badge badge-RECHAZADO',   txt: '❌ Rechazado — receta inválida' },
+            'PENDIENTE':        { cls: 'badge badge-pendiente',   txt: '⏳ Pendiente' },
+            'CONFIRMADO':       { cls: 'badge badge-confirmado',  txt: '✅ Confirmado' },
+            'EN_PREPARACION':   { cls: 'badge badge-preparacion', txt: '🔬 En preparación' },
+            'EN_CAMINO':        { cls: 'badge badge-camino',      txt: '🚚 En camino' },
+            'ENTREGADO':        { cls: 'badge badge-entregado',   txt: '🏠 Entregado' },
+            'RECHAZADO':        { cls: 'badge badge-RECHAZADO',   txt: '❌ Rechazado — receta inválida' },
+            // ✅ CORREGIDO: estado para ventas en tienda física
+            'VENTA_MOSTRADOR':  { cls: 'badge badge-entregado',   txt: '🏪 Compra en tienda' },
         };
         return map[estado] || { cls: 'badge', txt: estado };
     }
@@ -1578,7 +1603,12 @@
                 actualizarCarrito();
                 toast(`¡Bienvenido, ${data.nombre}! 👋`, 'exito');
             } else {
-                errEl.textContent = 'Correo o contraseña incorrectos.';
+                try {
+                    const errData = await res.json();
+                    errEl.textContent = errData.error || 'Correo o contraseña incorrectos.';
+                } catch {
+                    errEl.textContent = 'Correo o contraseña incorrectos.';
+                }
                 errEl.style.display = 'block';
             }
         } catch(e) {

@@ -1,5 +1,7 @@
 package com.boticlic.boticlic.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -18,23 +20,25 @@ public class Usuario {
     @Column(nullable = false, unique = true)
     private String email;
 
+    // ✅ WRITE_ONLY: se puede recibir en JSON (registro)
+    // pero NUNCA se devuelve en respuestas
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Column(nullable = false)
     private String password;
 
     @Column(nullable = false)
-    private String rol; // ADMIN, CLIENTE, FARMACEUTICO, DELIVERY
+    private String rol;
 
     @Column(nullable = false)
     private boolean activo = true;
 
-    // Nuevos campos
-    private String tipoDocumento;   // DNI, CE, PASAPORTE
+    private String tipoDocumento;
 
     private String numeroDocumento;
 
     private String celular;
 
-    private String fechaNacimiento; // formato DD/MM/AAAA
+    private String fechaNacimiento;
 
-    private String genero;          // M, F, OTRO
+    private String genero;
 }

@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +31,17 @@ public class ProductoService {
     }
 
     public Producto guardar(Producto producto) {
+        // ✅ Validar precio y stock no negativos
+        if (producto.getPrecio() < 0) {
+            throw new RuntimeException("El precio no puede ser negativo");
+        }
+        if (producto.getStock() < 0) {
+            throw new RuntimeException("El stock no puede ser negativo");
+        }
+        // ✅ Stock mínimo por defecto si no viene
+        if (producto.getStockMinimo() == null) {
+            producto.setStockMinimo(5);
+        }
         return productoRepository.save(producto);
     }
 
@@ -43,6 +55,10 @@ public class ProductoService {
         producto.setCategoria(datos.getCategoria());
         producto.setImagen(datos.getImagen());
         producto.setDisponible(datos.isDisponible());
+        // ✅ También actualizar stockMinimo
+        if (datos.getStockMinimo() != null) {
+            producto.setStockMinimo(datos.getStockMinimo());
+        }
         return productoRepository.save(producto);
     }
 
@@ -54,6 +70,19 @@ public class ProductoService {
     }
 
     public List<Producto> productosConStockBajo() {
-        return productoRepository.findByStockLessThanEqual(5);
+        // ✅ CORREGIDO: usa el stockMinimo de cada producto en lugar del 5 fijo
+        return productoRepository.findAll().stream()
+                .filter(p -> p.isDisponible()) // Solo productos activos
+                .filter(p -> {
+                    int minimo = (p.getStockMinimo() != null) ? p.getStockMinimo() : 5;
+                    return p.getStock() <= minimo;
+                })
+                .sorted((a, b) -> {
+                    // Ordenar: agotados primero, luego por stock ascendente
+                    if (a.getStock() == 0 && b.getStock() > 0) return -1;
+                    if (b.getStock() == 0 && a.getStock() > 0) return 1;
+                    return Integer.compare(a.getStock(), b.getStock());
+                })
+                .collect(Collectors.toList());
     }
 }
