@@ -26,4 +26,15 @@ public class Usuario {
 
     @Column(nullable = false)
     private boolean activo = true;
+
+    // Nuevos campos
+    private String tipoDocumento;   // DNI, CE, PASAPORTE
+
+    private String numeroDocumento;
+
+    private String celular;
+
+    private String fechaNacimiento; // formato DD/MM/AAAA
+
+    private String genero;          // M, F, OTRO
 }
