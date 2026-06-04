@@ -31,46 +31,45 @@ public class SecurityConfig {
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
 
-                        // ✅ PÚBLICAS — sin token
+                        // ✅ PÚBLICAS
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/usuarios/registrar").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/productos/**").permitAll()
                         .requestMatchers(
                                 "/", "/index.html", "/admin.html", "/farmaceutico.html",
                                 "/delivery.html", "/login.html", "/Login.html",
-                                "/*.css",
-                                "/*.js",
-                                "/Auth guard.js",
-                                "/images/**",
-                                "/img/**",
-                                "/favicon.png"
+                                "/*.css", "/*.js", "/Auth guard.js",
+                                "/images/**", "/img/**", "/favicon.png"
                         ).permitAll()
 
-                        // ✅ CLIENTE — ver y crear SUS pedidos
+                        // ✅ RECETAS
+                        .requestMatchers(HttpMethod.POST, "/api/recetas").hasAnyRole("CLIENTE", "ADMIN", "FARMACEUTICO")
+                        .requestMatchers(HttpMethod.GET, "/api/recetas/usuario/**").hasAnyRole("CLIENTE", "ADMIN", "FARMACEUTICO")
+                        .requestMatchers(HttpMethod.GET, "/api/recetas/pendientes").hasAnyRole("ADMIN", "FARMACEUTICO")
+                        .requestMatchers(HttpMethod.GET, "/api/recetas").hasAnyRole("ADMIN", "FARMACEUTICO")
+                        .requestMatchers(HttpMethod.GET, "/api/recetas/*/archivo").hasAnyRole("ADMIN", "FARMACEUTICO")
+                        .requestMatchers(HttpMethod.PUT, "/api/recetas/*/aprobar").hasAnyRole("ADMIN", "FARMACEUTICO")
+                        .requestMatchers(HttpMethod.PUT, "/api/recetas/*/rechazar").hasAnyRole("ADMIN", "FARMACEUTICO")
+
+                        // ✅ PEDIDOS
                         .requestMatchers(HttpMethod.POST, "/api/pedidos").hasAnyRole("CLIENTE", "ADMIN", "FARMACEUTICO")
                         .requestMatchers(HttpMethod.GET, "/api/pedidos/usuario/**").hasAnyRole("CLIENTE", "ADMIN")
-
-                        // ✅ ADMIN y FARMACEUTICO — gestión completa de pedidos (incluye VENTA_MOSTRADOR)
                         .requestMatchers(HttpMethod.GET, "/api/pedidos/estado/**").hasAnyRole("ADMIN", "FARMACEUTICO")
                         .requestMatchers(HttpMethod.GET, "/api/pedidos/**").hasAnyRole("ADMIN", "FARMACEUTICO")
                         .requestMatchers(HttpMethod.PUT, "/api/pedidos/**").hasAnyRole("ADMIN", "FARMACEUTICO")
 
-                        // ✅ ADMIN — gestión completa de usuarios
-                        // ✅ FARMACEUTICO — solo lectura (necesita listar repartidores para delivery)
+                        // ✅ USUARIOS
                         .requestMatchers(HttpMethod.GET, "/api/usuarios").hasAnyRole("ADMIN", "FARMACEUTICO")
                         .requestMatchers("/api/usuarios/**").hasRole("ADMIN")
 
-                        // ✅ FARMACEUTICO — gestión de productos y ventas mostrador
+                        // ✅ PRODUCTOS
                         .requestMatchers(HttpMethod.POST, "/api/productos/**").hasAnyRole("ADMIN", "FARMACEUTICO")
                         .requestMatchers(HttpMethod.PUT, "/api/productos/**").hasAnyRole("ADMIN", "FARMACEUTICO")
                         .requestMatchers(HttpMethod.DELETE, "/api/productos/**").hasAnyRole("ADMIN", "FARMACEUTICO")
 
-
-
                         // ✅ DELIVERY
                         .requestMatchers("/api/delivery/**").hasAnyRole("DELIVERY", "ADMIN", "FARMACEUTICO")
 
-                        // 🔒 Todo lo demás requiere autenticación
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFiltro, UsernamePasswordAuthenticationFilter.class);

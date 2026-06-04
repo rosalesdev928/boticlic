@@ -177,6 +177,7 @@
         .badge-camino { background: #e1f5fe; color: #0277bd; }
         .badge-entregado { background: #e8f5e9; color: #2e7d32; }
         .badge-receta-pendiente { background: #fff3e0; color: #f57c00; }
+        .badge-RECHAZADO { background: #ffebee; color: #c62828; }
         .badge-receta-aprobada { background: #e8f5e9; color: #2e7d32; }
         .badge-receta-rechazada { background: #ffebee; color: #c62828; }
         .pedido-productos { font-size: 13px; color: #444; margin-bottom: 8px; }
@@ -1529,6 +1530,7 @@
             'EN_PREPARACION':  { cls: 'badge badge-preparacion', txt: '🔬 En preparación' },
             'EN_CAMINO':       { cls: 'badge badge-camino',      txt: '🚚 En camino' },
             'ENTREGADO':       { cls: 'badge badge-entregado',   txt: '🏠 Entregado' },
+            'RECHAZADO':       { cls: 'badge badge-RECHAZADO',   txt: '❌ Rechazado — receta inválida' },
         };
         return map[estado] || { cls: 'badge', txt: estado };
     }

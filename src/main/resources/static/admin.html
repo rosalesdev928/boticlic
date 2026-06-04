@@ -107,6 +107,7 @@
         .badge.CONFIRMADO{background:rgba(59,127,255,.15);color:var(--blue);}
         .badge.EN_CAMINO{background:rgba(163,92,255,.15);color:var(--purple);}
         .badge.ENTREGADO{background:rgba(0,229,160,.12);color:var(--accent);}
+        .badge.RECHAZADO{background:rgba(255,107,107,.12);color:var(--red);}
         .badge.VENTA_MOSTRADOR{background:rgba(0,229,160,.12);color:var(--accent);}
         .badge.ADMIN{background:rgba(255,107,107,.12);color:var(--red);}
         .badge.CLIENTE{background:rgba(0,229,160,.1);color:var(--accent);}
@@ -326,6 +327,7 @@
                 <button class="fbtn" onclick="filtrarPed('CONFIRMADO',this)">✅ Confirmado</button>
                 <button class="fbtn" onclick="filtrarPed('EN_CAMINO',this)">🚚 En camino</button>
                 <button class="fbtn" onclick="filtrarPed('ENTREGADO',this)">📬 Entregado</button>
+                <button class="fbtn" onclick="filtrarPed('RECHAZADO',this)">❌ Rechazado</button>
             </div>
             <div class="card">
                 <table class="dt">
@@ -343,7 +345,7 @@
             </div>
             <div class="card">
                 <table class="dt">
-                    <thead><tr><th>Pedido</th><th>Cliente</th><th>Email</th><th>Productos</th><th>Total</th><th>Fecha</th><th>Acciones</th></tr></thead>
+                    <thead><tr><th>ID</th><th>Cliente</th><th>Email</th><th>Pedido</th><th>Archivo</th><th>Fecha</th><th>Notas</th><th>Acciones</th></tr></thead>
                     <tbody id="tblRec"><tr><td colspan="7" class="loading">Cargando...</td></tr></tbody>
                 </table>
             </div>
@@ -683,6 +685,7 @@
                     <option value="CONFIRMADO">✅ Confirmado</option>
                     <option value="EN_CAMINO">🚚 En camino</option>
                     <option value="ENTREGADO">📬 Entregado</option>
+                    <option value="RECHAZADO">❌ Rechazado</option>
                 </select>
             </div>
         </div>
@@ -973,7 +976,7 @@
 
     async function cargarPedidos(){
         try{
-            const estados=['PENDIENTE','CONFIRMADO','EN_CAMINO','ENTREGADO'];
+            const estados=['PENDIENTE','CONFIRMADO','EN_CAMINO','ENTREGADO','RECHAZADO'];
             const arr = await Promise.all(estados.map(e=>fetch(`${API}/pedidos/estado/${e}`,{headers:H()}).then(r=>r.json())));
             pedData = arr.flat();
             renderPed(pedData);
@@ -1022,34 +1025,172 @@
     // ══════════════════════════════════════════════════
     //  RECETAS
     // ══════════════════════════════════════════════════
-    let recId=null;
+    let recetaIdActual = null;
 
-    async function cargarRecetas(){
-        try{
-            const data=await fetch(`${API}/pedidos/estado/PENDIENTE`,{headers:H()}).then(r=>r.json());
-            document.getElementById('tblRec').innerHTML=data.length
-                ? data.map(p=>`<tr>
-            <td class="mono" style="color:var(--text2)">#${p.id}</td>
-            <td><b>${p.usuario?.nombre||'—'}</b></td>
-            <td style="font-size:11px;color:var(--text2)">${p.usuario?.email||'—'}</td>
-            <td style="color:var(--text2)">${p.detalles?.length||0} prod.</td>
-            <td class="mono" style="color:var(--accent);font-weight:600">S/ ${(p.total||0).toFixed(2)}</td>
-            <td class="mono" style="font-size:10px;color:var(--text2)">${fmtFecha(p.fechaCreacion)}</td>
-            <td style="display:flex;gap:5px">
-              <button class="btn btn-p btn-sm" onclick="aprobarReceta(${p.id})">✅ Aprobar</button>
-              <button class="btn btn-r btn-sm" onclick="toast('📩 Receta marcada para revisión')">❌ Rechazar</button>
-            </td>
-          </tr>`).join('')
-                : '<tr><td colspan="7" class="empty">✓ No hay recetas pendientes</td></tr>';
-        }catch(e){ toast('Error recetas',false); }
+    async function cargarRecetas() {
+        try {
+            const data = await fetch(`${API}/recetas/pendientes`, { headers: H() }).then(r => r.json());
+            document.getElementById('tblRec').innerHTML = data.length
+                ? data.map(r => `<tr>
+                <td class="mono" style="color:var(--text2)">#${r.id}</td>
+                <td><b>${r.usuario?.nombre || '—'}</b></td>
+                <td style="font-size:11px;color:var(--text2)">${r.usuario?.email || '—'}</td>
+                <td>${r.pedido ? '#' + r.pedido.id : 'Sin pedido'}</td>
+                <td style="font-size:11px">${r.nombreArchivo || '—'}</td>
+                <td style="font-size:11px">${fmtFecha(r.fechaEnvio)}</td>
+                <td style="font-size:11px;color:var(--text2)">${r.notas || '—'}</td>
+                <td style="display:flex;gap:5px">
+                  <button class="btn btn-b btn-sm" onclick="verArchivoReceta(${r.id},'${r.tipoArchivo||''}','${r.nombreArchivo||'receta'}')">👁️ Ver</button>
+                  <button class="btn btn-p btn-sm" onclick="aprobarReceta(${r.id})">✅ Aprobar</button>
+                  <button class="btn btn-r btn-sm" onclick="rechazarRecetaAdmin(${r.id})">❌ Rechazar</button>
+                </td>
+              </tr>`).join('')
+                : '<tr><td colspan="8" class="empty">✓ No hay recetas pendientes</td></tr>';
+        } catch (e) { toast('Error al cargar recetas', false); }
     }
 
-    async function aprobarReceta(id){
-        const res=await fetch(`${API}/pedidos/${id}/estado?estado=CONFIRMADO`,{method:'PUT',headers:H()});
-        if(res.ok){ toast('✅ Pedido aprobado'); cargarRecetas(); }
-        else toast('❌ Error',false);
+    function verArchivoReceta(id, tipoArchivo, nombreArchivo) {
+        recetaIdActual = id;
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        let modal = document.getElementById('modalVerReceta');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'modalVerReceta';
+            modal.style.cssText = 'display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.7);align-items:center;justify-content:center;';
+            modal.innerHTML = `
+            <div style="background:var(--surface,#1e1e2e);border-radius:14px;padding:24px;max-width:700px;width:95%;max-height:90vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,0.5)">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+                    <h3 style="margin:0;font-size:16px">📋 Receta — <span id="mRecetaTitulo"></span></h3>
+                    <button onclick="cerrarModalReceta()" style="background:none;border:none;color:var(--text,#fff);cursor:pointer;font-size:20px">✕</button>
+                </div>
+                <div id="mRecetaContenido"></div>
+                <div style="display:flex;gap:10px;margin-top:16px;justify-content:flex-end">
+                    <a id="btnDescargarReceta" target="_blank" style="padding:8px 16px;background:var(--blue,#3b7fff);color:#fff;border-radius:7px;text-decoration:none;font-size:13px;font-weight:600">⬇️ Descargar</a>
+                    <button onclick="aprobarReceta(recetaIdActual);cerrarModalReceta()" style="padding:8px 16px;background:#2e7d32;color:#fff;border:none;border-radius:7px;cursor:pointer;font-size:13px;font-weight:600">✅ Aprobar</button>
+                    <button onclick="rechazarRecetaAdmin(recetaIdActual);cerrarModalReceta()" style="padding:8px 16px;background:#c62828;color:#fff;border:none;border-radius:7px;cursor:pointer;font-size:13px;font-weight:600">❌ Rechazar</button>
+                </div>
+            </div>`;
+            document.body.appendChild(modal);
+        }
+        document.getElementById('mRecetaTitulo').textContent = `#${id} — ${nombreArchivo}`;
+        const contenedor = document.getElementById('mRecetaContenido');
+        contenedor.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text2)">Cargando...</div>';
+        fetch(`${API}/recetas/${id}/archivo`, { headers: { 'Authorization': `Bearer ${token}` } })
+            .then(r => { if (!r.ok) throw new Error(); return r.blob(); })
+            .then(blob => {
+                const url = URL.createObjectURL(blob);
+                document.getElementById('btnDescargarReceta').href = url;
+                document.getElementById('btnDescargarReceta').download = nombreArchivo;
+                if (tipoArchivo.startsWith('image/'))
+                    contenedor.innerHTML = `<img src="${url}" style="width:100%;max-height:500px;object-fit:contain;border-radius:8px;border:1px solid var(--border,#333)">`;
+                else if (tipoArchivo === 'application/pdf')
+                    contenedor.innerHTML = `<iframe src="${url}" style="width:100%;height:500px;border-radius:8px;border:1px solid var(--border,#333)" type="application/pdf"></iframe>`;
+                else
+                    contenedor.innerHTML = `<div style="text-align:center;padding:30px"><div style="font-size:48px">📄</div><p>${nombreArchivo}</p></div>`;
+            })
+            .catch(() => { contenedor.innerHTML = '<div style="color:#e53935;text-align:center;padding:20px">❌ Error al cargar el archivo</div>'; });
+        modal.style.display = 'flex';
     }
 
+    function cerrarModalReceta() {
+        const m = document.getElementById('modalVerReceta');
+        if (m) m.style.display = 'none';
+    }
+
+    async function aprobarReceta(id) {
+        const res = await fetch(`${API}/recetas/${id}/aprobar`, { method: 'PUT', headers: H() });
+        if (res.ok) { toast('✅ Receta aprobada y pedido confirmado'); cargarRecetas(); }
+        else toast('❌ Error al aprobar', false);
+    }
+
+    async function rechazarRecetaAdmin(id) {
+        recetaIdActual = id;
+        // Crear modal de rechazo si no existe
+        let m = document.getElementById('modalRechazo');
+        if (!m) {
+            m = document.createElement('div');
+            m.id = 'modalRechazo';
+            m.style.cssText = 'display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.7);align-items:center;justify-content:center;';
+            m.innerHTML = `
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:28px;max-width:460px;width:95%;box-shadow:0 20px 60px rgba(0,0,0,0.5)">
+                <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">
+                    <div style="width:42px;height:42px;border-radius:10px;background:rgba(255,107,107,.15);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">❌</div>
+                    <div>
+                        <h3 style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:2px">Rechazar Receta</h3>
+                        <p style="font-size:12px;color:var(--text2)">El pedido pasará a estado RECHAZADO y se notificará al cliente.</p>
+                    </div>
+                </div>
+                <div style="margin-bottom:18px">
+                    <label style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:8px">Motivo del rechazo</label>
+                    <div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px" id="motivosRapidos">
+                        <button onclick="selMotivo(this)" style="padding:5px 11px;border-radius:16px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif">Receta ilegible</button>
+                        <button onclick="selMotivo(this)" style="padding:5px 11px;border-radius:16px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif">Receta vencida</button>
+                        <button onclick="selMotivo(this)" style="padding:5px 11px;border-radius:16px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif">Receta falsa o inválida</button>
+                        <button onclick="selMotivo(this)" style="padding:5px 11px;border-radius:16px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif">Datos incompletos</button>
+                        <button onclick="selMotivo(this)" style="padding:5px 11px;border-radius:16px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif">Médico no registrado</button>
+                    </div>
+                    <textarea id="motivoRechazoTexto" placeholder="Escribe el motivo detallado aquí..." style="width:100%;padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif;resize:vertical;min-height:80px;outline:none;" onfocus="this.style.borderColor='var(--red)'"></textarea>
+                </div>
+                <div style="background:rgba(255,107,107,.08);border:1px solid rgba(255,107,107,.2);border-radius:8px;padding:11px 13px;font-size:12px;color:var(--red);margin-bottom:18px">
+                    ⚠️ El cliente verá este motivo en su panel y el pedido quedará como <b>RECHAZADO</b>.
+                </div>
+                <div style="display:flex;gap:9px;justify-content:flex-end">
+                    <button onclick="cerrarModalRechazo()" style="padding:9px 18px;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">Cancelar</button>
+                    <button onclick="confirmarRechazo()" style="padding:9px 18px;background:var(--red);border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">❌ Confirmar Rechazo</button>
+                </div>
+            </div>`;
+            document.body.appendChild(m);
+        }
+        document.getElementById('motivoRechazoTexto').value = '';
+        document.querySelectorAll('#motivosRapidos button').forEach(b => b.style.background = 'var(--surface2)');
+        m.style.display = 'flex';
+    }
+
+    function selMotivo(btn) {
+        document.querySelectorAll('#motivosRapidos button').forEach(b => {
+            b.style.background = 'var(--surface2)';
+            b.style.color = 'var(--text2)';
+            b.style.borderColor = 'var(--border)';
+        });
+        btn.style.background = 'rgba(255,107,107,.15)';
+        btn.style.color = 'var(--red)';
+        btn.style.borderColor = 'rgba(255,107,107,.4)';
+        document.getElementById('motivoRechazoTexto').value = btn.textContent;
+    }
+
+    function cerrarModalRechazo() {
+        const m = document.getElementById('modalRechazo');
+        if (m) m.style.display = 'none';
+    }
+
+    async function confirmarRechazo() {
+        const motivo = document.getElementById('motivoRechazoTexto').value.trim() || 'Receta no válida';
+        const id = recetaIdActual;
+
+        // 1. Rechazar la receta
+        const r1 = await fetch(`${API}/recetas/${id}/rechazar`, {
+            method: 'PUT',
+            headers: { ...H(), 'Content-Type': 'application/json' },
+            body: JSON.stringify({ motivo })
+        });
+
+        if (!r1.ok) { toast('❌ Error al rechazar', false); return; }
+
+        const receta = await r1.json();
+
+        // 2. Cambiar el pedido a RECHAZADO si tiene pedido asociado
+        if (receta.pedido?.id) {
+            await fetch(`${API}/pedidos/${receta.pedido.id}/estado?estado=RECHAZADO`, {
+                method: 'PUT', headers: H()
+            });
+        }
+
+        cerrarModalRechazo();
+        cerrarModalReceta();
+        toast('📩 Receta rechazada — pedido cancelado y cliente notificado');
+        cargarRecetas();
+        cargarPedidos();
+    }
     // ══════════════════════════════════════════════════
     //  DELIVERY
     // ══════════════════════════════════════════════════
@@ -1060,7 +1201,7 @@
             const us = await fetch(`${API}/usuarios`,{headers:H()}).then(r=>r.json());
             repartidores = us.filter(u=>u.rol==='DELIVERY');
             const conf = await fetch(`${API}/pedidos/estado/CONFIRMADO`,{headers:H()}).then(r=>r.json());
-            const estados=['ASIGNADO','EN_CAMINO','ENTREGADO'];
+            const estados=['PENDIENTE','CONFIRMADO','EN_CAMINO','ENTREGADO','RECHAZADO'];
             const dArr = await Promise.all(estados.map(e=>fetch(`${API}/delivery/estado/${e}`,{headers:H()}).then(r=>r.json())));
             delivData = dArr.flat();
             const conDelivery = new Set(delivData.map(d=>d.pedido?.id));
