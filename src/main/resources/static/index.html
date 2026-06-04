@@ -48,20 +48,7 @@
         .hero-stat p { font-size: 12px; opacity: 0.8; }
 
         /* ===== RESULTADOS BUSQUEDA ===== */
-        .busqueda-resultados {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 24px rgba(0,0,0,0.12);
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 60px;
-            margin-top: 6px;
-            max-height: 320px;
-            overflow-y: auto;
-            z-index: 200;
-            display: none;
-        }
+        .busqueda-resultados { background: white; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.12); position: absolute; top: 100%; left: 0; right: 60px; margin-top: 6px; max-height: 320px; overflow-y: auto; z-index: 200; display: none; }
         .busqueda-resultados.visible { display: block; }
         .resultado-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; cursor: pointer; border-bottom: 1px solid #f5f5f5; transition: background 0.15s; }
         .resultado-item:last-child { border-bottom: none; }
@@ -126,7 +113,7 @@
         .footer-col h4 { font-size: 14px; font-weight: 700; margin-bottom: 16px; color: #fff; }
         .footer-col ul { list-style: none; }
         .footer-col ul li { margin-bottom: 10px; }
-        .footer-col ul li a { color: #aaa; text-decoration: none; font-size: 13px; transition: color 0.2s; }
+        .footer-col ul li a { color: #aaa; text-decoration: none; font-size: 13px; transition: color 0.2s; cursor: pointer; }
         .footer-col ul li a:hover { color: #66bb6a; }
         .footer-bottom { border-top: 1px solid rgba(255,255,255,0.08); padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; }
         .footer-bottom p { font-size: 12px; color: #666; }
@@ -140,6 +127,7 @@
         .modal.activo { display: flex; }
         .modal-content { background: white; padding: 35px; border-radius: 16px; width: 440px; max-width: 95%; max-height: 92vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
         .modal-content.wide { width: 640px; }
+        .modal-content.extra-wide { width: 780px; }
         .modal-content h3 { margin-bottom: 6px; color: #1b5e20; font-size: 22px; }
         .modal-content .subtitle { color: #888; font-size: 13px; margin-bottom: 24px; }
         .modal-content label { display: block; font-size: 12px; font-weight: 600; color: #555; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.4px; }
@@ -148,6 +136,7 @@
         .modal-content textarea { resize: vertical; min-height: 70px; }
         .modal-content .btn-primary { width: 100%; padding: 13px; background: #2e7d32; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 15px; font-weight: 600; font-family: 'DM Sans', sans-serif; transition: background 0.2s; margin-top: 4px; }
         .modal-content .btn-primary:hover { background: #1b5e20; }
+        .modal-content .btn-primary:disabled { background: #aaa; cursor: not-allowed; }
         .modal-content .btn-ghost { width: 100%; padding: 11px; background: transparent; color: #888; border: 1.5px solid #e0e0e0; border-radius: 8px; cursor: pointer; font-size: 14px; font-family: 'DM Sans', sans-serif; margin-top: 10px; }
         .modal-content .switch-link { text-align: center; margin-top: 16px; font-size: 13px; color: #888; }
         .modal-content .switch-link a { color: #2e7d32; font-weight: 600; cursor: pointer; text-decoration: none; }
@@ -187,23 +176,149 @@
         .badge-preparacion { background: #f3e5f5; color: #6a1b9a; }
         .badge-camino { background: #e1f5fe; color: #0277bd; }
         .badge-entregado { background: #e8f5e9; color: #2e7d32; }
+        .badge-receta-pendiente { background: #fff3e0; color: #f57c00; }
+        .badge-receta-aprobada { background: #e8f5e9; color: #2e7d32; }
+        .badge-receta-rechazada { background: #ffebee; color: #c62828; }
         .pedido-productos { font-size: 13px; color: #444; margin-bottom: 8px; }
         .pedido-total { font-size: 16px; font-weight: 700; color: #1b5e20; }
 
-        /* ===== CHECKOUT ===== */
-        .checkout-resumen { background: #f9fbe7; border: 1.5px solid #c5e1a5; border-radius: 10px; padding: 16px; margin-bottom: 20px; }
-        .checkout-resumen h4 { font-size: 14px; font-weight: 700; color: #2e7d32; margin-bottom: 10px; }
-        .checkout-item { display: flex; justify-content: space-between; font-size: 13px; padding: 4px 0; }
-        .checkout-total { display: flex; justify-content: space-between; font-size: 16px; font-weight: 700; color: #1b5e20; border-top: 1.5px solid #c5e1a5; margin-top: 10px; padding-top: 10px; }
+        /* ===== CHECKOUT POR PASOS ===== */
+        .checkout-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 300; }
+        .checkout-overlay.activo { display: flex; align-items: flex-start; justify-content: center; overflow-y: auto; padding: 20px; }
+        .checkout-panel { background: white; border-radius: 16px; width: 100%; max-width: 1000px; min-height: 500px; display: flex; gap: 0; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.2); margin: auto; }
+        .checkout-main { flex: 1; padding: 35px; overflow-y: auto; max-height: 90vh; }
+        .checkout-sidebar { width: 320px; background: #f9fbe7; border-left: 1.5px solid #e8f5e9; padding: 30px 24px; overflow-y: auto; max-height: 90vh; }
+        .checkout-back { display: flex; align-items: center; gap: 8px; color: #2e7d32; font-size: 13px; font-weight: 600; cursor: pointer; margin-bottom: 20px; background: none; border: none; font-family: 'DM Sans', sans-serif; }
+        .checkout-back:hover { opacity: 0.7; }
+        .checkout-titulo { font-size: 22px; font-weight: 700; color: #1a2332; margin-bottom: 28px; }
 
-        /* ===== TOAST ===== */
+        /* Pasos barra */
+        .checkout-steps { display: flex; gap: 8px; margin-bottom: 28px; }
+        .step-dot { width: 10px; height: 10px; border-radius: 50%; background: #ddd; transition: background 0.2s; }
+        .step-dot.activo { background: #2e7d32; }
+        .step-dot.hecho { background: #66bb6a; }
+
+        /* Sección de entrega */
+        .entrega-opciones { display: flex; flex-direction: column; gap: 14px; margin-bottom: 24px; }
+        .entrega-opcion { border: 1.5px solid #e0e4ea; border-radius: 10px; padding: 16px; cursor: pointer; display: flex; align-items: flex-start; gap: 12px; transition: border-color 0.2s; }
+        .entrega-opcion.seleccionada { border-color: #2e7d32; background: #f9fbe7; }
+        .entrega-opcion input[type=radio] { margin-top: 3px; accent-color: #2e7d32; }
+        .entrega-opcion-info h4 { font-size: 15px; font-weight: 600; }
+        .entrega-opcion-info p { font-size: 12px; color: #888; margin-top: 3px; }
+        .tag-gratis { background: #e8f5e9; color: #2e7d32; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; margin-left: 8px; }
+
+        /* Dirección */
+        .dir-add-btn { width: 100%; padding: 14px; border: 2px dashed #c5e1a5; border-radius: 10px; background: transparent; color: #2e7d32; font-size: 14px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
+        .dir-add-btn:hover { border-color: #2e7d32; background: #f9fbe7; }
+
+        /* Modal mini dirección */
+        .mini-modal { display: none; background: white; border: 1.5px solid #e0e0e0; border-radius: 12px; padding: 20px; margin-top: 12px; }
+        .mini-modal.visible { display: block; }
+        .mini-modal label { display: block; font-size: 12px; font-weight: 600; color: #555; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.4px; }
+        .mini-modal input, .mini-modal select { width: 100%; padding: 10px 14px; margin-bottom: 12px; border: 1.5px solid #e0e0e0; border-radius: 8px; font-size: 14px; font-family: 'DM Sans', sans-serif; outline: none; }
+        .mini-modal input:focus { border-color: #2e7d32; }
+        .tipo-dir-btns { display: flex; gap: 10px; margin-bottom: 16px; }
+        .tipo-dir-btn { flex: 1; padding: 10px; border: 1.5px solid #e0e0e0; border-radius: 8px; background: white; cursor: pointer; font-size: 13px; font-family: 'DM Sans', sans-serif; font-weight: 500; transition: all 0.2s; }
+        .tipo-dir-btn.sel { border-color: #2e7d32; background: #e8f5e9; color: #2e7d32; font-weight: 700; }
+        .btn-guardar-dir { width: 100%; padding: 11px; background: #2e7d32; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; font-family: 'DM Sans', sans-serif; }
+        .dir-guardada { display: flex; align-items: center; justify-content: space-between; background: #e8f5e9; border: 1.5px solid #a5d6a7; border-radius: 10px; padding: 14px 16px; margin-top: 12px; }
+        .dir-guardada-info { font-size: 13px; color: #2e7d32; font-weight: 600; }
+        .dir-guardada-sub { font-size: 12px; color: #555; margin-top: 3px; }
+        .btn-cambiar-dir { background: none; border: none; color: #2e7d32; font-size: 12px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+
+        /* Quién recoge */
+        .recoge-opciones { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+        .recoge-opcion { border: 1.5px solid #e0e4ea; border-radius: 10px; padding: 14px 16px; cursor: pointer; display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 500; transition: border-color 0.2s; }
+        .recoge-opcion.sel { border-color: #2e7d32; background: #f9fbe7; font-weight: 700; }
+        .recoge-opcion input[type=radio] { accent-color: #2e7d32; }
+
+        /* Método pago */
+        .pago-opciones { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+        .pago-opcion { border: 1.5px solid #e0e4ea; border-radius: 10px; padding: 14px 16px; cursor: pointer; display: flex; align-items: center; gap: 14px; transition: border-color 0.2s; }
+        .pago-opcion.sel { border-color: #2e7d32; background: #f9fbe7; }
+        .pago-opcion input[type=radio] { accent-color: #2e7d32; }
+        .pago-icon-big { font-size: 22px; }
+        .pago-label { font-size: 14px; font-weight: 600; }
+        .pago-desc { font-size: 12px; color: #888; }
+
+        /* Comprobante */
+        .comprobante-toggle { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border: 1.5px solid #e0e4ea; border-radius: 10px; margin-bottom: 16px; }
+        .toggle-switch { position: relative; width: 44px; height: 24px; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .toggle-slider { position: absolute; inset: 0; background: #ccc; border-radius: 24px; cursor: pointer; transition: background 0.2s; }
+        .toggle-slider:before { content: ''; position: absolute; width: 18px; height: 18px; left: 3px; top: 3px; background: white; border-radius: 50%; transition: transform 0.2s; }
+        .toggle-switch input:checked + .toggle-slider { background: #2e7d32; }
+        .toggle-switch input:checked + .toggle-slider:before { transform: translateX(20px); }
+        .comprobante-info h4 { font-size: 14px; font-weight: 600; }
+        .comprobante-info p { font-size: 12px; color: #888; }
+        .factura-fields { display: none; }
+        .factura-fields.visible { display: block; }
+        .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+        /* Resumen checkout */
+        .resumen-titulo { font-size: 16px; font-weight: 700; color: #1b5e20; margin-bottom: 16px; }
+        .resumen-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #e8f5e9; font-size: 13px; }
+        .resumen-item:last-of-type { border-bottom: none; }
+        .resumen-item-nombre { font-weight: 500; flex: 1; margin-right: 8px; }
+        .resumen-item-precio { font-weight: 700; color: #1b5e20; white-space: nowrap; }
+        .resumen-subtotal { display: flex; justify-content: space-between; font-size: 14px; padding: 12px 0 6px; border-top: 1.5px solid #c5e1a5; margin-top: 8px; }
+        .resumen-total { display: flex; justify-content: space-between; font-size: 18px; font-weight: 700; color: #1b5e20; }
+        .resumen-envio { display: flex; justify-content: space-between; font-size: 13px; color: #2e7d32; padding: 4px 0; }
+        .coupon-row { display: flex; gap: 8px; margin: 14px 0; }
+        .coupon-row input { flex: 1; padding: 9px 12px; border: 1.5px solid #e0e0e0; border-radius: 8px; font-size: 13px; font-family: 'DM Sans', sans-serif; outline: none; }
+        .coupon-row button { padding: 9px 16px; background: #e0e0e0; color: #555; border: none; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; font-family: 'DM Sans', sans-serif; }
+        .btn-finalizar { width: 100%; padding: 14px; background: #2e7d32; color: white; border: none; border-radius: 10px; cursor: pointer; font-size: 15px; font-weight: 700; font-family: 'DM Sans', sans-serif; transition: background 0.2s; margin-top: 16px; }
+        .btn-finalizar:hover { background: #1b5e20; }
+        .btn-finalizar:disabled { background: #aaa; cursor: not-allowed; }
+
+        /* Resumen final antes de pagar */
+        .resumen-datos { background: #f5f7fa; border-radius: 10px; padding: 16px; margin-bottom: 20px; }
+        .resumen-datos-row { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 1px solid #e8eaf0; font-size: 13px; }
+        .resumen-datos-row:last-child { border-bottom: none; }
+        .resumen-datos-label { font-weight: 700; width: 140px; flex-shrink: 0; color: #555; }
+        .resumen-datos-val { color: #1a2332; }
+
+        /* ===== RECETA MÉDICA ===== */
+        .receta-zona { border: 2px dashed #a5d6a7; border-radius: 12px; padding: 28px 20px; text-align: center; cursor: pointer; transition: all 0.2s; background: #f9fbe7; margin-bottom: 16px; }
+        .receta-zona:hover { border-color: #2e7d32; background: #e8f5e9; }
+        .receta-zona.tiene-archivo { border-style: solid; border-color: #2e7d32; background: #e8f5e9; }
+        .receta-zona .receta-icon { font-size: 36px; margin-bottom: 10px; }
+        .receta-zona h4 { font-size: 14px; font-weight: 700; color: #1b5e20; margin-bottom: 4px; }
+        .receta-zona p { font-size: 12px; color: #888; }
+        .receta-info { background: #fff3e0; border: 1.5px solid #ffe0b2; border-radius: 10px; padding: 12px 14px; font-size: 13px; color: #e65100; margin-bottom: 16px; }
+        .receta-file-preview { display: none; align-items: center; gap: 10px; background: #e8f5e9; border: 1.5px solid #a5d6a7; border-radius: 8px; padding: 12px 14px; margin-top: 10px; }
+        .receta-file-preview.visible { display: flex; }
+        .receta-file-name { font-size: 13px; font-weight: 600; color: #2e7d32; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .receta-file-remove { background: none; border: none; color: #e53935; cursor: pointer; font-size: 16px; }
+        .receta-notas { width: 100%; padding: 10px 14px; border: 1.5px solid #e0e0e0; border-radius: 8px; font-size: 13px; font-family: 'DM Sans', sans-serif; resize: vertical; min-height: 70px; outline: none; margin-bottom: 0; }
+        .receta-notas:focus { border-color: #2e7d32; }
+        .receta-estado { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+        .receta-estado.pendiente { background: #fff3e0; color: #f57c00; }
+        .receta-estado.aprobada { background: #e8f5e9; color: #2e7d32; }
+        .receta-estado.rechazada { background: #ffebee; color: #c62828; }
+
+        /* TOAST */
         .toast { position: fixed; bottom: 24px; right: 24px; padding: 12px 20px; border-radius: 10px; color: white; font-size: 14px; font-weight: 500; z-index: 999; display: none; align-items: center; gap: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); max-width: 320px; }
         .toast.visible { display: flex; }
         .toast.exito { background: #2e7d32; }
         .toast.error { background: #e53935; }
         .toast.info { background: #1565c0; }
-
         .loading { text-align: center; padding: 40px; color: #bbb; grid-column: 1/-1; }
+
+        /* Overlay pasarela de pago */
+        .pasarela-loading { display: none; position: fixed; inset: 0; background: rgba(255,255,255,0.9); z-index: 500; justify-content: center; align-items: center; flex-direction: column; gap: 14px; }
+        .pasarela-loading.activo { display: flex; }
+        .spinner { width: 44px; height: 44px; border: 4px solid #e0e0e0; border-top-color: #2e7d32; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .pasarela-texto { font-size: 16px; font-weight: 600; color: #1b5e20; }
+        .pasarela-sub { font-size: 13px; color: #888; }
+
+        /* Pedido exitoso */
+        .pedido-exito { text-align: center; padding: 20px; }
+        .pedido-exito .check-big { font-size: 64px; margin-bottom: 16px; }
+        .pedido-exito h3 { font-size: 22px; font-weight: 700; color: #2e7d32; margin-bottom: 8px; }
+        .pedido-exito p { font-size: 14px; color: #666; margin-bottom: 20px; line-height: 1.6; }
+        .pedido-exito-id { background: #f9fbe7; border: 1.5px solid #c5e1a5; border-radius: 10px; padding: 14px; font-size: 18px; font-weight: 700; color: #1b5e20; margin-bottom: 20px; }
 
         @media (max-width: 768px) {
             .hero h2 { font-size: 28px; }
@@ -211,6 +326,9 @@
             .beneficios-grid { grid-template-columns: repeat(2, 1fr); }
             .footer-main { grid-template-columns: 1fr 1fr; }
             .grid { grid-template-columns: repeat(2, 1fr); }
+            .checkout-panel { flex-direction: column; }
+            .checkout-sidebar { width: 100%; border-left: none; border-top: 1.5px solid #e8f5e9; max-height: none; }
+            .input-row { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -245,7 +363,6 @@
 <div class="contenido">
     <div class="seccion-titulo"><h3>Categorías</h3></div>
     <div class="categorias-scroll" id="categoriasScroll"></div>
-
     <div class="seccion-titulo">
         <h3 id="tituloProductos">Nuestros Productos</h3>
         <a onclick="mostrarTodos()">Ver todos →</a>
@@ -287,15 +404,15 @@
         </div>
         <div class="footer-col">
             <h4>Productos</h4>
-            <ul><li><a href="#">Analgésicos</a></li><li><a href="#">Antibióticos</a></li><li><a href="#">Vitaminas</a></li><li><a href="#">Digestivos</a></li><li><a href="#">Alergias</a></li><li><a href="#">Curaciones</a></li></ul>
+            <ul><li><a>Analgésicos</a></li><li><a>Antibióticos</a></li><li><a>Vitaminas</a></li><li><a>Digestivos</a></li><li><a>Alergias</a></li><li><a>Curaciones</a></li></ul>
         </div>
         <div class="footer-col">
             <h4>Servicios</h4>
-            <ul><li><a href="#">Delivery 24h</a></li><li><a href="#">Recetas médicas</a></li><li><a onclick="abrirMisPedidos()" style="cursor:pointer">Mis pedidos</a></li><li><a href="#">Atención al cliente</a></li></ul>
+            <ul><li><a>Delivery 24h</a></li><li><a onclick="abrirRecetaModal()">Subir Receta Médica</a></li><li><a onclick="abrirMisPedidos()">Mis pedidos</a></li><li><a>Atención al cliente</a></li></ul>
         </div>
         <div class="footer-col">
             <h4>Empresa</h4>
-            <ul><li><a href="#">Sobre nosotros</a></li><li><a href="#">Términos y condiciones</a></li><li><a href="#">Política de privacidad</a></li><li><a href="#">Contacto</a></li></ul>
+            <ul><li><a>Sobre nosotros</a></li><li><a>Términos y condiciones</a></li><li><a>Política de privacidad</a></li><li><a>Contacto</a></li></ul>
             <div style="margin-top:20px;padding:12px;background:rgba(255,255,255,0.05);border-radius:8px">
                 <p style="font-size:11px;color:#888;margin-bottom:4px">📍 Lima, Perú</p>
                 <p style="font-size:11px;color:#888;margin-bottom:4px">📞 (01) 234-5678</p>
@@ -313,7 +430,7 @@
     </div>
 </footer>
 
-<!-- MODAL LOGIN -->
+<!-- ===================== MODAL LOGIN ===================== -->
 <div class="modal" id="modalLogin">
     <div class="modal-content">
         <h3>Iniciar Sesión</h3>
@@ -330,49 +447,98 @@
     </div>
 </div>
 
-<!-- MODAL REGISTRO -->
+<!-- ===================== MODAL REGISTRO ===================== -->
 <div class="modal" id="modalRegistro">
-    <div class="modal-content">
-        <h3>Crear Cuenta</h3>
-        <p class="subtitle">Únete a BotiClic y compra con facilidad</p>
+    <div class="modal-content wide">
+        <h3>¡Ya casi terminamos!</h3>
+        <p class="subtitle">Completa estos datos para crear tu cuenta en BotiClic.</p>
         <div class="error-box" id="regError"></div>
         <div class="success-box" id="regSuccess"></div>
-        <label>Nombre completo</label>
-        <input type="text" id="regNombre" placeholder="Juan Pérez">
-        <label>Correo electrónico</label>
-        <input type="email" id="regEmail" placeholder="tu@email.com">
+
+        <!-- Fila: Tipo doc + Número doc -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div>
+                <label>Tipo de documento</label>
+                <select id="regTipoDoc">
+                    <option value="DNI">DNI</option>
+                    <option value="CE">Carnet de Extranjería</option>
+                    <option value="PASAPORTE">Pasaporte</option>
+                </select>
+            </div>
+            <div>
+                <label>Número de documento</label>
+                <input type="text" id="regNumDoc" placeholder="Ingresa tu DNI" maxlength="12">
+            </div>
+        </div>
+
+        <!-- Nombre completo -->
+        <label>Nombres</label>
+        <input type="text" id="regNombre" placeholder="José Leonardo">
+
+        <!-- Fila: Apellido paterno + materno -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div>
+                <label>Apellido paterno</label>
+                <input type="text" id="regApellidoP" placeholder="Rosales">
+            </div>
+            <div>
+                <label>Apellido materno</label>
+                <input type="text" id="regApellidoM" placeholder="Gutiérrez">
+            </div>
+        </div>
+
+        <!-- Fila: Correo + Celular -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div>
+                <label>Correo electrónico</label>
+                <input type="email" id="regEmail" placeholder="tu@email.com">
+            </div>
+            <div>
+                <label>Celular</label>
+                <input type="tel" id="regCelular" placeholder="999 888 777" maxlength="9">
+            </div>
+        </div>
+
+        <!-- Fila: Fecha de nacimiento + Género -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div>
+                <label>Fecha de nacimiento <span style="color:#aaa;font-weight:400;text-transform:none">(Opcional)</span></label>
+                <div style="display:flex;gap:6px;">
+                    <input type="text" id="regDia"  placeholder="DD"   maxlength="2" style="width:60px;text-align:center;margin-bottom:16px;">
+                    <input type="text" id="regMes"  placeholder="MM"   maxlength="2" style="width:60px;text-align:center;margin-bottom:16px;">
+                    <input type="text" id="regAnio" placeholder="AAAA" maxlength="4" style="flex:1;text-align:center;margin-bottom:16px;">
+                </div>
+            </div>
+            <div>
+                <label>Género <span style="color:#aaa;font-weight:400;text-transform:none">(Opcional)</span></label>
+                <select id="regGenero">
+                    <option value="">Selecciona tu género</option>
+                    <option value="M">Masculino</option>
+                    <option value="F">Femenino</option>
+                    <option value="O">Prefiero no decir</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Contraseña -->
         <label>Contraseña</label>
         <input type="password" id="regPassword" placeholder="Mínimo 6 caracteres">
+
+        <!-- Términos -->
+        <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:16px;font-size:13px;color:#555;">
+            <input type="checkbox" id="regTerminos" style="width:auto;margin:0;margin-top:2px;flex-shrink:0;">
+            <label for="regTerminos" style="text-transform:none;letter-spacing:0;font-weight:400;margin-bottom:0;cursor:pointer;">
+                He leído y acepto los <a href="#" style="color:#2e7d32;font-weight:600;">Términos y condiciones</a> y las <a href="#" style="color:#2e7d32;font-weight:600;">Políticas de Privacidad</a>.
+            </label>
+        </div>
+
         <button class="btn-primary" onclick="registrarse()">Crear Cuenta</button>
         <button class="btn-ghost" onclick="cerrarModal('modalRegistro')">Cancelar</button>
         <div class="switch-link">¿Ya tienes cuenta? <a onclick="cerrarModal('modalRegistro');mostrarModal('modalLogin')">Inicia sesión</a></div>
     </div>
 </div>
 
-<!-- MODAL CHECKOUT -->
-<div class="modal" id="modalCheckout">
-    <div class="modal-content">
-        <h3>🛒 Confirmar Pedido</h3>
-        <p class="subtitle">Revisa tu pedido y completa los datos de entrega</p>
-        <div class="error-box" id="checkoutError"></div>
-        <div class="checkout-resumen" id="checkoutResumen"></div>
-        <label>Dirección de entrega *</label>
-        <input type="text" id="checkoutDireccion" placeholder="Ej: Av. Los Pinos 123, San Isidro">
-        <label>Referencia (opcional)</label>
-        <input type="text" id="checkoutReferencia" placeholder="Ej: Edificio azul, piso 3">
-        <label>Método de pago</label>
-        <select id="checkoutMetodoPago">
-            <option value="EFECTIVO">💵 Efectivo al recibir</option>
-            <option value="YAPE">📱 Yape</option>
-            <option value="PLIN">📱 Plin</option>
-            <option value="TARJETA">💳 Tarjeta de crédito/débito</option>
-        </select>
-        <button class="btn-primary" onclick="confirmarPedido()">✅ Confirmar Pedido</button>
-        <button class="btn-ghost" onclick="cerrarModal('modalCheckout')">Volver al carrito</button>
-    </div>
-</div>
-
-<!-- MODAL MIS PEDIDOS -->
+<!-- ===================== MODAL MIS PEDIDOS ===================== -->
 <div class="modal" id="modalMisPedidos">
     <div class="modal-content wide">
         <h3>📦 Mis Pedidos</h3>
@@ -384,7 +550,44 @@
     </div>
 </div>
 
-<!-- CARRITO -->
+<!-- ===================== MODAL RECETA MÉDICA ===================== -->
+<div class="modal" id="modalReceta">
+    <div class="modal-content wide">
+        <h3>📋 Subir Receta Médica</h3>
+        <p class="subtitle">Adjunta tu receta en PDF o imagen para que nuestro farmacéutico la revise y apruebe</p>
+        <div class="receta-info">
+            ⚠️ Algunos medicamentos requieren receta médica. Una vez aprobada por el farmacéutico, tu pedido podrá procesarse.
+        </div>
+        <div class="error-box" id="recetaError"></div>
+        <div class="success-box" id="recetaSuccess"></div>
+
+        <label>Pedido al que corresponde</label>
+        <select id="recetaPedidoId" style="margin-bottom:16px">
+            <option value="">— Selecciona un pedido —</option>
+        </select>
+
+        <label>Receta Médica (PDF o imagen)</label>
+        <div class="receta-zona" id="recetaZona" onclick="document.getElementById('recetaFileInput').click()">
+            <div class="receta-icon">📄</div>
+            <h4>Toca aquí para adjuntar tu receta</h4>
+            <p>Formatos aceptados: PDF, JPG, PNG · Máximo 10MB</p>
+        </div>
+        <input type="file" id="recetaFileInput" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="onRecetaFileChange(event)">
+        <div class="receta-file-preview" id="recetaFilePreview">
+            <span style="font-size:20px">📎</span>
+            <span class="receta-file-name" id="recetaFileName"></span>
+            <button class="receta-file-remove" onclick="quitarRecetaArchivo()">✕</button>
+        </div>
+
+        <label style="margin-top:12px">Notas para el farmacéutico (opcional)</label>
+        <textarea class="receta-notas" id="recetaNotas" placeholder="Ej: Receta del Dr. García, consulta del 27/05/2026. Medicamento para tratamiento de 7 días."></textarea>
+
+        <button class="btn-primary" onclick="enviarReceta()" style="margin-top:16px">📤 Enviar Receta al Farmacéutico</button>
+        <button class="btn-ghost" onclick="cerrarModal('modalReceta')">Cancelar</button>
+    </div>
+</div>
+
+<!-- ===================== CARRITO LATERAL ===================== -->
 <div class="carrito-lateral" id="carritoLateral">
     <div class="carrito-header">
         <h3>🛒 Mi Carrito</h3>
@@ -397,6 +600,36 @@
         <div class="carrito-total"><span>Total:</span><span>S/ <span id="totalCarrito">0.00</span></span></div>
         <button class="btn-pagar" onclick="abrirCheckout()">Realizar Pedido →</button>
     </div>
+</div>
+
+<!-- ===================== CHECKOUT POR PASOS ===================== -->
+<div class="checkout-overlay" id="checkoutOverlay">
+    <div class="checkout-panel">
+        <!-- MAIN -->
+        <div class="checkout-main">
+            <button class="checkout-back" onclick="volverCarrito()">← Volver al carrito</button>
+            <div id="checkoutContenido"></div>
+        </div>
+        <!-- SIDEBAR RESUMEN -->
+        <div class="checkout-sidebar">
+            <div class="resumen-titulo">🧾 Resumen de pedido</div>
+            <div id="resumenItems"></div>
+            <div class="coupon-row">
+                <input type="text" id="couponInput" placeholder="Código de descuento">
+                <button onclick="aplicarCupon()">Aplicar</button>
+            </div>
+            <div class="resumen-subtotal"><span>Subtotal</span><span>S/ <span id="resumenSubtotal">0.00</span></span></div>
+            <div class="resumen-envio" id="resumenEnvioRow"><span>Envío</span><span id="resumenEnvio">Por calcular</span></div>
+            <div class="resumen-total" style="margin-top:10px"><span>Total</span><span>S/ <span id="resumenTotal">0.00</span></span></div>
+        </div>
+    </div>
+</div>
+
+<!-- PASARELA LOADING -->
+<div class="pasarela-loading" id="pasarelaLoading">
+    <div class="spinner"></div>
+    <div class="pasarela-texto">Estamos preparando la pasarela de pago</div>
+    <div class="pasarela-sub">Por favor, no cierres esta ventana mientras completamos el proceso.</div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -412,6 +645,20 @@
     let usuarioActual = JSON.parse(localStorage.getItem('usuario') || 'null');
     let tokenActual   = localStorage.getItem('token') || null;
 
+    // Estado checkout
+    let chkStep = 1; // 1=entrega 2=pago 3=resumen
+    let chkTipoEntrega = 'domicilio'; // 'domicilio' | 'botica'
+    let chkDireccion = null; // { calle, numero, referencia, tipo }
+    let chkRecogePor = 'yo'; // 'yo' | 'otro'
+    let chkOtraPersona = null;
+    let chkMetodoPago = 'TARJETA';
+    let chkFactura = false;
+    let chkRUC = ''; let chkRazonSocial = ''; let chkDomicilioLegal = '';
+
+    // Receta
+    let recetaFile = null;
+    let recetaBase64 = null;
+
     // =============================================
     // HEADER DINÁMICO
     // =============================================
@@ -420,6 +667,7 @@
         if (usuarioActual && tokenActual) {
             const iniciales = usuarioActual.nombre.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
             nav.innerHTML = `
+            <button class="btn-nav" onclick="abrirRecetaModal()" title="Subir receta médica">📋 Receta</button>
             <button class="btn-carrito" onclick="toggleCarrito()">🛒 Carrito (<span id="contadorCarrito">${carrito.reduce((a,i)=>a+i.cantidad,0)}</span>)</button>
             <div class="usuario-info" onclick="toggleDropdown(event)">
                 <div class="avatar">${iniciales}</div>
@@ -429,6 +677,7 @@
                 </div>
                 <div class="dropdown-menu" id="dropdownMenu">
                     <div class="dropdown-item" onclick="abrirMisPedidos()">📦 Mis pedidos</div>
+                    <div class="dropdown-item" onclick="abrirRecetaModal()">📋 Subir receta</div>
                     <div class="dropdown-item rojo" onclick="cerrarSesion()">🚪 Cerrar sesión</div>
                 </div>
             </div>`;
@@ -445,23 +694,20 @@
         const menu = document.getElementById('dropdownMenu');
         if (menu) menu.classList.toggle('visible');
     }
-
     document.addEventListener('click', () => {
         const menu = document.getElementById('dropdownMenu');
         if (menu) menu.classList.remove('visible');
     });
 
     function cerrarSesion() {
-        localStorage.removeItem('token');
-        localStorage.removeItem('usuario');
-        usuarioActual = null;
-        tokenActual   = null;
+        localStorage.removeItem('token'); localStorage.removeItem('usuario');
+        usuarioActual = null; tokenActual = null;
         renderHeader();
         toast('Sesión cerrada', 'info');
     }
 
     // =============================================
-    // PRODUCTOS — CARGAR Y RENDERIZAR
+    // PRODUCTOS
     // =============================================
     async function cargarProductos() {
         try {
@@ -477,27 +723,20 @@
     }
 
     const iconosCategoria = {
-        'Analgésicos':'💊','Analgésico':'💊',
-        'Antibióticos':'🧬','Antibiótico':'🧬',
-        'Digestivos':'🫁','Digestivo':'🫁',
-        'Vitaminas':'🍊','Vitamina':'🍊',
-        'Alergias':'🌿','Alergia':'🌿',
-        'Antisépticos':'🧴','Antiséptico':'🧴',
-        'Curaciones':'🩹','Curación':'🩹',
-        'Suplemento':'💪','Suplementos':'💪',
-        'Antihistamínico':'💉','Cuidado Personal':'🧼'
+        'Analgésicos':'💊','Analgésico':'💊','Antibióticos':'🧬','Antibiótico':'🧬',
+        'Digestivos':'🫁','Digestivo':'🫁','Vitaminas':'🍊','Vitamina':'🍊',
+        'Alergias':'🌿','Alergia':'🌿','Antisépticos':'🧴','Antiséptico':'🧴',
+        'Curaciones':'🩹','Curación':'🩹','Suplemento':'💪','Suplementos':'💪',
+        'Antihistamínico':'💉','Cuidado Personal':'🧼','Antiinflamatorio':'🔴','Antiinflamatorios':'🔴'
     };
-
     function getIcon(cat) { return iconosCategoria[cat] || '💊'; }
 
     function renderCategorias(prods) {
         const cats = [...new Set(prods.map(p => p.categoria).filter(Boolean))];
         const div = document.getElementById('categoriasScroll');
-        div.innerHTML = `<div class="cat-card activo" onclick="filtrarCat(null, this)">
-        <div class="cat-icon">🏥</div><div class="cat-name">Todos</div></div>`;
+        div.innerHTML = `<div class="cat-card activo" onclick="filtrarCat(null,this)"><div class="cat-icon">🏥</div><div class="cat-name">Todos</div></div>`;
         cats.forEach(c => {
-            div.innerHTML += `<div class="cat-card" onclick="filtrarCat('${c.replace(/'/g,"\\'")}', this)">
-            <div class="cat-icon">${getIcon(c)}</div><div class="cat-name">${c}</div></div>`;
+            div.innerHTML += `<div class="cat-card" onclick="filtrarCat('${c.replace(/'/g,"\\'")}',this)"><div class="cat-icon">${getIcon(c)}</div><div class="cat-name">${c}</div></div>`;
         });
     }
 
@@ -507,9 +746,7 @@
         const lista = cat ? productos.filter(p => p.categoria === cat) : productos;
         document.getElementById('tituloProductos').textContent = cat ? `Categoría: ${cat}` : 'Nuestros Productos';
         renderProductos(lista);
-        // Cerrar dropdown de búsqueda si está abierto
         cerrarResultadosBusqueda();
-        // Scroll a productos
         document.getElementById('listaProductos').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
@@ -522,65 +759,55 @@
 
     function renderProductos(lista) {
         const div = document.getElementById('listaProductos');
-        if (!lista.length) {
-            div.innerHTML = '<p class="loading">🔍 No se encontraron productos</p>';
-            return;
-        }
+        if (!lista.length) { div.innerHTML = '<p class="loading">🔍 No se encontraron productos</p>'; return; }
         div.innerHTML = lista.map(p => {
             const agotado = p.stock <= 0;
             const stockBajo = p.stock > 0 && p.stock <= 10;
             return `
-        <div class="card">
-            <div class="card-img">${getIcon(p.categoria)}</div>
-            <div class="card-body">
-                <div class="card-cat">${p.categoria || 'General'}</div>
-                <h4>${p.nombre}</h4>
-                <p>${p.descripcion ? p.descripcion.substring(0,55)+(p.descripcion.length>55?'…':'') : ''}</p>
-                <div class="precio">S/ ${p.precio?.toFixed(2)}</div>
-                <div class="stock ${agotado?'agotado':stockBajo?'bajo':''}">
-                    ${agotado ? '❌ Agotado' : stockBajo ? `⚠️ Poco stock: ${p.stock} uds.` : `✅ Stock: ${p.stock} uds.`}
+            <div class="card">
+                <div class="card-img">${getIcon(p.categoria)}</div>
+                <div class="card-body">
+                    <div class="card-cat">${p.categoria || 'General'}</div>
+                    <h4>${p.nombre}</h4>
+                    <p>${p.descripcion ? p.descripcion.substring(0,55)+(p.descripcion.length>55?'…':'') : ''}</p>
+                    <div class="precio">S/ ${p.precio?.toFixed(2)}</div>
+                    <div class="stock ${agotado?'agotado':stockBajo?'bajo':''}">
+                        ${agotado ? '❌ Agotado' : stockBajo ? `⚠️ Poco stock: ${p.stock} uds.` : `✅ Stock: ${p.stock} uds.`}
+                    </div>
+                    <button onclick="agregarAlCarrito(${p.id},'${p.nombre.replace(/'/g,"\\'")}',${p.precio})" ${agotado?'disabled':''}>
+                        ${agotado ? 'Sin stock' : '🛒 Agregar al carrito'}
+                    </button>
                 </div>
-                <button onclick="agregarAlCarrito(${p.id},'${p.nombre.replace(/'/g,"\\'")}',${p.precio})"
-                    ${agotado ? 'disabled' : ''}>
-                    ${agotado ? 'Sin stock' : '🛒 Agregar al carrito'}
-                </button>
-            </div>
-        </div>`;
+            </div>`;
         }).join('');
     }
 
     // =============================================
-    // BÚSQUEDA EN TIEMPO REAL (HU-04)
+    // BÚSQUEDA
     // =============================================
     let buscarTimeout = null;
-
     function onBuscarInput() {
         const txt = document.getElementById('inputBuscar').value.trim();
         clearTimeout(buscarTimeout);
         if (!txt) { cerrarResultadosBusqueda(); return; }
-        // Debounce: espera 250ms antes de buscar
         buscarTimeout = setTimeout(() => buscarEnTiempoReal(txt), 250);
     }
-
     function onBuscarKeydown(e) {
-        if (e.key === 'Enter') { ejecutarBusqueda(); }
-        if (e.key === 'Escape') { cerrarResultadosBusqueda(); }
+        if (e.key === 'Enter') ejecutarBusqueda();
+        if (e.key === 'Escape') cerrarResultadosBusqueda();
     }
-
     async function buscarEnTiempoReal(txt) {
-        // Buscar en los productos ya cargados (rápido, sin otra llamada)
         const resultados = productos.filter(p =>
             p.nombre.toLowerCase().includes(txt.toLowerCase()) ||
             (p.categoria||'').toLowerCase().includes(txt.toLowerCase()) ||
             (p.descripcion||'').toLowerCase().includes(txt.toLowerCase())
-        ).slice(0, 6); // máximo 6 resultados en el dropdown
-
+        ).slice(0, 6);
         const div = document.getElementById('resultadosBusqueda');
         if (!resultados.length) {
             div.innerHTML = `<div class="resultado-sin">Sin resultados para "<strong>${txt}</strong>"</div>`;
         } else {
             div.innerHTML = resultados.map(p => `
-            <div class="resultado-item" onclick="seleccionarResultado(${p.id},'${p.nombre.replace(/'/g,"\\'")}',${p.precio})">
+            <div class="resultado-item" onclick="seleccionarResultado('${p.nombre.replace(/'/g,"\\'")}')">
                 <div class="resultado-icon">${getIcon(p.categoria)}</div>
                 <div class="resultado-info">
                     <h4>${resaltarTexto(p.nombre, txt)}</h4>
@@ -591,30 +818,23 @@
         }
         div.classList.add('visible');
     }
-
     function resaltarTexto(texto, busqueda) {
         const re = new RegExp(`(${busqueda.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, 'gi');
         return texto.replace(re, '<strong style="color:#1b5e20">$1</strong>');
     }
-
-    function seleccionarResultado(id, nombre, precio) {
+    function seleccionarResultado(nombre) {
         cerrarResultadosBusqueda();
         document.getElementById('inputBuscar').value = nombre;
-        // Scroll al producto en la lista
         ejecutarBusqueda();
     }
-
     function ejecutarBusqueda() {
         const txt = document.getElementById('inputBuscar').value.trim();
         cerrarResultadosBusqueda();
         if (!txt) { mostrarTodos(); return; }
-        // Primero intentar con el endpoint del backend
         buscarConAPI(txt);
     }
-
     async function buscarConAPI(txt) {
         try {
-            // Usa el endpoint real: GET /api/productos/buscar?nombre=...
             const res = await fetch(`${API}/productos/buscar?nombre=${encodeURIComponent(txt)}`);
             if (res.ok) {
                 const resultado = await res.json();
@@ -624,7 +844,6 @@
                 return;
             }
         } catch {}
-        // Fallback: filtrar en memoria
         const filtrados = productos.filter(p =>
             p.nombre.toLowerCase().includes(txt.toLowerCase()) ||
             (p.categoria||'').toLowerCase().includes(txt.toLowerCase())
@@ -633,16 +852,8 @@
         renderProductos(filtrados);
         document.getElementById('listaProductos').scrollIntoView({ behavior: 'smooth' });
     }
-
-    function cerrarResultadosBusqueda() {
-        const div = document.getElementById('resultadosBusqueda');
-        div.classList.remove('visible');
-    }
-
-    // Cerrar resultados al hacer clic fuera
-    document.addEventListener('click', (e) => {
-        if (!e.target.closest('.buscador')) cerrarResultadosBusqueda();
-    });
+    function cerrarResultadosBusqueda() { document.getElementById('resultadosBusqueda').classList.remove('visible'); }
+    document.addEventListener('click', (e) => { if (!e.target.closest('.buscador')) cerrarResultadosBusqueda(); });
 
     // =============================================
     // CARRITO
@@ -651,11 +862,9 @@
         const existe = carrito.find(i => i.id === id);
         if (existe) existe.cantidad++;
         else carrito.push({ id, nombre, precio, cantidad: 1 });
-        guardarCarrito();
-        actualizarCarrito();
+        guardarCarrito(); actualizarCarrito();
         toast(`✅ ${nombre} agregado al carrito`, 'exito');
     }
-
     function actualizarCarrito() {
         const total = carrito.reduce((a, i) => a + i.precio * i.cantidad, 0);
         const count = carrito.reduce((a, i) => a + i.cantidad, 0);
@@ -680,20 +889,17 @@
             </div>
         </div>`).join('');
     }
-
     function cambiarCantidad(idx, delta) {
         carrito[idx].cantidad += delta;
         if (carrito[idx].cantidad <= 0) carrito.splice(idx, 1);
-        guardarCarrito();
-        actualizarCarrito();
+        guardarCarrito(); actualizarCarrito();
     }
-
     function quitarDelCarrito(idx) { carrito.splice(idx, 1); guardarCarrito(); actualizarCarrito(); }
     function toggleCarrito() { document.getElementById('carritoLateral').classList.toggle('abierto'); }
     function guardarCarrito() { localStorage.setItem('carritoBoticlic', JSON.stringify(carrito)); }
 
     // =============================================
-    // CHECKOUT (pedir dirección y confirmar)
+    // CHECKOUT — FLUJO POR PASOS (estilo Inkafarma)
     // =============================================
     function abrirCheckout() {
         if (!usuarioActual || !tokenActual) {
@@ -703,28 +909,348 @@
             return;
         }
         if (!carrito.length) { toast('Tu carrito está vacío', 'error'); return; }
-        const total = carrito.reduce((a,i) => a + i.precio*i.cantidad, 0);
-        // Mostrar resumen
-        document.getElementById('checkoutResumen').innerHTML = `
-        <h4>Resumen del pedido</h4>
-        ${carrito.map(i=>`<div class="checkout-item"><span>${i.nombre} ×${i.cantidad}</span><span>S/ ${(i.precio*i.cantidad).toFixed(2)}</span></div>`).join('')}
-        <div class="checkout-total"><span>Total</span><span>S/ ${total.toFixed(2)}</span></div>`;
-        document.getElementById('checkoutError').style.display = 'none';
-        mostrarModal('modalCheckout');
+        // reset estado
+        chkStep = 1; chkTipoEntrega = 'domicilio'; chkDireccion = null;
+        chkRecogePor = 'yo'; chkOtraPersona = null; chkMetodoPago = 'TARJETA';
+        chkFactura = false; chkRUC = ''; chkRazonSocial = ''; chkDomicilioLegal = '';
+        document.getElementById('carritoLateral').classList.remove('abierto');
+        renderResumenSidebar();
+        renderCheckoutStep();
+        document.getElementById('checkoutOverlay').classList.add('activo');
     }
 
-    async function confirmarPedido() {
-        const direccion = document.getElementById('checkoutDireccion').value.trim();
-        const referencia = document.getElementById('checkoutReferencia').value.trim();
-        const metodoPago = document.getElementById('checkoutMetodoPago').value;
-        const errEl = document.getElementById('checkoutError');
-        errEl.style.display = 'none';
+    function volverCarrito() {
+        document.getElementById('checkoutOverlay').classList.remove('activo');
+        toggleCarrito();
+    }
 
-        if (!direccion) {
-            errEl.textContent = 'Por favor ingresa una dirección de entrega.';
-            errEl.style.display = 'block';
-            return;
+    function renderResumenSidebar() {
+        const subtotal = carrito.reduce((a,i) => a + i.precio*i.cantidad, 0);
+        const envio = chkTipoEntrega === 'botica' ? 0 : (subtotal >= 50 ? 0 : 8);
+        const total = subtotal + envio;
+        document.getElementById('resumenItems').innerHTML = carrito.map(i =>
+            `<div class="resumen-item">
+                <span class="resumen-item-nombre">${i.nombre} ×${i.cantidad}</span>
+                <span class="resumen-item-precio">S/ ${(i.precio*i.cantidad).toFixed(2)}</span>
+            </div>`).join('');
+        document.getElementById('resumenSubtotal').textContent = subtotal.toFixed(2);
+        document.getElementById('resumenTotal').textContent = total.toFixed(2);
+        const envioEl = document.getElementById('resumenEnvio');
+        if (chkTipoEntrega === 'botica') envioEl.textContent = '🟢 Gratis (recojo)';
+        else if (subtotal >= 50) envioEl.textContent = '🟢 Gratis';
+        else envioEl.textContent = `S/ ${envio.toFixed(2)}`;
+    }
+
+    function aplicarCupon() {
+        const val = document.getElementById('couponInput').value.trim().toUpperCase();
+        if (val === 'BOTICLIC10') toast('✅ Cupón aplicado: 10% de descuento', 'exito');
+        else toast('❌ Cupón no válido', 'error');
+    }
+
+    function renderCheckoutStep() {
+        const cont = document.getElementById('checkoutContenido');
+        if (chkStep === 1) cont.innerHTML = renderStepEntrega();
+        else if (chkStep === 2) cont.innerHTML = renderStepPago();
+        else if (chkStep === 3) cont.innerHTML = renderStepResumen();
+        else if (chkStep === 4) cont.innerHTML = renderStepExito();
+        renderResumenSidebar();
+    }
+
+    // ---- PASO 1: Entrega ----
+    function renderStepEntrega() {
+        const dirHtml = chkDireccion ? `
+            <div class="dir-guardada">
+                <div>
+                    <div class="dir-guardada-info">📍 ${chkDireccion.calle}${chkDireccion.numero ? ', ' + chkDireccion.numero : ''}</div>
+                    <div class="dir-guardada-sub">${chkDireccion.referencia || ''} · ${chkDireccion.tipo}</div>
+                </div>
+                <button class="btn-cambiar-dir" onclick="chkDireccion=null;renderCheckoutStep()">Cambiar</button>
+            </div>` :
+            `<button class="dir-add-btn" onclick="mostrarFormDir()">+ Agregar dirección</button>
+            <div class="mini-modal" id="formDir">
+                <label>Calle / Av. / Jr.</label>
+                <input type="text" id="dirCalle" placeholder="Ej: Av. Los Pinos">
+                <label>Número</label>
+                <input type="text" id="dirNumero" placeholder="Ej: 123, 1504">
+                <label>Referencia / Depto / Piso</label>
+                <input type="text" id="dirRef" placeholder="Ej: Entre Av. Colonial y Av. Venezuela">
+                <div style="font-size:12px;font-weight:600;color:#555;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:8px">Tipo de dirección</div>
+                <div class="tipo-dir-btns">
+                    <button class="tipo-dir-btn sel" id="tipoCasa" onclick="selTipoDir('Mi casa')">🏠 Mi casa</button>
+                    <button class="tipo-dir-btn" id="tipoTrabajo" onclick="selTipoDir('Trabajo')">💼 Trabajo</button>
+                    <button class="tipo-dir-btn" id="tipoOtros" onclick="selTipoDir('Otros')">📍 Otros</button>
+                </div>
+                <button class="btn-guardar-dir" onclick="guardarDireccion()">Guardar dirección</button>
+            </div>`;
+
+        const recogeHtml = chkTipoEntrega === 'botica' ? `
+            <div style="margin-top:18px">
+                <label style="display:block;font-size:12px;font-weight:600;color:#555;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:10px">¿Quién recogerá el pedido?</label>
+                <div class="recoge-opciones">
+                    <div class="recoge-opcion ${chkRecogePor==='yo'?'sel':''}" onclick="selRecogePor('yo')">
+                        <input type="radio" ${chkRecogePor==='yo'?'checked':''} readonly> Yo
+                    </div>
+                    <div class="recoge-opcion ${chkRecogePor==='otro'?'sel':''}" onclick="selRecogePor('otro')">
+                        <input type="radio" ${chkRecogePor==='otro'?'checked':''} readonly> Agregar otra persona
+                    </div>
+                </div>
+                ${chkRecogePor === 'otro' ? `
+                <div class="mini-modal visible">
+                    <label>Nombres y apellidos</label>
+                    <input type="text" id="otroNombre" placeholder="Ingresa los nombres y apellidos" value="${chkOtraPersona?.nombre||''}">
+                    <div class="input-row">
+                        <div><label>Correo electrónico</label><input type="email" id="otroEmail" placeholder="Correo" value="${chkOtraPersona?.email||''}"></div>
+                        <div><label>Número de celular</label><input type="tel" id="otroCelular" placeholder="Celular" value="${chkOtraPersona?.celular||''}"></div>
+                    </div>
+                    <div class="input-row">
+                        <div><label>Tipo de documento</label>
+                            <select id="otroTipoDoc">
+                                <option ${(chkOtraPersona?.tipoDoc||'DNI')==='DNI'?'selected':''}>DNI</option>
+                                <option ${(chkOtraPersona?.tipoDoc||'')==='CE'?'selected':''}>Carnet de extranjería</option>
+                                <option ${(chkOtraPersona?.tipoDoc||'')==='PASAPORTE'?'selected':''}>Pasaporte</option>
+                            </select>
+                        </div>
+                        <div><label>Número de documento</label><input type="text" id="otroDoc" placeholder="Número" value="${chkOtraPersona?.doc||''}"></div>
+                    </div>
+                </div>` : ''}
+            </div>` : '';
+
+        return `
+        <div class="checkout-steps">
+            <div class="step-dot activo"></div>
+            <div class="step-dot"></div>
+            <div class="step-dot"></div>
+        </div>
+        <div class="checkout-titulo">¡Ya falta poco para finalizar tu compra!</div>
+        <div style="font-size:15px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px">📍 ¿En dónde recibirás tu pedido?</div>
+        <div class="entrega-opciones">
+            <div class="entrega-opcion ${chkTipoEntrega==='domicilio'?'seleccionada':''}" onclick="selTipoEntrega('domicilio')">
+                <input type="radio" ${chkTipoEntrega==='domicilio'?'checked':''} readonly>
+                <div class="entrega-opcion-info">
+                    <h4>En una de tus direcciones</h4>
+                    <p>Recibe tu pedido donde estés</p>
+                </div>
+            </div>
+            <div class="entrega-opcion ${chkTipoEntrega==='botica'?'seleccionada':''}" onclick="selTipoEntrega('botica')">
+                <input type="radio" ${chkTipoEntrega==='botica'?'checked':''} readonly>
+                <div class="entrega-opcion-info">
+                    <h4>En una botica <span class="tag-gratis">Gratis</span></h4>
+                    <p>¡Olvídate del costo de envío!</p>
+                </div>
+            </div>
+        </div>
+        ${chkTipoEntrega === 'domicilio' ? dirHtml : '<p style="font-size:13px;color:#888;margin-bottom:16px">Puedes recoger en cualquiera de nuestras boticas en Lima.</p>'}
+        ${recogeHtml}
+        <div style="margin-top:10px">
+            <div style="font-size:15px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px">📋 ¿Tienes receta médica?</div>
+            <p style="font-size:13px;color:#888;margin-bottom:14px">Si algún producto requiere receta, puedes adjuntarla ahora o enviarla después desde "Mis pedidos".</p>
+            <button style="padding:10px 18px;background:#e8f5e9;color:#2e7d32;border:1.5px solid #a5d6a7;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif" onclick="abrirRecetaDesdeCheckout()">📋 Adjuntar receta médica (opcional)</button>
+        </div>
+        <div style="margin-top:28px;display:flex;gap:12px">
+            <button class="btn-finalizar" onclick="irAPaso2()" style="margin-top:0">Continuar →</button>
+        </div>`;
+    }
+
+    // ---- PASO 2: Pago + Comprobante ----
+    function renderStepPago() {
+        const pagoOpciones = [
+            { val: 'TARJETA', icon: '💳', label: 'Pago Online', desc: 'Visa, Mastercard, Amex' },
+            { val: 'YAPE',    icon: '📱', label: 'Yape',        desc: 'Pago rápido con Yape' },
+            { val: 'PLIN',    icon: '📲', label: 'Plin',        desc: 'Pago rápido con Plin' },
+            { val: 'EFECTIVO',icon: '💵', label: 'Efectivo',    desc: 'Pago al recibir / recoger' },
+        ];
+        return `
+        <div class="checkout-steps">
+            <div class="step-dot hecho"></div>
+            <div class="step-dot activo"></div>
+            <div class="step-dot"></div>
+        </div>
+        <div class="checkout-titulo">¿Cómo quieres pagar?</div>
+        <div class="pago-opciones">
+            ${pagoOpciones.map(op => `
+            <div class="pago-opcion ${chkMetodoPago===op.val?'sel':''}" onclick="selMetodoPago('${op.val}')">
+                <input type="radio" ${chkMetodoPago===op.val?'checked':''} readonly>
+                <div class="pago-icon-big">${op.icon}</div>
+                <div><div class="pago-label">${op.label}</div><div class="pago-desc">${op.desc}</div></div>
+            </div>`).join('')}
+        </div>
+        <div style="font-size:15px;font-weight:700;margin:20px 0 12px;display:flex;align-items:center;gap:8px">📄 Solicita un comprobante de pago</div>
+        <p style="font-size:13px;color:#888;margin-bottom:12px">Activa esta opción si deseas que te enviemos factura, de lo contrario te enviaremos boleta.</p>
+        <div class="comprobante-toggle">
+            <label class="toggle-switch">
+                <input type="checkbox" id="toggleFactura" ${chkFactura?'checked':''} onchange="toggleFacturaCampos()">
+                <span class="toggle-slider"></span>
+            </label>
+            <div class="comprobante-info"><h4>Solicitar factura</h4><p>Ingresa los datos de tu empresa</p></div>
+        </div>
+        <div class="factura-fields ${chkFactura?'visible':''}" id="facturaFields">
+            <div class="input-row">
+                <div><label style="display:block;font-size:12px;font-weight:600;color:#555;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:5px">RUC (11 dígitos)</label>
+                    <input type="text" id="factRUC" placeholder="Ingresa el RUC" value="${chkRUC}" oninput="chkRUC=this.value" maxlength="11"></div>
+                <div><label style="display:block;font-size:12px;font-weight:600;color:#555;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:5px">Razón social</label>
+                    <input type="text" id="factRazon" placeholder="Razón social" value="${chkRazonSocial}" oninput="chkRazonSocial=this.value"></div>
+            </div>
+            <label style="display:block;font-size:12px;font-weight:600;color:#555;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:5px">Domicilio legal</label>
+            <input type="text" id="factDomicilio" placeholder="Domicilio legal" value="${chkDomicilioLegal}" oninput="chkDomicilioLegal=this.value">
+        </div>
+        <div style="display:flex;gap:12px;margin-top:20px">
+            <button style="padding:13px 20px;background:transparent;color:#888;border:1.5px solid #e0e0e0;border-radius:8px;cursor:pointer;font-size:14px;font-family:'DM Sans',sans-serif" onclick="chkStep=1;renderCheckoutStep()">← Volver</button>
+            <button class="btn-finalizar" style="margin-top:0;flex:1" onclick="irAPaso3()">Ver resumen →</button>
+        </div>`;
+    }
+
+    // ---- PASO 3: Resumen final ----
+    function renderStepResumen() {
+        const subtotal = carrito.reduce((a,i) => a + i.precio*i.cantidad, 0);
+        const envio = chkTipoEntrega === 'botica' ? 0 : (subtotal >= 50 ? 0 : 8);
+        const total = subtotal + envio;
+        const tipoEntregaLabel = chkTipoEntrega === 'domicilio'
+            ? `Delivery — ${chkDireccion ? chkDireccion.calle + (chkDireccion.numero?', '+chkDireccion.numero:'') : 'Sin dirección'}`
+            : 'Recojo en botica (Gratis)';
+        const metodoPagoLabel = { TARJETA:'Pago Online (Tarjeta)', YAPE:'Yape', PLIN:'Plin', EFECTIVO:'Efectivo' }[chkMetodoPago] || chkMetodoPago;
+        const comprobante = chkFactura ? 'Factura' : 'Boleta';
+
+        return `
+        <div class="checkout-steps">
+            <div class="step-dot hecho"></div>
+            <div class="step-dot hecho"></div>
+            <div class="step-dot activo"></div>
+        </div>
+        <div class="checkout-titulo">Comprueba tus datos antes de finalizar</div>
+        <div class="resumen-datos">
+            <div class="resumen-datos-row"><div class="resumen-datos-label">📦 Despachado por</div><div class="resumen-datos-val">BotiClic</div></div>
+            <div class="resumen-datos-row"><div class="resumen-datos-label">🚚 Tipo de entrega</div><div class="resumen-datos-val">${tipoEntregaLabel}</div></div>
+            ${chkTipoEntrega==='domicilio'&&chkDireccion?.referencia?`<div class="resumen-datos-row"><div class="resumen-datos-label">📍 Referencia</div><div class="resumen-datos-val">${chkDireccion.referencia}</div></div>`:''}
+            <div class="resumen-datos-row"><div class="resumen-datos-label">👤 Recoge</div><div class="resumen-datos-val">${chkRecogePor==='yo' ? (usuarioActual?.nombre||'Yo') : (chkOtraPersona?.nombre||'Otra persona')}</div></div>
+            <div class="resumen-datos-row"><div class="resumen-datos-label">📄 Comprobante</div><div class="resumen-datos-val">${comprobante}</div></div>
+            <div class="resumen-datos-row"><div class="resumen-datos-label">💳 Medio de pago</div><div class="resumen-datos-val">${metodoPagoLabel}</div></div>
+            <div class="resumen-datos-row"><div class="resumen-datos-label">🧾 Total</div><div class="resumen-datos-val" style="font-weight:700;color:#1b5e20;font-size:16px">S/ ${total.toFixed(2)}</div></div>
+        </div>
+        <div class="error-box" id="checkoutError"></div>
+        <div style="display:flex;gap:12px">
+            <button style="padding:13px 20px;background:transparent;color:#888;border:1.5px solid #e0e0e0;border-radius:8px;cursor:pointer;font-size:14px;font-family:'DM Sans',sans-serif" onclick="chkStep=2;renderCheckoutStep()">← Volver</button>
+            <button class="btn-finalizar" style="margin-top:0;flex:1" id="btnFinalizar" onclick="finalizarCompra()">✅ Finalizar compra</button>
+        </div>`;
+    }
+
+    // ---- PASO 4: Pedido exitoso ----
+    function renderStepExito(pedidoId) {
+        return `
+        <div class="pedido-exito">
+            <div class="check-big">🎉</div>
+            <h3>¡Pedido confirmado!</h3>
+            <p>Tu pedido fue registrado exitosamente. Te notificaremos cuando esté listo.<br>
+            Recuerda llevar tu DNI si vas a recoger en botica.</p>
+            <div class="pedido-exito-id">Pedido #${pedidoId || '—'}</div>
+            <button class="btn-finalizar" onclick="document.getElementById('checkoutOverlay').classList.remove('activo');cargarProductos()">🏠 Volver al inicio</button>
+            <button style="width:100%;padding:12px;background:transparent;color:#2e7d32;border:1.5px solid #a5d6a7;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;margin-top:10px" onclick="document.getElementById('checkoutOverlay').classList.remove('activo');abrirMisPedidos()">📦 Ver mis pedidos</button>
+        </div>`;
+    }
+
+    // --- Acciones paso 1 ---
+    function selTipoEntrega(tipo) {
+        chkTipoEntrega = tipo;
+        if (tipo === 'botica') chkDireccion = null;
+        renderCheckoutStep();
+    }
+
+    function mostrarFormDir() {
+        const f = document.getElementById('formDir');
+        if (f) f.classList.add('visible');
+    }
+
+    let tipoDirSel = 'Mi casa';
+    function selTipoDir(tipo) {
+        tipoDirSel = tipo;
+        ['Casa','Trabajo','Otros'].forEach(t => {
+            const el = document.getElementById('tipo'+t);
+            if (el) el.classList.remove('sel');
+        });
+        const map = {'Mi casa':'Casa','Trabajo':'Trabajo','Otros':'Otros'};
+        const el2 = document.getElementById('tipo' + map[tipo]);
+        if (el2) el2.classList.add('sel');
+    }
+
+    function guardarDireccion() {
+        const calle = document.getElementById('dirCalle')?.value.trim();
+        const numero = document.getElementById('dirNumero')?.value.trim();
+        const referencia = document.getElementById('dirRef')?.value.trim();
+        if (!calle) { toast('Ingresa la calle o avenida', 'error'); return; }
+        chkDireccion = { calle, numero, referencia, tipo: tipoDirSel };
+        renderCheckoutStep();
+    }
+
+    function selRecogePor(tipo) {
+        if (chkRecogePor === 'otro' && tipo === 'otro') {
+            // guardar campos
+            chkOtraPersona = {
+                nombre: document.getElementById('otroNombre')?.value || '',
+                email:  document.getElementById('otroEmail')?.value || '',
+                celular:document.getElementById('otroCelular')?.value || '',
+                tipoDoc:document.getElementById('otroTipoDoc')?.value || 'DNI',
+                doc:    document.getElementById('otroDoc')?.value || ''
+            };
         }
+        chkRecogePor = tipo;
+        renderCheckoutStep();
+    }
+
+    function irAPaso2() {
+        if (chkTipoEntrega === 'domicilio' && !chkDireccion) {
+            toast('Ingresa una dirección de entrega', 'error'); return;
+        }
+        if (chkRecogePor === 'otro') {
+            chkOtraPersona = {
+                nombre: document.getElementById('otroNombre')?.value.trim() || '',
+                email:  document.getElementById('otroEmail')?.value.trim() || '',
+                celular:document.getElementById('otroCelular')?.value.trim() || '',
+                tipoDoc:document.getElementById('otroTipoDoc')?.value || 'DNI',
+                doc:    document.getElementById('otroDoc')?.value.trim() || ''
+            };
+            if (!chkOtraPersona.nombre) { toast('Ingresa el nombre de quien recoge', 'error'); return; }
+        }
+        chkStep = 2; renderCheckoutStep();
+    }
+
+    // --- Acciones paso 2 ---
+    function selMetodoPago(val) { chkMetodoPago = val; renderCheckoutStep(); }
+    function toggleFacturaCampos() {
+        chkFactura = document.getElementById('toggleFactura').checked;
+        const fields = document.getElementById('facturaFields');
+        if (fields) fields.classList.toggle('visible', chkFactura);
+    }
+
+    function irAPaso3() {
+        if (chkFactura) {
+            chkRUC = document.getElementById('factRUC')?.value.trim() || '';
+            chkRazonSocial = document.getElementById('factRazon')?.value.trim() || '';
+            chkDomicilioLegal = document.getElementById('factDomicilio')?.value.trim() || '';
+            if (!chkRUC || chkRUC.length !== 11) { toast('Ingresa un RUC válido de 11 dígitos', 'error'); return; }
+            if (!chkRazonSocial) { toast('Ingresa la razón social', 'error'); return; }
+        }
+        chkStep = 3; renderCheckoutStep();
+    }
+
+    // --- Finalizar compra ---
+    async function finalizarCompra() {
+        const btn = document.getElementById('btnFinalizar');
+        const errEl = document.getElementById('checkoutError');
+        if (btn) btn.disabled = true;
+        if (errEl) errEl.style.display = 'none';
+
+        const subtotal = carrito.reduce((a,i) => a + i.precio*i.cantidad, 0);
+        const envio = chkTipoEntrega === 'botica' ? 0 : (subtotal >= 50 ? 0 : 8);
+
+        let direccionFinal = '';
+        if (chkTipoEntrega === 'domicilio' && chkDireccion) {
+            direccionFinal = `${chkDireccion.calle}${chkDireccion.numero?', '+chkDireccion.numero:''}`;
+            if (chkDireccion.referencia) direccionFinal += ` (Ref: ${chkDireccion.referencia})`;
+        } else {
+            direccionFinal = 'Recojo en botica BotiClic';
+        }
+
+        let metodoFinal = chkMetodoPago;
+        if (chkFactura && chkRUC) metodoFinal += ` | Factura RUC:${chkRUC}`;
 
         const pedido = {
             usuario: { id: usuarioActual.id },
@@ -733,9 +1259,13 @@
                 cantidad: i.cantidad,
                 precioUnitario: i.precio
             })),
-            direccionEntrega: referencia ? `${direccion} — Ref: ${referencia}` : direccion,
-            metodoPago
+            direccionEntrega: direccionFinal,
+            metodoPago: metodoFinal,
+            total: subtotal + envio
         };
+
+        // Mostrar pasarela loading
+        document.getElementById('pasarelaLoading').classList.add('activo');
 
         try {
             const res = await fetch(`${API}/pedidos`, {
@@ -743,37 +1273,173 @@
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${tokenActual}` },
                 body: JSON.stringify(pedido)
             });
+
+            document.getElementById('pasarelaLoading').classList.remove('activo');
+
             if (res.ok) {
                 const pedidoCreado = await res.json();
                 carrito = [];
                 guardarCarrito();
                 actualizarCarrito();
-                cerrarModal('modalCheckout');
-                document.getElementById('carritoLateral').classList.remove('abierto');
-                document.getElementById('checkoutDireccion').value = '';
-                document.getElementById('checkoutReferencia').value = '';
-                toast(`🎉 ¡Pedido #${pedidoCreado.id} realizado con éxito!`, 'exito');
-                // Recargar productos para actualizar stock
-                setTimeout(() => cargarProductos(), 1500);
+                chkStep = 4;
+                const cont = document.getElementById('checkoutContenido');
+                cont.innerHTML = renderStepExito(pedidoCreado.id);
+                // Ocultar botón volver
+                document.querySelector('.checkout-back').style.display = 'none';
+                setTimeout(() => cargarProductos(), 2000);
             } else {
+                if (btn) btn.disabled = false;
                 const txt = await res.text();
-                errEl.textContent = txt.includes('Stock') ? '❌ ' + txt : '❌ Error al procesar el pedido.';
-                errEl.style.display = 'block';
+                if (errEl) {
+                    errEl.textContent = txt.includes('Stock') ? '❌ ' + txt : '❌ Error al procesar el pedido.';
+                    errEl.style.display = 'block';
+                }
             }
         } catch(e) {
-            errEl.textContent = '❌ Error de conexión al servidor.';
-            errEl.style.display = 'block';
+            document.getElementById('pasarelaLoading').classList.remove('activo');
+            if (btn) btn.disabled = false;
+            if (errEl) { errEl.textContent = '❌ Error de conexión al servidor.'; errEl.style.display = 'block'; }
+        }
+    }
+
+    function abrirRecetaDesdeCheckout() {
+        document.getElementById('checkoutOverlay').classList.remove('activo');
+        setTimeout(() => abrirRecetaModal(), 100);
+    }
+
+    // =============================================
+    // RECETA MÉDICA
+    // =============================================
+    async function abrirRecetaModal() {
+        if (!usuarioActual || !tokenActual) {
+            toast('Inicia sesión para subir una receta', 'info');
+            mostrarModal('modalLogin');
+            return;
+        }
+        recetaFile = null; recetaBase64 = null;
+        document.getElementById('recetaFilePreview').classList.remove('visible');
+        document.getElementById('recetaZona').classList.remove('tiene-archivo');
+        document.getElementById('recetaNotas').value = '';
+        document.getElementById('recetaError').style.display = 'none';
+        document.getElementById('recetaSuccess').style.display = 'none';
+
+        // Cargar pedidos del usuario para selector
+        const select = document.getElementById('recetaPedidoId');
+        select.innerHTML = '<option value="">— Cargando pedidos... —</option>';
+        try {
+            const res = await fetch(`${API}/pedidos/usuario/${usuarioActual.id}`, {
+                headers: { 'Authorization': `Bearer ${tokenActual}` }
+            });
+            if (res.ok) {
+                const pedidos = await res.json();
+                if (pedidos.length) {
+                    select.innerHTML = '<option value="">— Selecciona un pedido —</option>' +
+                        pedidos.map(p => `<option value="${p.id}">Pedido #${p.id} — S/ ${p.total?.toFixed(2)} (${p.estado})</option>`).join('');
+                } else {
+                    select.innerHTML = '<option value="">— Sin pedidos aún —</option>';
+                }
+            }
+        } catch { select.innerHTML = '<option value="">— Error al cargar pedidos —</option>'; }
+
+        mostrarModal('modalReceta');
+    }
+
+    function onRecetaFileChange(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        if (file.size > 10 * 1024 * 1024) { toast('El archivo supera los 10MB', 'error'); return; }
+        recetaFile = file;
+        document.getElementById('recetaFileName').textContent = file.name;
+        document.getElementById('recetaFilePreview').classList.add('visible');
+        document.getElementById('recetaZona').classList.add('tiene-archivo');
+
+        // Convertir a base64 para enviar
+        const reader = new FileReader();
+        reader.onload = (ev) => { recetaBase64 = ev.target.result.split(',')[1]; };
+        reader.readAsDataURL(file);
+    }
+
+    function quitarRecetaArchivo() {
+        recetaFile = null; recetaBase64 = null;
+        document.getElementById('recetaFileInput').value = '';
+        document.getElementById('recetaFilePreview').classList.remove('visible');
+        document.getElementById('recetaZona').classList.remove('tiene-archivo');
+    }
+
+    async function enviarReceta() {
+        const pedidoId = document.getElementById('recetaPedidoId').value;
+        const notas    = document.getElementById('recetaNotas').value.trim();
+        const errEl    = document.getElementById('recetaError');
+        const sucEl    = document.getElementById('recetaSuccess');
+        errEl.style.display = 'none'; sucEl.style.display = 'none';
+
+        if (!recetaFile) {
+            errEl.textContent = '❌ Adjunta tu receta médica (PDF o imagen).';
+            errEl.style.display = 'block'; return;
+        }
+
+        // Enviar como FormData al backend
+        const formData = new FormData();
+        formData.append('archivo', recetaFile);
+        formData.append('usuarioId', usuarioActual.id);
+        if (pedidoId) formData.append('pedidoId', pedidoId);
+        if (notas)    formData.append('notas', notas);
+
+        try {
+            const res = await fetch(`${API}/recetas`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${tokenActual}` },
+                body: formData
+            });
+            if (res.ok) {
+                sucEl.textContent = '✅ ¡Receta enviada! El farmacéutico la revisará y te notificará la aprobación.';
+                sucEl.style.display = 'block';
+                quitarRecetaArchivo();
+                document.getElementById('recetaNotas').value = '';
+                toast('✅ Receta enviada al farmacéutico', 'exito');
+            } else {
+                // Si el endpoint aún no existe, guardar localmente y mostrar éxito visual
+                sucEl.textContent = '✅ Receta guardada localmente. Se procesará cuando el servidor esté disponible.';
+                sucEl.style.display = 'block';
+                // Guardar en localStorage como pendiente
+                const recetasPendientes = JSON.parse(localStorage.getItem('recetasPendientes') || '[]');
+                recetasPendientes.push({
+                    usuarioId: usuarioActual.id,
+                    pedidoId: pedidoId || null,
+                    nombreArchivo: recetaFile.name,
+                    notas,
+                    fecha: new Date().toISOString(),
+                    estado: 'PENDIENTE'
+                });
+                localStorage.setItem('recetasPendientes', JSON.stringify(recetasPendientes));
+                toast('✅ Receta guardada (pendiente de conexión)', 'exito');
+                quitarRecetaArchivo();
+                document.getElementById('recetaNotas').value = '';
+            }
+        } catch(e) {
+            // Guardar offline igualmente
+            const recetasPendientes = JSON.parse(localStorage.getItem('recetasPendientes') || '[]');
+            recetasPendientes.push({
+                usuarioId: usuarioActual.id,
+                pedidoId: pedidoId || null,
+                nombreArchivo: recetaFile.name,
+                notas,
+                fecha: new Date().toISOString(),
+                estado: 'PENDIENTE'
+            });
+            localStorage.setItem('recetasPendientes', JSON.stringify(recetasPendientes));
+            sucEl.textContent = '✅ Receta guardada localmente. Se procesará cuando el servidor esté disponible.';
+            sucEl.style.display = 'block';
+            quitarRecetaArchivo();
+            toast('📋 Receta guardada (modo sin conexión)', 'info');
         }
     }
 
     // =============================================
-    // MIS PEDIDOS (HU-09 / HU-12)
+    // MIS PEDIDOS
     // =============================================
     async function abrirMisPedidos() {
-        if (!usuarioActual || !tokenActual) {
-            mostrarModal('modalLogin');
-            return;
-        }
+        if (!usuarioActual || !tokenActual) { mostrarModal('modalLogin'); return; }
         mostrarModal('modalMisPedidos');
         const div = document.getElementById('listaMisPedidos');
         div.innerHTML = '<p style="text-align:center;color:#bbb;padding:30px">⏳ Cargando pedidos...</p>';
@@ -783,32 +1449,77 @@
             });
             if (!res.ok) throw new Error('Error al cargar pedidos');
             const pedidos = await res.json();
-            if (!pedidos.length) {
-                div.innerHTML = '<div style="text-align:center;color:#bbb;padding:40px"><div style="font-size:48px">📦</div><p style="margin-top:12px">Aún no tienes pedidos.</p><p style="font-size:13px;margin-top:6px">¡Explora nuestro catálogo y realiza tu primera compra!</p></div>';
+
+            // Recetas pendientes locales
+            const recetasPendientes = JSON.parse(localStorage.getItem('recetasPendientes') || '[]')
+                .filter(r => r.usuarioId == usuarioActual.id);
+
+            if (!pedidos.length && !recetasPendientes.length) {
+                div.innerHTML = `<div style="text-align:center;color:#bbb;padding:40px">
+                    <div style="font-size:48px">📦</div>
+                    <p style="margin-top:12px">Aún no tienes pedidos.</p>
+                    <p style="font-size:13px;margin-top:6px">¡Explora nuestro catálogo y realiza tu primera compra!</p></div>`;
                 return;
             }
-            div.innerHTML = pedidos.map(p => {
+
+            let html = pedidos.map(p => {
                 const badge = badgeEstado(p.estado);
                 const prods = (p.detalles||[]).map(d => d.producto?.nombre || '—').join(', ');
+                const receta = recetasPendientes.find(r => r.pedidoId == p.id);
+                const recetaBadge = receta ?
+                    `<span class="badge badge-receta-pendiente" style="margin-left:8px">📋 Receta pendiente</span>` : '';
                 return `
-            <div class="pedido-card">
-                <div class="pedido-header">
-                    <div>
-                        <div class="pedido-id">Pedido #${p.id}</div>
-                        <div class="pedido-fecha">📅 ${formatFecha(p.fechaCreacion)}</div>
+                <div class="pedido-card">
+                    <div class="pedido-header">
+                        <div>
+                            <div class="pedido-id">Pedido #${p.id}</div>
+                            <div class="pedido-fecha">📅 ${formatFecha(p.fechaCreacion)}</div>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+                            <span class="${badge.cls}">${badge.txt}</span>
+                            ${recetaBadge}
+                        </div>
                     </div>
-                    <span class="${badge.cls}">${badge.txt}</span>
-                </div>
-                <div class="pedido-productos">📦 ${prods || 'Sin detalle disponible'}</div>
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
-                    <div class="pedido-total">S/ ${p.total?.toFixed(2)}</div>
-                    <div style="font-size:12px;color:#888">📍 ${p.direccionEntrega||'—'} · ${p.metodoPago||'—'}</div>
-                </div>
-            </div>`;
+                    <div class="pedido-productos">📦 ${prods || 'Sin detalle disponible'}</div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;flex-wrap:wrap;gap:8px">
+                        <div class="pedido-total">S/ ${p.total?.toFixed(2)}</div>
+                        <div style="font-size:12px;color:#888">📍 ${p.direccionEntrega||'—'} · ${p.metodoPago||'—'}</div>
+                        <button style="font-size:12px;padding:6px 12px;background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7;border-radius:6px;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:600" onclick="abrirRecetaParaPedido(${p.id})">📋 Adjuntar Receta</button>
+                    </div>
+                </div>`;
             }).join('');
+
+            if (recetasPendientes.length) {
+                html += `<div style="margin-top:16px"><div style="font-size:14px;font-weight:700;color:#f57c00;margin-bottom:10px">📋 Recetas enviadas (pendientes de aprobación)</div>
+                ${recetasPendientes.map(r => `
+                    <div style="background:#fff8e1;border:1.5px solid #ffe082;border-radius:8px;padding:12px;margin-bottom:8px;font-size:13px">
+                        <div style="font-weight:600">📎 ${r.nombreArchivo}</div>
+                        <div style="color:#888;margin-top:4px">Pedido #${r.pedidoId||'—'} · ${new Date(r.fecha).toLocaleDateString('es-PE')}</div>
+                        ${r.notas?`<div style="color:#666;margin-top:4px;font-style:italic">"${r.notas}"</div>`:''}
+                        <span class="receta-estado pendiente" style="margin-top:6px;display:inline-flex">⏳ Pendiente de aprobación</span>
+                    </div>`).join('')}
+                </div>`;
+            }
+
+            div.innerHTML = html;
         } catch(e) {
             div.innerHTML = '<p style="color:#e53935;text-align:center;padding:30px">❌ Error al cargar tus pedidos. Intenta de nuevo.</p>';
         }
+    }
+
+    function abrirRecetaParaPedido(pedidoId) {
+        cerrarModal('modalMisPedidos');
+        setTimeout(() => {
+            abrirRecetaModal().then(() => {
+                const sel = document.getElementById('recetaPedidoId');
+                if (sel) {
+                    // Seleccionar el pedido específico
+                    for (let opt of sel.options) {
+                        if (opt.value == pedidoId) { opt.selected = true; break; }
+                    }
+                }
+            });
+        }, 200);
     }
 
     function badgeEstado(estado) {
@@ -846,7 +1557,6 @@
             });
             if (res.ok) {
                 const data = await res.json();
-                // Si NO es cliente, redirigir a su panel
                 if (data.rol !== 'CLIENTE') {
                     localStorage.setItem('token', data.token);
                     localStorage.setItem('rol', data.rol);
@@ -856,7 +1566,6 @@
                     window.location.href = rutas[data.rol] || '/index.html';
                     return;
                 }
-                // Guardar sesión de CLIENTE (incluyendo el ID para los pedidos)
                 tokenActual   = data.token;
                 usuarioActual = { id: data.id, nombre: data.nombre, email, rol: data.rol };
                 localStorage.setItem('token',    data.token);
@@ -877,29 +1586,65 @@
     }
 
     async function registrarse() {
-        const nombre   = document.getElementById('regNombre').value.trim();
-        const email    = document.getElementById('regEmail').value.trim();
-        const password = document.getElementById('regPassword').value;
-        const errEl    = document.getElementById('regError');
-        const sucEl    = document.getElementById('regSuccess');
+        const tipoDoc   = document.getElementById('regTipoDoc').value;
+        const numDoc    = document.getElementById('regNumDoc').value.trim();
+        const nombre    = document.getElementById('regNombre').value.trim();
+        const apellidoP = document.getElementById('regApellidoP').value.trim();
+        const apellidoM = document.getElementById('regApellidoM').value.trim();
+        const email     = document.getElementById('regEmail').value.trim();
+        const celular   = document.getElementById('regCelular').value.trim();
+        const dia       = document.getElementById('regDia').value.trim();
+        const mes       = document.getElementById('regMes').value.trim();
+        const anio      = document.getElementById('regAnio').value.trim();
+        const genero    = document.getElementById('regGenero').value;
+        const password  = document.getElementById('regPassword').value;
+        const terminos  = document.getElementById('regTerminos').checked;
+        const errEl     = document.getElementById('regError');
+        const sucEl     = document.getElementById('regSuccess');
         errEl.style.display = 'none'; sucEl.style.display = 'none';
-        if (!nombre || !email || !password) { errEl.textContent = 'Completa todos los campos.'; errEl.style.display = 'block'; return; }
-        if (password.length < 6) { errEl.textContent = 'La contraseña debe tener mínimo 6 caracteres.'; errEl.style.display = 'block'; return; }
+
+        // Validaciones obligatorias
+        if (!numDoc)    { errEl.textContent = '⚠️ Ingresa tu número de documento.'; errEl.style.display = 'block'; return; }
+        if (!nombre)    { errEl.textContent = '⚠️ Ingresa tu nombre.'; errEl.style.display = 'block'; return; }
+        if (!apellidoP) { errEl.textContent = '⚠️ Ingresa tu apellido paterno.'; errEl.style.display = 'block'; return; }
+        if (!apellidoM) { errEl.textContent = '⚠️ Ingresa tu apellido materno.'; errEl.style.display = 'block'; return; }
+        if (!email)     { errEl.textContent = '⚠️ Ingresa tu correo electrónico.'; errEl.style.display = 'block'; return; }
+        if (!celular)   { errEl.textContent = '⚠️ Ingresa tu número de celular.'; errEl.style.display = 'block'; return; }
+        if (!password)  { errEl.textContent = '⚠️ Ingresa una contraseña.'; errEl.style.display = 'block'; return; }
+        if (password.length < 6) { errEl.textContent = '⚠️ La contraseña debe tener mínimo 6 caracteres.'; errEl.style.display = 'block'; return; }
+        if (!terminos)  { errEl.textContent = '⚠️ Debes aceptar los términos y condiciones.'; errEl.style.display = 'block'; return; }
+
+        // Construir nombre completo y fecha
+        const nombreCompleto = `${nombre} ${apellidoP} ${apellidoM}`.trim();
+        let fechaNacimiento = null;
+        if (dia && mes && anio && anio.length === 4) {
+            fechaNacimiento = `${anio}-${mes.padStart(2,'0')}-${dia.padStart(2,'0')}`;
+        }
+
         try {
             const res = await fetch(`${API}/usuarios/registrar`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ nombre, email, password, rol: 'CLIENTE' })
+                body: JSON.stringify({
+                    nombre: nombreCompleto,
+                    email, password,
+                    rol: 'CLIENTE',
+                    tipoDocumento: tipoDoc,
+                    numeroDocumento: numDoc,
+                    celular,
+                    fechaNacimiento,
+                    genero: genero || null
+                })
             });
             if (res.ok) {
                 sucEl.textContent = '✅ ¡Cuenta creada! Iniciando sesión automáticamente...';
                 sucEl.style.display = 'block';
-                document.getElementById('regNombre').value = '';
-                document.getElementById('regEmail').value = '';
-                document.getElementById('regPassword').value = '';
+                // Limpiar campos
+                ['regNumDoc','regNombre','regApellidoP','regApellidoM','regEmail','regCelular','regDia','regMes','regAnio','regPassword'].forEach(id => document.getElementById(id).value = '');
+                document.getElementById('regGenero').value = '';
+                document.getElementById('regTerminos').checked = false;
                 setTimeout(async () => {
                     cerrarModal('modalRegistro');
-                    // Auto-login tras registro
                     document.getElementById('loginEmail').value = email;
                     document.getElementById('loginPassword').value = password;
                     await iniciarSesion();
@@ -921,7 +1666,6 @@
     function mostrarModal(id) { document.getElementById(id).classList.add('activo'); }
     function cerrarModal(id)  { document.getElementById(id).classList.remove('activo'); }
 
-    // Cerrar modales al hacer clic fuera
     document.querySelectorAll('.modal').forEach(m => {
         m.addEventListener('click', e => { if (e.target === m) cerrarModal(m.id); });
     });

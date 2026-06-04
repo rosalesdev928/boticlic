@@ -21,7 +21,7 @@
             border-radius: 20px;
             padding: 45px 40px;
             width: 100%;
-            max-width: 420px;
+            max-width: 580px;
             box-shadow: 0 25px 60px rgba(0,0,0,0.3);
         }
         .logo {
@@ -154,12 +154,67 @@
     <div class="form-section" id="secRegistro">
         <div class="error-box" id="regError"></div>
         <div class="success-box" id="regSuccess"></div>
-        <label>Nombre completo</label>
-        <input type="text" id="regNombre" placeholder="Juan Pérez">
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div>
+                <label>Tipo de documento</label>
+                <select id="regTipoDoc" style="width:100%;padding:11px 12px;margin-bottom:14px;border:1.5px solid #e0e0e0;border-radius:8px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;">
+                    <option value="DNI">DNI</option>
+                    <option value="CE">Carnet de Extranjería</option>
+                    <option value="PASAPORTE">Pasaporte</option>
+                </select>
+            </div>
+            <div>
+                <label>Número de documento</label>
+                <input type="text" id="regNumDoc" placeholder="Ingresa tu DNI" maxlength="12">
+            </div>
+        </div>
+
+        <label>Nombres</label>
+        <input type="text" id="regNombre" placeholder="José Leonardo">
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div>
+                <label>Apellido paterno</label>
+                <input type="text" id="regApellidoP" placeholder="Rosales">
+            </div>
+            <div>
+                <label>Apellido materno</label>
+                <input type="text" id="regApellidoM" placeholder="Gutiérrez">
+            </div>
+        </div>
+
         <label>Correo electrónico</label>
         <input type="email" id="regEmail" placeholder="tu@email.com">
+
+        <label>Celular</label>
+        <input type="tel" id="regCelular" placeholder="999 888 777" maxlength="9">
+
+        <label>Fecha de nacimiento <span style="color:#aaa;font-weight:400;text-transform:none;font-size:11px;">(Opcional)</span></label>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1.4fr;gap:8px;margin-bottom:14px;">
+            <input type="text" id="regDia"  placeholder="DD"   maxlength="2" style="text-align:center;margin-bottom:0;">
+            <input type="text" id="regMes"  placeholder="MM"   maxlength="2" style="text-align:center;margin-bottom:0;">
+            <input type="text" id="regAnio" placeholder="AAAA" maxlength="4" style="text-align:center;margin-bottom:0;">
+        </div>
+
+        <label>Género <span style="color:#aaa;font-weight:400;text-transform:none;font-size:11px;">(Opcional)</span></label>
+        <select id="regGenero" style="width:100%;padding:11px 12px;margin-bottom:14px;border:1.5px solid #e0e0e0;border-radius:8px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;">
+            <option value="">Selecciona tu género</option>
+            <option value="M">Masculino</option>
+            <option value="F">Femenino</option>
+            <option value="O">Prefiero no decir</option>
+        </select>
+
         <label>Contraseña</label>
         <input type="password" id="regPassword" placeholder="Mínimo 6 caracteres">
+
+        <div style="display:flex;align-items:flex-start;gap:9px;margin-bottom:16px;font-size:13px;color:#555;">
+            <input type="checkbox" id="regTerminos" style="width:auto;margin-top:2px;flex-shrink:0;">
+            <label for="regTerminos" style="text-transform:none;letter-spacing:0;font-weight:400;margin-bottom:0;cursor:pointer;font-size:12px;color:#666;">
+                He leído y acepto los <a href="#" style="color:#2e7d32;font-weight:600;">Términos y condiciones</a> y las <a href="#" style="color:#2e7d32;font-weight:600;">Políticas de Privacidad</a>.
+            </label>
+        </div>
+
         <button class="btn-primary" id="btnRegistro" onclick="registrarse()">
             Crear Cuenta
         </button>
@@ -255,40 +310,60 @@
     }
 
     async function registrarse() {
-        const nombre   = document.getElementById('regNombre').value.trim();
-        const email    = document.getElementById('regEmail').value.trim();
-        const password = document.getElementById('regPassword').value;
-        const errEl    = document.getElementById('regError');
-        const sucEl    = document.getElementById('regSuccess');
-        const btn      = document.getElementById('btnRegistro');
-        errEl.style.display = 'none';
-        sucEl.style.display = 'none';
+        const tipoDoc   = document.getElementById('regTipoDoc').value;
+        const numDoc    = document.getElementById('regNumDoc').value.trim();
+        const nombre    = document.getElementById('regNombre').value.trim();
+        const apellidoP = document.getElementById('regApellidoP').value.trim();
+        const apellidoM = document.getElementById('regApellidoM').value.trim();
+        const email     = document.getElementById('regEmail').value.trim();
+        const celular   = document.getElementById('regCelular').value.trim();
+        const dia       = document.getElementById('regDia').value.trim();
+        const mes       = document.getElementById('regMes').value.trim();
+        const anio      = document.getElementById('regAnio').value.trim();
+        const genero    = document.getElementById('regGenero').value;
+        const password  = document.getElementById('regPassword').value;
+        const terminos  = document.getElementById('regTerminos').checked;
+        const errEl     = document.getElementById('regError');
+        const sucEl     = document.getElementById('regSuccess');
+        const btn       = document.getElementById('btnRegistro');
+        errEl.style.display = 'none'; sucEl.style.display = 'none';
 
-        if (!nombre || !email || !password) {
-            errEl.textContent = '⚠️ Completa todos los campos.';
-            errEl.style.display = 'block';
-            return;
-        }
-        if (password.length < 6) {
-            errEl.textContent = '⚠️ La contraseña debe tener mínimo 6 caracteres.';
-            errEl.style.display = 'block';
-            return;
+        if (!numDoc)    { errEl.textContent = '⚠️ Ingresa tu número de documento.'; errEl.style.display = 'block'; return; }
+        if (!nombre)    { errEl.textContent = '⚠️ Ingresa tu nombre.'; errEl.style.display = 'block'; return; }
+        if (!apellidoP) { errEl.textContent = '⚠️ Ingresa tu apellido paterno.'; errEl.style.display = 'block'; return; }
+        if (!apellidoM) { errEl.textContent = '⚠️ Ingresa tu apellido materno.'; errEl.style.display = 'block'; return; }
+        if (!email)     { errEl.textContent = '⚠️ Ingresa tu correo electrónico.'; errEl.style.display = 'block'; return; }
+        if (!celular)   { errEl.textContent = '⚠️ Ingresa tu número de celular.'; errEl.style.display = 'block'; return; }
+        if (!password || password.length < 6) { errEl.textContent = '⚠️ La contraseña debe tener mínimo 6 caracteres.'; errEl.style.display = 'block'; return; }
+        if (!terminos)  { errEl.textContent = '⚠️ Debes aceptar los términos y condiciones.'; errEl.style.display = 'block'; return; }
+
+        const nombreCompleto = `${nombre} ${apellidoP} ${apellidoM}`.trim();
+        let fechaNacimiento = null;
+        if (dia && mes && anio && anio.length === 4) {
+            fechaNacimiento = `${anio}-${mes.padStart(2,'0')}-${dia.padStart(2,'0')}`;
         }
 
-        btn.disabled = true;
-        btn.textContent = 'Creando cuenta...';
+        btn.disabled = true; btn.textContent = 'Creando cuenta...';
 
         try {
             const res = await fetch(`${API}/usuarios/registrar`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ nombre, email, password, rol: 'CLIENTE' })
+                body: JSON.stringify({
+                    nombre: nombreCompleto,
+                    email, password,
+                    rol: 'CLIENTE',
+                    tipoDocumento: tipoDoc,
+                    numeroDocumento: numDoc,
+                    celular,
+                    fechaNacimiento,
+                    genero: genero || null
+                })
             });
 
             if (res.ok) {
                 sucEl.textContent = '✅ ¡Cuenta creada! Iniciando sesión...';
                 sucEl.style.display = 'block';
-                // Auto-login
                 document.getElementById('loginEmail').value = email;
                 document.getElementById('loginPassword').value = password;
                 setTimeout(async () => {
@@ -306,8 +381,7 @@
             errEl.textContent = '❌ Error de conexión.';
             errEl.style.display = 'block';
         } finally {
-            btn.disabled = false;
-            btn.textContent = 'Crear Cuenta';
+            btn.disabled = false; btn.textContent = 'Crear Cuenta';
         }
     }
 
