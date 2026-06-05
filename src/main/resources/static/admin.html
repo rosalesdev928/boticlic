@@ -411,7 +411,22 @@
                 <div class="form-g3">
                     <div class="fg"><label>Stock actual *</label><input type="number" id="fStock" placeholder="0" min="0"></div>
                     <div class="fg"><label>Stock mínimo</label><input type="number" id="fStockMin" placeholder="5" value="5" min="0"></div>
-                    <div class="fg"><label>URL Imagen</label><input type="text" id="fImagen" placeholder="https://..."></div>
+                    <div class="fg">
+                        <label>Imagen del producto</label>
+                        <div style="display:flex;gap:7px;align-items:center">
+                            <input type="text" id="fImagen" placeholder="URL o sube desde PC..." style="flex:1;min-width:0">
+                            <button type="button" class="btn btn-b btn-sm" onclick="document.getElementById('imgFileInput').click()" style="white-space:nowrap;flex-shrink:0">📁 Subir</button>
+                        </div>
+                        <input type="file" id="imgFileInput" accept="image/*" style="display:none" onchange="previsualizarImagen(event)">
+                        <div id="imgPreviewBox" style="display:none;align-items:center;gap:10px;background:var(--surface2);padding:10px 12px;border-radius:8px;margin-top:8px;border:1px solid var(--border)">
+                            <img id="imgPreviewEl" src="" style="width:60px;height:60px;object-fit:cover;border-radius:7px;border:1px solid var(--border);flex-shrink:0">
+                            <div style="flex:1;min-width:0">
+                                <div id="imgPreviewNom" style="font-size:11px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></div>
+                                <div id="imgPreviewStatus" style="font-size:10px;color:var(--text2);margin-top:2px">Lista para subir al guardar</div>
+                            </div>
+                            <button type="button" class="btn btn-r btn-sm" onclick="cancelarImagen()" style="flex-shrink:0">✕</button>
+                        </div>
+                    </div>
                 </div>
                 <div class="fg" style="margin-bottom:14px"><label>Descripción</label><textarea id="fDesc" placeholder="Descripción breve del producto..."></textarea></div>
                 <div style="display:flex;gap:9px;align-items:center">
@@ -1321,7 +1336,13 @@
             const cls=p.stock===0?'bajo':p.stock<=(p.stockMinimo||5)?'medio':'alto';
             return `<tr>
         <td class="mono" style="color:var(--text2)">#${p.id}</td>
-        <td><div style="font-weight:600">${p.nombre}</div>${p.descripcion?`<div style="font-size:10px;color:var(--text2);margin-top:2px">${p.descripcion.substring(0,50)}…</div>`:''}</td>
+        <td style="display:flex;align-items:center;gap:10px">
+          ${p.imagen ? `<img src="${p.imagen}" style="width:42px;height:42px;object-fit:cover;border-radius:7px;border:1px solid var(--border);flex-shrink:0" onerror="this.style.display='none'">` : `<div style="width:42px;height:42px;border-radius:7px;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">${p.categoria==='Vitaminas'?'🍊':p.categoria==='Antibiótico'||p.categoria==='Antibióticos'?'🧬':p.categoria==='Digestivo'||p.categoria==='Digestivos'?'🫁':p.categoria==='Antiinflamatorio'?'🔴':p.categoria==='Cuidado Personal'?'🧴':'💊'}</div>`}
+          <div>
+            <div style="font-weight:600">${p.nombre}</div>
+            ${p.descripcion?`<div style="font-size:10px;color:var(--text2);margin-top:2px">${p.descripcion.substring(0,45)}…</div>`:''}
+          </div>
+        </td>
         <td>${p.categoria?`<span class="cat-pill">${p.categoria}</span>`:'—'}</td>
         <td class="mono" style="font-weight:600;color:var(--accent)">S/ ${p.precio?.toFixed(2)}</td>
         <td><div class="sb-wrap"><div class="sb-bar"><div class="sb-fill ${cls}" style="width:${pct}%"></div></div><span class="sb-num">${p.stock} uds.</span></div></td>
@@ -1349,6 +1370,13 @@
         const precio= parseFloat(document.getElementById('fPrecio').value);
         const stock = parseInt(document.getElementById('fStock').value);
         if(!nombre||isNaN(precio)||isNaN(stock)){ toast('Completa nombre, precio y stock.',false); return; }
+
+        // ✅ Si hay imagen pendiente y estamos EDITANDO, subir ANTES de guardar
+        if (imagenArchivoPendiente && id) {
+            const urlSubida = await subirImagenAlServidor(parseInt(id));
+            if (urlSubida) document.getElementById('fImagen').value = urlSubida;
+        }
+
         const body={nombre,precio,stock,
             descripcion:document.getElementById('fDesc').value.trim(),
             categoria:document.getElementById('fCat').value,
@@ -1358,8 +1386,16 @@
         try{
             const url=id?`${API}/productos/${id}`:`${API}/productos`;
             const res=await fetch(url,{method:id?'PUT':'POST',headers:H(),body:JSON.stringify(body)});
-            if(res.ok){ toast(id?'✅ Producto actualizado':'✅ Producto creado'); cancelEditProd(); cargarInventario(); }
-            else toast('❌ Error al guardar',false);
+            if(res.ok){
+                // ✅ Si es producto NUEVO y hay imagen pendiente, subir después de crear
+                if (!id && imagenArchivoPendiente) {
+                    const prod = await res.json();
+                    await subirImagenAlServidor(prod.id);
+                }
+                toast(id?'✅ Producto actualizado':'✅ Producto creado');
+                cancelEditProd();
+                cargarInventario();
+            } else toast('❌ Error al guardar',false);
         }catch(e){ toast('❌ Error de conexión',false); }
     }
 
@@ -1376,6 +1412,14 @@
         document.getElementById('prodFormTitle').textContent=`✏️ Editando: ${p.nombre}`;
         document.getElementById('fBtnTxt').textContent='💾 Actualizar producto';
         document.getElementById('btnCancelarProd').style.display='inline-flex';
+        // Mostrar preview si ya tiene imagen guardada
+        cancelarImagen();
+        if (p.imagen) {
+            document.getElementById('imgPreviewEl').src = p.imagen;
+            document.getElementById('imgPreviewNom').textContent = p.imagen.split('/').pop();
+            document.getElementById('imgPreviewStatus').textContent = '🖼️ Imagen actual guardada';
+            document.getElementById('imgPreviewBox').style.display = 'flex';
+        }
         document.getElementById('sec-inventario').scrollIntoView({behavior:'smooth'});
     }
 
@@ -1387,6 +1431,7 @@
         document.getElementById('prodFormTitle').textContent='➕ Nuevo Producto';
         document.getElementById('fBtnTxt').textContent='✅ Guardar producto';
         document.getElementById('btnCancelarProd').style.display='none';
+        cancelarImagen();
     }
 
     async function eliminarProd(id,nom){
@@ -2121,6 +2166,71 @@
         const win=window.open(url,'_blank','width=420,height=700,toolbar=0,menubar=0');
         if(!win) toast('⚠️ Permite pop-ups para imprimir',false);
         setTimeout(()=>URL.revokeObjectURL(url),30000);
+    }
+
+    // ══════════════════════════════════════════════════
+    //  SUBIR IMAGEN DE PRODUCTO DESDE PC
+    // ══════════════════════════════════════════════════
+    let imagenArchivoPendiente = null;
+
+    function previsualizarImagen(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        if (file.size > 5 * 1024 * 1024) { toast('❌ La imagen no puede superar 5MB', false); return; }
+        imagenArchivoPendiente = file;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            document.getElementById('imgPreviewEl').src = e.target.result;
+            document.getElementById('imgPreviewNom').textContent = file.name;
+            document.getElementById('imgPreviewStatus').textContent = '⏳ Lista para subir al guardar';
+            const box = document.getElementById('imgPreviewBox');
+            box.style.display = 'flex';
+            box.style.alignItems = 'center';
+        };
+        reader.readAsDataURL(file);
+        toast('📁 Imagen seleccionada — se subirá al guardar');
+    }
+
+    function cancelarImagen() {
+        imagenArchivoPendiente = null;
+        const inp = document.getElementById('imgFileInput');
+        if (inp) inp.value = '';
+        const box = document.getElementById('imgPreviewBox');
+        if (box) box.style.display = 'none';
+        const el = document.getElementById('imgPreviewEl');
+        if (el) el.src = '';
+    }
+
+    async function subirImagenAlServidor(prodId) {
+        if (!imagenArchivoPendiente) return null;
+        try {
+            document.getElementById('imgPreviewStatus').textContent = '⏫ Subiendo imagen...';
+            const fd = new FormData();
+            fd.append('imagen', imagenArchivoPendiente);
+            const res = await fetch(`${API}/productos/${prodId}/imagen`, {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + token },
+                body: fd
+            });
+            if (res.ok) {
+                const data = await res.json();
+                document.getElementById('fImagen').value = data.url;
+                document.getElementById('imgPreviewStatus').textContent = '✅ ¡Imagen subida correctamente!';
+                imagenArchivoPendiente = null;
+                document.getElementById('imgFileInput').value = '';
+                toast('✅ Imagen subida al servidor');
+                return data.url;
+            } else {
+                const err = await res.text();
+                document.getElementById('imgPreviewStatus').textContent = '❌ Error al subir';
+                toast('❌ Error al subir imagen: ' + err, false);
+                return null;
+            }
+        } catch(e) {
+            document.getElementById('imgPreviewStatus').textContent = '❌ Error de conexión';
+            toast('❌ Error de conexión al subir imagen', false);
+            return null;
+        }
     }
 
     // ── INIT ──────────────────────────────────────────

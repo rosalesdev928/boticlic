@@ -63,7 +63,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/usuarios/**").hasRole("ADMIN")
 
                         // ✅ PRODUCTOS
-                        .requestMatchers(HttpMethod.POST, "/api/productos/**").hasAnyRole("ADMIN", "FARMACEUTICO")
+                        .requestMatchers(HttpMethod.POST, "/api/productos/*/imagen").hasAnyRole("ADMIN", "FARMACEUTICO")
                         .requestMatchers(HttpMethod.PUT, "/api/productos/**").hasAnyRole("ADMIN", "FARMACEUTICO")
                         .requestMatchers(HttpMethod.DELETE, "/api/productos/**").hasAnyRole("ADMIN", "FARMACEUTICO")
 
