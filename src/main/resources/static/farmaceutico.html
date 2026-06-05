@@ -254,7 +254,22 @@
         <div class="form-g3">
           <div class="fg"><label>Stock actual *</label><input type="number" id="fStock" placeholder="0" min="0"></div>
           <div class="fg"><label>Stock mínimo</label><input type="number" id="fStockMin" placeholder="5" value="5" min="0"></div>
-          <div class="fg"><label>URL Imagen</label><input type="text" id="fImagen" placeholder="https://..."></div>
+          <div class="fg">
+            <label>Imagen del producto</label>
+            <div style="display:flex;gap:7px;align-items:center">
+              <input type="text" id="fImagen" placeholder="URL o sube desde PC..." style="flex:1;min-width:0">
+              <button type="button" class="btn btn-b btn-sm" onclick="document.getElementById('fImgFileInput').click()" style="white-space:nowrap;flex-shrink:0">📁 Subir</button>
+            </div>
+            <input type="file" id="fImgFileInput" accept="image/*" style="display:none" onchange="fPrevisualizarImagen(event)">
+            <div id="fImgPreviewBox" style="display:none;align-items:center;gap:10px;background:var(--surface2);padding:10px 12px;border-radius:8px;margin-top:8px;border:1px solid var(--border)">
+              <img id="fImgPreviewEl" src="" style="width:60px;height:60px;object-fit:cover;border-radius:7px;border:1px solid var(--border);flex-shrink:0">
+              <div style="flex:1;min-width:0">
+                <div id="fImgPreviewNom" style="font-size:11px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></div>
+                <div id="fImgPreviewStatus" style="font-size:10px;color:var(--text2);margin-top:2px">Lista para subir al guardar</div>
+              </div>
+              <button type="button" class="btn btn-r btn-sm" onclick="fCancelarImagen()" style="flex-shrink:0">✕</button>
+            </div>
+          </div>
         </div>
         <div class="fg" style="margin-bottom:14px"><label>Descripción</label><textarea id="fDesc" placeholder="Descripción breve del producto..."></textarea></div>
         <div style="display:flex;gap:9px;align-items:center">
@@ -638,7 +653,13 @@
       const cls=p.stock===0?'bajo':p.stock<=(p.stockMinimo||5)?'medio':'alto';
       return `<tr>
       <td class="mono" style="color:var(--text2)">#${p.id}</td>
-      <td><div style="font-weight:600">${p.nombre}</div>${p.descripcion?`<div style="font-size:10px;color:var(--text2);margin-top:2px">${p.descripcion.substring(0,55)}${p.descripcion.length>55?'…':''}</div>`:''}</td>
+      <td style="display:flex;align-items:center;gap:10px">
+        ${p.imagen ? `<img src="${p.imagen}" style="width:42px;height:42px;object-fit:cover;border-radius:7px;border:1px solid var(--border);flex-shrink:0" onerror="this.style.display='none'">` : `<div style="width:42px;height:42px;border-radius:7px;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">${p.categoria==='Vitaminas'?'🍊':p.categoria==='Antibiótico'||p.categoria==='Antibióticos'?'🧬':p.categoria==='Digestivo'||p.categoria==='Digestivos'?'🫁':p.categoria==='Antiinflamatorio'?'🔴':p.categoria==='Cuidado Personal'?'🧴':'💊'}</div>`}
+        <div>
+          <div style="font-weight:600">${p.nombre}</div>
+          ${p.descripcion?`<div style="font-size:10px;color:var(--text2);margin-top:2px">${p.descripcion.substring(0,45)}…</div>`:''}
+        </div>
+      </td>
       <td>${p.categoria?`<span class="cat-pill">${p.categoria}</span>`:'<span style="color:var(--text2)">—</span>'}</td>
       <td class="mono" style="font-weight:600;color:var(--teal)">S/ ${p.precio?.toFixed(2)}</td>
       <td><div class="sb-wrap"><div class="sb-bar"><div class="sb-fill ${cls}" style="width:${pct}%"></div></div><span class="sb-num">${p.stock} uds.</span></div></td>
@@ -669,6 +690,13 @@
     const precio= parseFloat(document.getElementById('fPrecio').value);
     const stock = parseInt(document.getElementById('fStock').value);
     if(!nombre||isNaN(precio)||isNaN(stock)){ toast('Completa nombre, precio y stock.',false); return; }
+
+    // ✅ Si hay imagen pendiente y estamos EDITANDO, subir ANTES de guardar
+    if (fImagenArchivoPendiente && id) {
+      const urlSubida = await fSubirImagenAlServidor(parseInt(id));
+      if (urlSubida) document.getElementById('fImagen').value = urlSubida;
+    }
+
     const body={ nombre, precio, stock,
       descripcion: document.getElementById('fDesc').value.trim(),
       categoria:   document.getElementById('fCat').value,
@@ -678,8 +706,16 @@
     try{
       const url = id?`${API}/productos/${id}`:`${API}/productos`;
       const res = await fetch(url,{method:id?'PUT':'POST',headers:H(),body:JSON.stringify(body)});
-      if(res.ok){ toast(id?'✅ Producto actualizado':'✅ Producto creado'); cancelEdit(); cargarProductos(); }
-      else toast('❌ Error al guardar',false);
+      if(res.ok){
+        // ✅ Si es producto NUEVO y hay imagen pendiente, subir después de crear
+        if (!id && fImagenArchivoPendiente) {
+          const prod = await res.json();
+          await fSubirImagenAlServidor(prod.id);
+        }
+        toast(id?'✅ Producto actualizado':'✅ Producto creado');
+        cancelEdit();
+        cargarProductos();
+      } else toast('❌ Error al guardar',false);
     }catch(e){ toast('❌ Error de conexión',false); }
   }
 
@@ -696,6 +732,14 @@
     document.getElementById('formTitle').textContent=`✏️ Editando: ${p.nombre}`;
     document.getElementById('fBtnTxt').textContent='💾 Actualizar producto';
     document.getElementById('btnCancelar').style.display='inline-flex';
+    // ✅ Mostrar preview si ya tiene imagen guardada
+    fCancelarImagen();
+    if (p.imagen) {
+      document.getElementById('fImgPreviewEl').src = p.imagen;
+      document.getElementById('fImgPreviewNom').textContent = p.imagen.split('/').pop();
+      document.getElementById('fImgPreviewStatus').textContent = '🖼️ Imagen actual guardada';
+      document.getElementById('fImgPreviewBox').style.display = 'flex';
+    }
     window.scrollTo({top:0,behavior:'smooth'});
   }
 
@@ -707,6 +751,7 @@
     document.getElementById('formTitle').textContent='➕ Nuevo Producto';
     document.getElementById('fBtnTxt').textContent='✅ Guardar producto';
     document.getElementById('btnCancelar').style.display='none';
+    fCancelarImagen();
   }
 
   async function eliminarProd(id,nom){
@@ -1397,6 +1442,72 @@
 
   cargarProductos();
   actualizarBadgeVentas();
+
+  // ══════════════════════════════════════════════════
+  //  SUBIR IMAGEN DE PRODUCTO DESDE PC (FARMACÉUTICO)
+  // ══════════════════════════════════════════════════
+  let fImagenArchivoPendiente = null;
+
+  function fPrevisualizarImagen(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { toast('❌ La imagen no puede superar 5MB', false); return; }
+    fImagenArchivoPendiente = file;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      document.getElementById('fImgPreviewEl').src = e.target.result;
+      document.getElementById('fImgPreviewNom').textContent = file.name;
+      document.getElementById('fImgPreviewStatus').textContent = '⏳ Lista para subir al guardar';
+      const box = document.getElementById('fImgPreviewBox');
+      box.style.display = 'flex';
+      box.style.alignItems = 'center';
+    };
+    reader.readAsDataURL(file);
+    toast('📁 Imagen seleccionada — se subirá al guardar');
+  }
+
+  function fCancelarImagen() {
+    fImagenArchivoPendiente = null;
+    const inp = document.getElementById('fImgFileInput');
+    if (inp) inp.value = '';
+    const box = document.getElementById('fImgPreviewBox');
+    if (box) box.style.display = 'none';
+    const el = document.getElementById('fImgPreviewEl');
+    if (el) el.src = '';
+  }
+
+  async function fSubirImagenAlServidor(prodId) {
+    if (!fImagenArchivoPendiente) return null;
+    try {
+      document.getElementById('fImgPreviewStatus').textContent = '⏫ Subiendo imagen...';
+      const fd = new FormData();
+      fd.append('imagen', fImagenArchivoPendiente);
+      const res = await fetch(`${API}/productos/${prodId}/imagen`, {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token },
+        body: fd
+      });
+      if (res.ok) {
+        const data = await res.json();
+        document.getElementById('fImagen').value = data.url;
+        document.getElementById('fImgPreviewStatus').textContent = '✅ ¡Imagen subida correctamente!';
+        fImagenArchivoPendiente = null;
+        document.getElementById('fImgFileInput').value = '';
+        toast('✅ Imagen subida al servidor');
+        return data.url;
+      } else {
+        const err = await res.text();
+        document.getElementById('fImgPreviewStatus').textContent = '❌ Error al subir';
+        toast('❌ Error al subir imagen: ' + err, false);
+        return null;
+      }
+    } catch(e) {
+      document.getElementById('fImgPreviewStatus').textContent = '❌ Error de conexión';
+      toast('❌ Error de conexión al subir imagen', false);
+      return null;
+    }
+  }
+
 </script>
 </body>
 </html>
