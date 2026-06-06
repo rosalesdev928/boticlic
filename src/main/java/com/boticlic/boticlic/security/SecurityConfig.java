@@ -42,6 +42,11 @@ public class SecurityConfig {
                                 "/images/**", "/img/**", "/favicon.png"
                         ).permitAll()
 
+                        // ✅ NEWSLETTER — suscribir es público, ver lista solo ADMIN
+                        .requestMatchers(HttpMethod.POST, "/api/newsletter/suscribir").permitAll()
+                        .requestMatchers(HttpMethod.DELETE, "/api/newsletter/desuscribir").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/newsletter/suscriptores").hasRole("ADMIN")
+
                         // ✅ RECETAS
                         .requestMatchers(HttpMethod.POST, "/api/recetas").hasAnyRole("CLIENTE", "ADMIN", "FARMACEUTICO")
                         .requestMatchers(HttpMethod.GET, "/api/recetas/usuario/**").hasAnyRole("CLIENTE", "ADMIN", "FARMACEUTICO")
@@ -54,6 +59,8 @@ public class SecurityConfig {
                         // ✅ PEDIDOS
                         .requestMatchers(HttpMethod.POST, "/api/pedidos").hasAnyRole("CLIENTE", "ADMIN", "FARMACEUTICO")
                         .requestMatchers(HttpMethod.GET, "/api/pedidos/usuario/**").hasAnyRole("CLIENTE", "ADMIN")
+                        // ✅ FIX: permite al cliente ver el detalle de su propio pedido por ID
+                        .requestMatchers(HttpMethod.GET, "/api/pedidos/{id}").hasAnyRole("CLIENTE", "ADMIN", "FARMACEUTICO")
                         .requestMatchers(HttpMethod.GET, "/api/pedidos/estado/**").hasAnyRole("ADMIN", "FARMACEUTICO")
                         .requestMatchers(HttpMethod.GET, "/api/pedidos/**").hasAnyRole("ADMIN", "FARMACEUTICO")
                         .requestMatchers(HttpMethod.PUT, "/api/pedidos/**").hasAnyRole("ADMIN", "FARMACEUTICO")

@@ -11,6 +11,7 @@ import com.boticlic.boticlic.repository.RecetaRepository;
 import com.boticlic.boticlic.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -27,6 +28,9 @@ public class RecetaService {
     private final ProductoRepository productoRepository;
     private final NotificacionService notificacionService;
 
+    // ✅ @Transactional: si la BD falla al guardar la receta,
+    // no queda ningún dato a medias.
+    @Transactional
     public Receta guardarReceta(MultipartFile archivo, Long usuarioId, Long pedidoId, String notas) throws IOException {
 
         Usuario usuario = usuarioRepository.findById(usuarioId)
@@ -90,6 +94,12 @@ public class RecetaService {
         return guardada;
     }
 
+    // ✅ @Transactional CRÍTICO aquí: restaurar stock de MÚLTIPLES productos
+    // y cambiar estado del pedido debe ser todo-o-nada.
+    // Escenario sin @Transactional: restaura stock del producto 1, falla en el 2
+    // → producto 1 tiene stock de más, producto 2 sigue con stock de menos,
+    //   y el pedido sigue en estado incorrecto. Nadie se entera.
+    @Transactional
     public Receta rechazar(Long id, String motivo) {
         Receta receta = recetaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Receta no encontrada"));
@@ -103,7 +113,7 @@ public class RecetaService {
             Pedido pedido = pedidoRepository.findById(pedidoId)
                     .orElseThrow(() -> new RuntimeException("Pedido no encontrado"));
 
-            // ✅ RESTAURAR STOCK de cada producto del pedido
+            // Restaurar stock — si algo falla el @Transactional revierte TODO
             for (DetallePedido detalle : pedido.getDetalles()) {
                 Producto producto = productoRepository.findById(detalle.getProducto().getId())
                         .orElse(null);
@@ -111,7 +121,7 @@ public class RecetaService {
                     producto.setStock(producto.getStock() + detalle.getCantidad());
                     productoRepository.save(producto);
                     System.out.println("✅ Stock restaurado: " + producto.getNombre()
-                            + " +"+detalle.getCantidad()+" = "+producto.getStock());
+                            + " +" + detalle.getCantidad() + " = " + producto.getStock());
                 }
             }
 

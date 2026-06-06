@@ -3,10 +3,17 @@ package com.boticlic.boticlic.controller;
 import com.boticlic.boticlic.model.Producto;
 import com.boticlic.boticlic.service.ProductoService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/productos")
@@ -14,6 +21,13 @@ import org.springframework.web.multipart.MultipartFile;
 public class ProductoController {
 
     private final ProductoService productoService;
+
+    // ✅ Ruta de uploads leída desde application.properties
+    // En Windows será: C:/boticlic-uploads/productos/
+    // En Linux/Mac:    /var/boticlic-uploads/productos/
+    // Si no se configura, usa una carpeta "uploads" en el directorio donde corre el .jar
+    @Value("${app.upload.dir:uploads/productos}")
+    private String uploadDir;
 
     @GetMapping
     public ResponseEntity<List<Producto>> listar() {
@@ -57,7 +71,9 @@ public class ProductoController {
     public ResponseEntity<List<Producto>> stockBajo() {
         return ResponseEntity.ok(productoService.productosConStockBajo());
     }
-    // ✅ Subir imagen de producto
+
+    // ✅ Subir imagen — ahora se guarda FUERA del proyecto
+    //    en la carpeta definida por app.upload.dir
     @PostMapping("/{id}/imagen")
     public ResponseEntity<?> subirImagen(
             @PathVariable Long id,
@@ -68,37 +84,47 @@ public class ProductoController {
             if (tipo == null || !tipo.startsWith("image/")) {
                 return ResponseEntity.badRequest().body("Solo se aceptan imágenes");
             }
-            // Validar tamaño (máximo 5MB)
+
+            // Validar tamaño máximo 5MB
             if (archivo.getSize() > 5 * 1024 * 1024) {
                 return ResponseEntity.badRequest().body("La imagen no puede superar 5MB");
             }
-            // Crear carpeta si no existe
-            String uploadDir = "src/main/resources/static/img/productos/";
-            java.nio.file.Path dirPath = java.nio.file.Paths.get(uploadDir);
-            if (!java.nio.file.Files.exists(dirPath)) {
-                java.nio.file.Files.createDirectories(dirPath);
+
+            // Crear carpeta externa si no existe
+            Path dirPath = Paths.get(uploadDir);
+            if (!Files.exists(dirPath)) {
+                Files.createDirectories(dirPath);
             }
-            // Guardar con nombre único
-            String ext = archivo.getOriginalFilename() != null
-                    ? archivo.getOriginalFilename().substring(archivo.getOriginalFilename().lastIndexOf('.'))
-                    : ".jpg";
+
+            // Nombre único para evitar colisiones
+            String ext = "";
+            String original = archivo.getOriginalFilename();
+            if (original != null && original.contains(".")) {
+                ext = original.substring(original.lastIndexOf('.'));
+            } else {
+                ext = ".jpg";
+            }
             String nombreArchivo = "producto_" + id + "_" + System.currentTimeMillis() + ext;
-            java.nio.file.Path rutaArchivo = dirPath.resolve(nombreArchivo);
-            java.nio.file.Files.write(rutaArchivo, archivo.getBytes());
-            // Actualizar URL en la base de datos
+            Path rutaArchivo = dirPath.resolve(nombreArchivo);
+            Files.write(rutaArchivo, archivo.getBytes());
+
+            // La URL que se guarda en BD apunta al endpoint /uploads/productos/
+            // que Spring sirve como recurso estático (configurado en WebConfig)
+            String urlImagen = "/uploads/productos/" + nombreArchivo;
+
             Producto producto = productoService.buscarPorId(id)
                     .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
-            String urlImagen = "/img/productos/" + nombreArchivo;
             producto.setImagen(urlImagen);
             productoService.guardar(producto);
-            return ResponseEntity.ok(java.util.Map.of(
+
+            return ResponseEntity.ok(Map.of(
                     "url", urlImagen,
                     "mensaje", "Imagen subida correctamente"
             ));
-        } catch (Exception e) {
+
+        } catch (IOException e) {
             return ResponseEntity.internalServerError()
-                    .body("Error al subir imagen: " + e.getMessage());
+                    .body("Error al guardar la imagen: " + e.getMessage());
         }
     }
-
 }

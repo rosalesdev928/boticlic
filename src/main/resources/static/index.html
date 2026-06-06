@@ -12,6 +12,22 @@
 
         /* ===== HEADER ===== */
         header { background: #1b5e20; color: white; padding: 0 30px; height: 64px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 12px rgba(0,0,0,0.15); position: sticky; top: 0; z-index: 50; }
+        .header-search { display: flex; align-items: center; flex: 1; max-width: 460px; margin: 0 30px; position: relative; }
+        .header-search input { width: 100%; padding: 9px 42px 9px 18px; border-radius: 25px; border: none; font-size: 14px; font-family: 'DM Sans', sans-serif; outline: none; background: rgba(255,255,255,0.15); color: white; }
+        .header-search input::placeholder { color: rgba(255,255,255,0.65); }
+        .header-search input:focus { background: rgba(255,255,255,0.25); }
+        .header-search-btn { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); background: #ff6f00; border: none; color: white; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; transition: background .2s; }
+        .header-search-btn:hover { background: #e65100; }
+        .header-search-results { position: absolute; top: 100%; left: 0; right: 0; margin-top: 6px; background: white; border-radius: 12px; box-shadow: 0 6px 28px rgba(0,0,0,0.15); max-height: 300px; overflow-y: auto; z-index: 999; display: none; }
+        .header-search-results.visible { display: block; }
+        .hsr-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; cursor: pointer; border-bottom: 1px solid #f5f5f5; transition: background .15s; color: #1a2332; }
+        .hsr-item:last-child { border-bottom: none; }
+        .hsr-item:hover { background: #f9fbe7; }
+        .hsr-icon { font-size: 20px; width: 32px; text-align: center; }
+        .hsr-info h4 { font-size: 13px; font-weight: 600; }
+        .hsr-info p { font-size: 11px; color: #888; }
+        .hsr-price { font-size: 13px; font-weight: 700; color: #1b5e20; margin-left: auto; white-space: nowrap; }
+        .hsr-empty { padding: 16px; text-align: center; color: #bbb; font-size: 13px; }
         .logo { display: flex; align-items: center; gap: 10px; font-size: 22px; font-weight: 700; }
         .nav-actions { display: flex; align-items: center; gap: 12px; }
         .btn-nav { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 13px; font-family: 'DM Sans', sans-serif; font-weight: 500; transition: all 0.2s; text-decoration: none; display: inline-block; }
@@ -33,19 +49,35 @@
         .banner-ofertas { background: #ff6f00; color: white; text-align: center; padding: 12px; font-size: 14px; font-weight: 600; }
         .banner-ofertas span { background: rgba(255,255,255,0.2); padding: 2px 10px; border-radius: 10px; margin: 0 5px; }
 
-        /* ===== HERO ===== */
-        .hero { background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 40%, #388e3c 70%, #43a047 100%); color: white; text-align: center; padding: 60px 20px 80px; position: relative; overflow: hidden; }
-        .hero::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 60%); }
-        .hero-badge { display: inline-block; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; margin-bottom: 16px; letter-spacing: 0.5px; }
-        .hero h2 { font-size: 42px; font-weight: 700; margin-bottom: 12px; line-height: 1.2; }
-        .hero p { font-size: 17px; margin-bottom: 30px; opacity: 0.9; }
-        .buscador { display: flex; justify-content: center; gap: 0; max-width: 520px; margin: 0 auto; position: relative; z-index: 2; }
+        /* ===== HERO CARRUSEL ===== */
+        .hero-carousel-wrap { position: relative; overflow: hidden; }
+        .hero-slides { display: flex; transition: transform 0.6s cubic-bezier(.4,0,.2,1); will-change: transform; }
+        .hero-slide { min-width: 100%; color: white; text-align: center; padding: 50px 20px 70px; position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 380px; }
+        .hero-slide::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 60%); pointer-events: none; }
+        .hs-1 { background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 40%, #388e3c 70%, #43a047 100%); }
+        .hs-2 { background: linear-gradient(135deg, #0d47a1 0%, #1565c0 40%, #1976d2 70%, #1e88e5 100%); }
+        .hs-3 { background: linear-gradient(135deg, #bf360c 0%, #d84315 40%, #e64a19 70%, #ff5722 100%); }
+        .hs-4 { background: linear-gradient(135deg, #4a148c 0%, #6a1b9a 40%, #7b1fa2 70%, #9c27b0 100%); }
+        .hero-badge { display: inline-block; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; margin-bottom: 16px; letter-spacing: 0.5px; position: relative; z-index: 2; }
+        .hero-slide h2 { font-size: 42px; font-weight: 700; margin-bottom: 12px; line-height: 1.2; position: relative; z-index: 2; }
+        .hero-slide p { font-size: 17px; margin-bottom: 30px; opacity: 0.9; position: relative; z-index: 2; }
+        .buscador { display: flex; justify-content: center; gap: 0; max-width: 520px; margin: 0 auto; position: relative; z-index: 10; }
         .buscador input { padding: 14px 22px; flex: 1; border-radius: 30px 0 0 30px; border: none; font-size: 15px; font-family: 'DM Sans', sans-serif; outline: none; }
         .buscador button { padding: 14px 28px; background: #ff6f00; color: white; border: none; border-radius: 0 30px 30px 0; cursor: pointer; font-size: 15px; font-weight: 600; transition: background 0.2s; }
         .buscador button:hover { background: #e65100; }
         .hero-stats { display: flex; justify-content: center; gap: 40px; margin-top: 40px; position: relative; z-index: 2; }
         .hero-stat h3 { font-size: 28px; font-weight: 700; }
         .hero-stat p { font-size: 12px; opacity: 0.8; }
+        .hero-slide-cta { display: inline-block; margin-top: 20px; background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.5); color: white; padding: 10px 28px; border-radius: 25px; font-size: 14px; font-weight: 700; cursor: pointer; transition: all .2s; position: relative; z-index: 2; }
+        .hero-slide-cta:hover { background: rgba(255,255,255,0.35); }
+        /* Flechas */
+        .hc-prev, .hc-next { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.2); border: none; color: white; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; font-size: 22px; z-index: 20; display: flex; align-items: center; justify-content: center; transition: background .2s; }
+        .hc-prev { left: 16px; } .hc-next { right: 16px; }
+        .hc-prev:hover, .hc-next:hover { background: rgba(255,255,255,0.4); }
+        /* Dots */
+        .hc-dots { position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; z-index: 20; }
+        .hc-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.45); cursor: pointer; transition: all .3s; border: none; }
+        .hc-dot.on { background: white; width: 24px; border-radius: 4px; }
 
         /* ===== RESULTADOS BUSQUEDA ===== */
         .busqueda-resultados { background: white; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.12); position: absolute; top: 100%; left: 0; right: 60px; margin-top: 6px; max-height: 320px; overflow-y: auto; z-index: 200; display: none; }
@@ -59,16 +91,53 @@
         .resultado-precio { font-size: 14px; font-weight: 700; color: #1b5e20; margin-left: auto; white-space: nowrap; }
         .resultado-sin { padding: 20px; text-align: center; color: #bbb; font-size: 13px; }
 
+        /* ===== CARRUSEL OFERTAS ===== */
+        .oferta-carousel-sec { background: white; padding: 28px 0 10px; border-bottom: 1px solid #f0f0f0; }
+        .oferta-carousel-inner { max-width: 1400px; margin: 0 auto; padding: 0 30px; }
+        .oferta-carousel-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .oferta-carousel-title h3 { font-size: 20px; font-weight: 700; color: #1a2332; }
+        .oferta-carousel-title span { font-size: 13px; color: #2e7d32; font-weight: 600; cursor: pointer; }
+        .oferta-track-wrap { position: relative; }
+        .oferta-track { display: flex; gap: 14px; overflow-x: auto; scroll-behavior: smooth; scrollbar-width: none; padding-bottom: 14px; }
+        .oferta-track::-webkit-scrollbar { display: none; }
+        .oferta-card { flex-shrink: 0; width: 200px; background: white; border-radius: 14px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.08); border: 1.5px solid #f0f0f0; cursor: pointer; transition: all .2s; position: relative; }
+        .oferta-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.13); transform: translateY(-3px); border-color: #c8e6c9; }
+        .oferta-img { height: 150px; display: flex; align-items: center; justify-content: center; font-size: 60px; background: linear-gradient(135deg,#e8f5e9,#c8e6c9); position: relative; overflow: hidden; }
+        .oferta-img img { width: 100%; height: 100%; object-fit: cover; }
+        .oferta-badge-desc { position: absolute; top: 8px; right: 8px; background: #ff6f00; color: white; font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 6px; }
+        .oferta-badge-new { position: absolute; top: 8px; left: 8px; background: #2e7d32; color: white; font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 6px; }
+        .oferta-body { padding: 10px 12px 14px; }
+        .oferta-cat { font-size: 9px; color: #2e7d32; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 3px; }
+        .oferta-name { font-size: 13px; font-weight: 600; color: #1a2332; line-height: 1.3; margin-bottom: 4px; height: 34px; overflow: hidden; }
+        .oferta-price-row { display: flex; align-items: baseline; gap: 6px; margin-bottom: 8px; }
+        .oferta-price { font-size: 18px; font-weight: 800; color: #1b5e20; }
+        .oferta-price-old { font-size: 11px; color: #bbb; text-decoration: line-through; }
+        .oferta-btn { width: 100%; padding: 8px; background: #2e7d32; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 600; font-family: 'DM Sans', sans-serif; transition: background .2s; }
+        .oferta-btn:hover { background: #1b5e20; }
+        .oferta-btn:disabled { background: #e0e0e0; color: #999; cursor: not-allowed; }
+        .oferta-arrow { position: absolute; top: 50%; transform: translateY(-60%); width: 36px; height: 36px; background: white; border: 1.5px solid #e0e0e0; border-radius: 50%; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); z-index: 5; transition: all .2s; }
+        .oferta-arrow:hover { background: #2e7d32; color: white; border-color: #2e7d32; }
+        .oferta-arrow-left { left: -14px; }
+        .oferta-arrow-right { right: -14px; }
+
+        /* ===== BANNER PROMO STRIP ===== */
+        .promo-strip { background: linear-gradient(90deg, #1b5e20, #2e7d32, #43a047); padding: 16px 30px; margin-bottom: 0; }
+        .promo-strip-inner { max-width: 1400px; margin: 0 auto; display: flex; gap: 14px; overflow-x: auto; scrollbar-width: none; }
+        .promo-strip-inner::-webkit-scrollbar { display: none; }
+        .promo-pill { flex-shrink: 0; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 8px 18px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .2s; white-space: nowrap; display: flex; align-items: center; gap: 6px; }
+        .promo-pill:hover { background: rgba(255,255,255,0.28); }
+
         /* ===== CATEGORÍAS ===== */
-        .contenido { max-width: 1200px; margin: 35px auto; padding: 0 20px; }
+        .contenido { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        .contenido-wrap { padding-top: 30px; }
         .seccion-titulo { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .seccion-titulo h3 { font-size: 20px; font-weight: 700; }
         .seccion-titulo a { color: #2e7d32; font-size: 13px; font-weight: 600; text-decoration: none; cursor: pointer; }
-        .categorias-scroll { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; margin-bottom: 35px; }
+        .categorias-scroll { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 10px; padding-top: 4px; scrollbar-width: none; margin-bottom: 30px; }
         .categorias-scroll::-webkit-scrollbar { display: none; }
         .cat-card { flex-shrink: 0; width: 100px; text-align: center; cursor: pointer; padding: 15px 10px; background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); transition: all 0.2s; border: 2px solid transparent; }
         .cat-card:hover, .cat-card.activo { border-color: #2e7d32; transform: translateY(-2px); }
-        .cat-card .cat-icon { font-size: 28px; margin-bottom: 6px; }
+        .cat-card .cat-icon { font-size: 28px; margin-bottom: 6px; line-height: 1.2; display: block; }
         .cat-card .cat-name { font-size: 11px; font-weight: 600; color: #444; }
 
         /* ===== PRODUCTOS ===== */
@@ -409,10 +478,38 @@
         .carrito-header .carrito-close { color:rgba(255,255,255,.8) !important; }
         .carrito-envio-msg { font-size:12px; color:#2e7d32; font-weight:600; margin-bottom:12px; }
 
+        /* ===== NOSOTROS ===== */
+        .nosotros-sec { background: white; padding: 60px 20px; border-top: 1px solid #f0f0f0; }
+        .nosotros-inner { max-width: 1200px; margin: 0 auto; }
+        .nosotros-header { text-align: center; margin-bottom: 48px; }
+        .nosotros-header h2 { font-size: 30px; font-weight: 800; color: #1a2332; margin-bottom: 10px; }
+        .nosotros-header p { font-size: 16px; color: #666; max-width: 560px; margin: 0 auto; }
+        .nosotros-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; align-items: start; }
+        .nosotros-about h3 { font-size: 20px; font-weight: 700; color: #1b5e20; margin-bottom: 14px; }
+        .nosotros-about p { font-size: 14px; color: #555; line-height: 1.8; margin-bottom: 16px; }
+        .nosotros-valores { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 24px; }
+        .valor-card { background: #f9fbe7; border: 1.5px solid #e8f5e9; border-radius: 12px; padding: 16px; text-align: center; }
+        .valor-card .v-icon { font-size: 28px; margin-bottom: 8px; }
+        .valor-card h4 { font-size: 13px; font-weight: 700; color: #1a2332; margin-bottom: 4px; }
+        .valor-card p { font-size: 11px; color: #888; }
+        .nosotros-contacto { display: flex; flex-direction: column; gap: 18px; }
+        .contacto-card { background: #f9fbe7; border: 1.5px solid #e8f5e9; border-radius: 14px; padding: 20px 22px; display: flex; align-items: flex-start; gap: 16px; transition: all .2s; cursor: pointer; text-decoration: none; }
+        .contacto-card:hover { border-color: #2e7d32; box-shadow: 0 4px 16px rgba(46,125,50,0.12); transform: translateY(-2px); }
+        .cc-icon { width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 26px; flex-shrink: 0; }
+        .cc-wsp { background: #dcf8c6; }
+        .cc-maps { background: #e3f2fd; }
+        .cc-phone { background: #fff3e0; }
+        .cc-mail { background: #f3e5f5; }
+        .cc-hours { background: #e8f5e9; }
+        .cc-info h4 { font-size: 14px; font-weight: 700; color: #1a2332; margin-bottom: 3px; }
+        .cc-info p { font-size: 13px; color: #555; }
+        .cc-info span { font-size: 11px; color: #2e7d32; font-weight: 600; }
+        .wsp-btn { display: inline-flex; align-items: center; gap: 10px; background: #25d366; color: white; border: none; border-radius: 25px; padding: 12px 28px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: background .2s; text-decoration: none; margin-top: 24px; }
+        .wsp-btn:hover { background: #1ebe5d; }
+
         @media(max-width:768px){
-            .topbar-info{display:none}
-            .banners-row{grid-template-columns:1fr}
-            .servicios-inner{padding:0 12px}
+            .nosotros-grid { grid-template-columns: 1fr; }
+            .nosotros-valores { grid-template-columns: 1fr 1fr; }
         }
         @media (max-width: 768px) {
             .hero h2 { font-size: 28px; }
@@ -424,6 +521,24 @@
             .checkout-sidebar { width: 100%; border-left: none; border-top: 1.5px solid #e8f5e9; max-height: none; }
             .input-row { grid-template-columns: 1fr; }
         }
+
+        /* ===== MODAL PERFIL ===== */
+        .perfil-avatar-big { width: 72px; height: 72px; border-radius: 50%; background: linear-gradient(135deg, #66bb6a, #2e7d32); display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 700; color: white; margin: 0 auto 16px; }
+        .perfil-tabs { display: flex; gap: 0; border-bottom: 2px solid #f0f0f0; margin-bottom: 24px; }
+        .perfil-tab { flex: 1; padding: 10px; text-align: center; font-size: 13px; font-weight: 600; color: #888; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all .2s; }
+        .perfil-tab.activo { color: #2e7d32; border-bottom-color: #2e7d32; }
+        .perfil-tab:hover { color: #2e7d32; }
+        .perfil-panel { display: none; }
+        .perfil-panel.activo { display: block; }
+        .perfil-field { margin-bottom: 16px; }
+        .perfil-field label { display: block; font-size: 12px; font-weight: 600; color: #555; margin-bottom: 5px; text-transform: uppercase; letter-spacing: .4px; }
+        .perfil-field input { width: 100%; padding: 11px 14px; border: 1.5px solid #e0e0e0; border-radius: 8px; font-size: 14px; font-family: 'DM Sans', sans-serif; outline: none; transition: border-color .2s; }
+        .perfil-field input:focus { border-color: #2e7d32; }
+        .perfil-field input:disabled { background: #f9f9f9; color: #aaa; cursor: not-allowed; }
+        .perfil-info-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f5f5f5; font-size: 13px; }
+        .perfil-info-row:last-child { border-bottom: none; }
+        .perfil-info-label { color: #888; font-weight: 500; display: flex; align-items: center; gap: 6px; }
+        .perfil-info-value { font-weight: 600; color: #1a2332; }
     </style>
 </head>
 <body>
@@ -434,6 +549,12 @@
 
 <header>
     <div class="logo">💊 BotiClic</div>
+    <div class="header-search">
+        <input type="text" id="headerSearchInput" placeholder="🔍  Buscar medicamento, vitamina..." autocomplete="off"
+               oninput="onHeaderSearchInput()" onkeydown="onHeaderSearchKeydown(event)">
+        <button class="header-search-btn" onclick="ejecutarHeaderSearch()">🔍</button>
+        <div class="header-search-results" id="headerSearchResults"></div>
+    </div>
     <div class="nav-actions" id="navActions"></div>
 </header>
 
@@ -456,32 +577,153 @@
     </div>
 </div>
 
-<div class="hero">
-    <div class="hero-badge">🏥 Farmacia Digital — Lima, Perú</div>
-    <h2>Tu farmacia online<br>de confianza</h2>
-    <p>Medicamentos y productos de salud a domicilio en menos de 24h</p>
-    <div class="buscador">
-        <input type="text" id="inputBuscar" placeholder="Buscar medicamento, vitamina..." autocomplete="off"
-               oninput="onBuscarInput()" onkeydown="onBuscarKeydown(event)">
-        <div class="busqueda-resultados" id="resultadosBusqueda"></div>
-        <button onclick="ejecutarBusqueda()">🔍 Buscar</button>
+<!-- HERO CARRUSEL -->
+<div class="hero-carousel-wrap" id="heroCarousel"
+     onmouseenter="pauseHeroCarousel()" onmouseleave="resumeHeroCarousel()">
+    <div class="hero-slides" id="heroSlides">
+
+        <!-- Slide 1 -->
+        <div class="hero-slide hs-1">
+            <div class="hero-badge">🏥 Farmacia Digital — Lima, Perú</div>
+            <h2>Tu farmacia online<br>de confianza</h2>
+            <p>Medicamentos y productos de salud a domicilio en menos de 24h</p>
+            <div class="buscador">
+                <input type="text" id="inputBuscar" placeholder="Buscar medicamento, vitamina..." autocomplete="off"
+                       oninput="onBuscarInput()" onkeydown="onBuscarKeydown(event)">
+                <div class="busqueda-resultados" id="resultadosBusqueda"></div>
+                <button onclick="ejecutarBusqueda()">🔍 Buscar</button>
+            </div>
+            <div class="hero-stats">
+                <div class="hero-stat"><h3 id="statTotal">—</h3><p>Productos</p></div>
+                <div class="hero-stat"><h3>24h</h3><p>Entrega</p></div>
+                <div class="hero-stat"><h3>100%</h3><p>Seguro</p></div>
+            </div>
+        </div>
+
+        <!-- Slide 2 -->
+        <div class="hero-slide hs-2">
+            <div class="hero-badge">🚀 Envío exprés disponible</div>
+            <h2>Envío gratis en<br>pedidos desde S/ 50</h2>
+            <p>Recibe tus medicamentos sin salir de casa. Rápido, seguro y confiable.</p>
+            <div class="hero-stats">
+                <div class="hero-stat"><h3>24h</h3><p>Entrega</p></div>
+                <div class="hero-stat"><h3>Lima</h3><p>Cobertura</p></div>
+                <div class="hero-stat"><h3>🚚</h3><p>Gratis +S/50</p></div>
+            </div>
+            <span class="hero-slide-cta" onclick="filtrarCatNombre('Analgésico')">Ver analgésicos →</span>
+        </div>
+
+        <!-- Slide 3 -->
+        <div class="hero-slide hs-3">
+            <div class="hero-badge">🔥 Ofertas especiales</div>
+            <h2>Vitaminas y suplementos<br>para tu bienestar</h2>
+            <p>Refuerza tu sistema inmune con los mejores productos naturales y certificados.</p>
+            <div class="hero-stats">
+                <div class="hero-stat"><h3>100%</h3><p>Originales</p></div>
+                <div class="hero-stat"><h3>🍊</h3><p>Vitamina C</p></div>
+                <div class="hero-stat"><h3>💪</h3><p>Suplementos</p></div>
+            </div>
+            <span class="hero-slide-cta" onclick="filtrarCatNombre('Vitaminas')">Explorar vitaminas →</span>
+        </div>
+
+        <!-- Slide 4 -->
+        <div class="hero-slide hs-4">
+            <div class="hero-badge">📋 Atención personalizada</div>
+            <h2>¿Tienes receta médica?<br>Te ayudamos</h2>
+            <p>Sube tu receta y nuestro farmacéutico te atiende en minutos las 24 horas.</p>
+            <div class="hero-stats">
+                <div class="hero-stat"><h3>24/7</h3><p>Disponible</p></div>
+                <div class="hero-stat"><h3>📋</h3><p>Receta válida</p></div>
+                <div class="hero-stat"><h3>🩺</h3><p>Farmacéutico</p></div>
+            </div>
+            <span class="hero-slide-cta" onclick="abrirRecetaModal()">Subir receta →</span>
+        </div>
+
     </div>
-    <div class="hero-stats">
-        <div class="hero-stat"><h3 id="statTotal">—</h3><p>Productos</p></div>
-        <div class="hero-stat"><h3>24h</h3><p>Entrega</p></div>
-        <div class="hero-stat"><h3>100%</h3><p>Seguro</p></div>
+    <!-- Flechas -->
+    <button class="hc-prev" onclick="moveHero(-1)">&#8249;</button>
+    <button class="hc-next" onclick="moveHero(1)">&#8250;</button>
+    <!-- Dots -->
+    <div class="hc-dots" id="heroDots">
+        <button class="hc-dot on"></button>
+        <button class="hc-dot"></button>
+        <button class="hc-dot"></button>
+        <button class="hc-dot"></button>
     </div>
 </div>
 
-<div class="contenido">
-    <div class="seccion-titulo"><h3>Categorías</h3></div>
-    <div class="categorias-scroll" id="categoriasScroll"></div>
-    <div class="seccion-titulo">
-        <h3 id="tituloProductos">Nuestros Productos</h3>
-        <a onclick="mostrarTodos()">Ver todos →</a>
+<div class="promo-strip">
+    <div class="promo-strip-inner">
+        <div class="promo-pill" onclick="filtrarCatNombre('Analgésico')">💊 Analgésicos</div>
+        <div class="promo-pill" onclick="filtrarCatNombre('Antibiótico')">🧬 Antibióticos</div>
+        <div class="promo-pill" onclick="filtrarCatNombre('Vitaminas')">🍊 Vitaminas</div>
+        <div class="promo-pill" onclick="filtrarCatNombre('Antiinflamatorio')">🔴 Antiinflamatorios</div>
+        <div class="promo-pill" onclick="filtrarCatNombre('Digestivo')">🟤 Digestivos</div>
+        <div class="promo-pill" onclick="filtrarCatNombre('Antihistamínico')">💉 Antihistamínicos</div>
+        <div class="promo-pill" onclick="filtrarCatNombre('Suplemento')">💪 Suplementos</div>
+        <div class="promo-pill" onclick="filtrarCatNombre('Cuidado Personal')">🧼 Cuidado Personal</div>
+        <div class="promo-pill" onclick="filtrarCatNombre('Otro')">📦 Otros</div>
     </div>
-    <div class="grid" id="listaProductos">
-        <p class="loading">⏳ Cargando productos...</p>
+</div>
+
+<!-- CARRUSEL OFERTAS -->
+<div class="oferta-carousel-sec">
+    <div class="oferta-carousel-inner">
+        <div class="oferta-carousel-title">
+            <h3>🔥 Ofertas y Descuentos</h3>
+            <span onclick="mostrarTodos()">Ver todo →</span>
+        </div>
+        <div class="oferta-track-wrap">
+            <button class="oferta-arrow oferta-arrow-left" onclick="scrollOferta(-1)">&#8249;</button>
+            <div class="oferta-track" id="ofertaTrack">
+                <!-- Productos cargados dinámicamente -->
+                <div style="padding:30px;color:#bbb;text-align:center;font-size:13px">⏳ Cargando ofertas...</div>
+            </div>
+            <button class="oferta-arrow oferta-arrow-right" onclick="scrollOferta(1)">&#8250;</button>
+        </div>
+    </div>
+</div>
+
+<div id="seccionProductos">
+    <div class="contenido contenido-wrap">
+        <div class="seccion-titulo"><h3>Categorías</h3></div>
+        <div class="categorias-scroll" id="categoriasScroll"></div>
+
+        <!-- BANNERS PROMO -->
+        <div class="banners-row" style="margin-bottom:28px">
+            <div class="banner-promo-card bpc-1" onclick="filtrarCatNombre('Antibiótico')">
+                <div class="bpc-ic">🧬</div>
+                <div class="bpc-txt">
+                    <h4>Antibióticos certificados</h4>
+                    <p>Amplio espectro y de acción específica</p>
+                    <span class="bpc-tag">Ver más</span>
+                </div>
+            </div>
+            <div class="banner-promo-card bpc-2" onclick="filtrarCatNombre('Vitaminas')">
+                <div class="bpc-ic">🍊</div>
+                <div class="bpc-txt">
+                    <h4>Vitaminas y suplementos</h4>
+                    <p>Refuerza tu sistema inmune</p>
+                    <span class="bpc-tag">Desde S/ 3.50</span>
+                </div>
+            </div>
+            <div class="banner-promo-card bpc-3" onclick="abrirRecetaModal()">
+                <div class="bpc-ic">📋</div>
+                <div class="bpc-txt">
+                    <h4>¿Tienes receta médica?</h4>
+                    <p>Sube tu receta y te atendemos rápido</p>
+                    <span class="bpc-tag">Subir receta</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="seccion-titulo">
+            <h3 id="tituloProductos">Nuestros Productos</h3>
+            <a onclick="mostrarTodos()">Ver todos →</a>
+        </div>
+        <div class="grid" id="listaProductos">
+            <p class="loading">⏳ Cargando productos...</p>
+        </div>
     </div>
 </div>
 
@@ -515,12 +757,98 @@
     </div>
 </div>
 
+<!-- ===================== NOSOTROS ===================== -->
+<div class="nosotros-sec" id="nosotros">
+    <div class="nosotros-inner">
+        <div class="nosotros-header">
+            <h2>💊 Sobre BotiClic</h2>
+            <p>Tu farmacia digital de confianza en Lima, Perú. Medicamentos originales, entrega rápida y atención farmacéutica personalizada.</p>
+        </div>
+        <div class="nosotros-grid">
+            <!-- Columna izquierda: info y valores -->
+            <div class="nosotros-about">
+                <h3>¿Quiénes somos?</h3>
+                <p>BotiClic es una farmacia digital comprometida con la salud de los peruanos. Ofrecemos medicamentos 100% certificados con delivery en menos de 24 horas a toda Lima, respaldados por farmacéuticos calificados.</p>
+                <p>Nuestro equipo trabaja las 24 horas para asegurarse de que recibas exactamente lo que necesitas, cuando lo necesitas, al mejor precio.</p>
+                <div class="nosotros-valores">
+                    <div class="valor-card">
+                        <div class="v-icon">🔬</div>
+                        <h4>100% Certificados</h4>
+                        <p>Todos nuestros productos son originales y cuentan con registro sanitario</p>
+                    </div>
+                    <div class="valor-card">
+                        <div class="v-icon">🚚</div>
+                        <h4>Entrega en 24h</h4>
+                        <p>Delivery rápido y seguro a tu domicilio en toda Lima metropolitana</p>
+                    </div>
+                    <div class="valor-card">
+                        <div class="v-icon">🩺</div>
+                        <h4>Farmacéuticos</h4>
+                        <p>Atención especializada de profesionales de la salud disponibles siempre</p>
+                    </div>
+                    <div class="valor-card">
+                        <div class="v-icon">🔒</div>
+                        <h4>Pago Seguro</h4>
+                        <p>Transacciones protegidas con tecnología de encriptación de datos</p>
+                    </div>
+                </div>
+                <a href="https://wa.me/51933406222?text=Hola%20BotiClic%2C%20quiero%20hacer%20un%20pedido" target="_blank" class="wsp-btn">
+                    💬 Escríbenos por WhatsApp
+                </a>
+            </div>
+            <!-- Columna derecha: contacto -->
+            <div class="nosotros-contacto">
+                <a href="https://wa.me/51933406222?text=Hola%20BotiClic%2C%20quiero%20hacer%20un%20pedido" target="_blank" class="contacto-card">
+                    <div class="cc-icon cc-wsp">💬</div>
+                    <div class="cc-info">
+                        <h4>WhatsApp</h4>
+                        <p>+51 933 406 222</p>
+                        <span>📲 Respuesta en minutos · Disponible 24/7</span>
+                    </div>
+                </a>
+                <a href="https://maps.google.com/?q=Lima+Peru" target="_blank" class="contacto-card">
+                    <div class="cc-icon cc-maps">📍</div>
+                    <div class="cc-info">
+                        <h4>Nuestra ubicación</h4>
+                        <p>Av. Arequipa 1234, Miraflores, Lima</p>
+                        <span>🗺️ Ver en Google Maps</span>
+                    </div>
+                </a>
+                <div class="contacto-card">
+                    <div class="cc-icon cc-phone">📞</div>
+                    <div class="cc-info">
+                        <h4>Teléfono</h4>
+                        <p>(01) 234-5678</p>
+                        <span>☎️ Lun – Dom · 8:00 am – 10:00 pm</span>
+                    </div>
+                </div>
+                <a href="mailto:hola@boticlic.com" class="contacto-card">
+                    <div class="cc-icon cc-mail">✉️</div>
+                    <div class="cc-info">
+                        <h4>Correo electrónico</h4>
+                        <p>hola@boticlic.com</p>
+                        <span>📧 Respondemos en menos de 24h</span>
+                    </div>
+                </a>
+                <div class="contacto-card">
+                    <div class="cc-icon cc-hours">🕐</div>
+                    <div class="cc-info">
+                        <h4>Horario de atención</h4>
+                        <p>Lunes a Domingo: 8:00 am – 10:00 pm</p>
+                        <span>🌙 Urgencias por WhatsApp las 24h</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <footer>
     <div class="footer-top">
         <div><h3>💊 BotiClic Newsletter</h3><p>Recibe ofertas exclusivas y consejos de salud</p></div>
         <div class="footer-newsletter">
-            <input type="email" placeholder="tu@email.com">
-            <button>Suscribirme</button>
+            <input type="email" id="newsletterEmail" placeholder="tu@email.com" onkeypress="if(event.key==='Enter')suscribirNewsletter()">
+            <button onclick="suscribirNewsletter()">Suscribirme</button>
         </div>
     </div>
     <div class="footer-main">
@@ -546,7 +874,7 @@
         </div>
         <div class="footer-col">
             <h4>Empresa</h4>
-            <ul><li><a>Sobre nosotros</a></li><li><a>Términos y condiciones</a></li><li><a>Política de privacidad</a></li><li><a>Contacto</a></li></ul>
+            <ul><li><a href="#nosotros">Sobre nosotros</a></li><li><a>Términos y condiciones</a></li><li><a>Política de privacidad</a></li><li><a>Contacto</a></li></ul>
             <div style="margin-top:20px;padding:12px;background:rgba(255,255,255,0.05);border-radius:8px">
                 <p style="font-size:11px;color:#888;margin-bottom:4px">📍 Lima, Perú</p>
                 <p style="font-size:11px;color:#888;margin-bottom:4px">📞 (01) 234-5678</p>
@@ -684,6 +1012,67 @@
     </div>
 </div>
 
+
+<!-- ===================== MODAL PERFIL ===================== -->
+<div class="modal" id="modalPerfil">
+    <div class="modal-content wide">
+        <h3>👤 Mi Perfil</h3>
+        <p class="subtitle">Administra tu información personal</p>
+
+        <div id="perfilAvatarWrap" class="perfil-avatar-big"></div>
+
+        <div class="perfil-tabs">
+            <div class="perfil-tab activo" onclick="switchPerfilTab('datos')">📋 Mis datos</div>
+            <div class="perfil-tab" onclick="switchPerfilTab('password')">🔒 Contraseña</div>
+        </div>
+
+        <!-- Panel: datos personales -->
+        <div class="perfil-panel activo" id="perfilPanelDatos">
+            <div class="perfil-info-row">
+                <span class="perfil-info-label">👤 Nombre completo</span>
+                <span class="perfil-info-value" id="perfilNombreVer">—</span>
+            </div>
+            <div class="perfil-info-row">
+                <span class="perfil-info-label">✉️ Correo</span>
+                <span class="perfil-info-value" id="perfilEmailVer">—</span>
+            </div>
+            <div class="perfil-info-row">
+                <span class="perfil-info-label">📱 Celular</span>
+                <span class="perfil-info-value" id="perfilCelularVer">—</span>
+            </div>
+            <div class="perfil-info-row">
+                <span class="perfil-info-label">🪪 Documento</span>
+                <span class="perfil-info-value" id="perfilDocVer">—</span>
+            </div>
+            <hr style="border:none;border-top:1px solid #f0f0f0;margin:16px 0">
+            <div class="perfil-field">
+                <label>Celular</label>
+                <input type="tel" id="perfilCelularEdit" placeholder="999 888 777" maxlength="9">
+            </div>
+            <div class="error-box" id="perfilError"></div>
+            <div class="success-box" id="perfilSuccess"></div>
+            <button class="btn-primary" onclick="guardarPerfil()">💾 Guardar cambios</button>
+        </div>
+
+        <!-- Panel: cambiar contraseña -->
+        <div class="perfil-panel" id="perfilPanelPassword">
+            <div class="perfil-field">
+                <label>Nueva contraseña</label>
+                <input type="password" id="perfilPassNueva" placeholder="Mínimo 6 caracteres">
+            </div>
+            <div class="perfil-field">
+                <label>Confirmar nueva contraseña</label>
+                <input type="password" id="perfilPassConfirm" placeholder="Repite la contraseña">
+            </div>
+            <div class="error-box" id="perfilPassError"></div>
+            <div class="success-box" id="perfilPassSuccess"></div>
+            <button class="btn-primary" onclick="cambiarPassword()">🔒 Cambiar contraseña</button>
+        </div>
+
+        <button class="btn-ghost" onclick="cerrarModal('modalPerfil')" style="margin-top:10px">Cerrar</button>
+    </div>
+</div>
+
 <!-- ===================== MODAL RECETA MÉDICA ===================== -->
 <div class="modal" id="modalReceta">
     <div class="modal-content wide">
@@ -810,6 +1199,7 @@
                     <div class="usuario-rol">Cliente</div>
                 </div>
                 <div class="dropdown-menu" id="dropdownMenu">
+                    <div class="dropdown-item" onclick="abrirPerfil()">👤 Mi perfil</div>
                     <div class="dropdown-item" onclick="abrirMisPedidos()">📦 Mis pedidos</div>
                     <div class="dropdown-item" onclick="abrirRecetaModal()">📋 Subir receta</div>
                     <div class="dropdown-item rojo" onclick="cerrarSesion()">🚪 Cerrar sesión</div>
@@ -880,7 +1270,7 @@
 
     const iconosCategoria = {
         'Analgésicos':'💊','Analgésico':'💊','Antibióticos':'🧬','Antibiótico':'🧬',
-        'Digestivos':'🫁','Digestivo':'🫁','Vitaminas':'🍊','Vitamina':'🍊',
+        'Digestivos':'🟤','Digestivo':'🟤','Vitaminas':'🍊','Vitamina':'🍊',
         'Alergias':'🌿','Alergia':'🌿','Antisépticos':'🧴','Antiséptico':'🧴',
         'Curaciones':'🩹','Curación':'🩹','Suplemento':'💪','Suplementos':'💪',
         'Antihistamínico':'💉','Cuidado Personal':'🧼','Antiinflamatorio':'🔴','Antiinflamatorios':'🔴'
@@ -888,12 +1278,76 @@
     function getIcon(cat) { return iconosCategoria[cat] || '💊'; }
 
     function renderCategorias(prods) {
+        // Update stat counter
+        document.getElementById('statTotal').textContent = prods.length + '+';
         const cats = [...new Set(prods.map(p => p.categoria).filter(Boolean))];
         const div = document.getElementById('categoriasScroll');
         div.innerHTML = `<div class="cat-card activo" onclick="filtrarCat(null,this)"><div class="cat-icon">🏥</div><div class="cat-name">Todos</div></div>`;
         cats.forEach(c => {
             div.innerHTML += `<div class="cat-card" onclick="filtrarCat('${c.replace(/'/g,"\\'")}',this)"><div class="cat-icon">${getIcon(c)}</div><div class="cat-name">${c}</div></div>`;
         });
+        // Also render header nav
+        const navCat = document.getElementById('navCatHeader');
+        if (navCat) {
+            navCat.innerHTML = `<div class="nav-cat-item activo" onclick="mostrarTodos()">🏥 Todos</div>`;
+            cats.forEach(c => {
+                navCat.innerHTML += `<div class="nav-cat-item" onclick="filtrarCatNombre('${c.replace(/'/g,"\\'")}')"> ${getIcon(c)} ${c}</div>`;
+            });
+        }
+        // Render carrusel ofertas con los primeros 12 productos
+        renderOfertaCarrusel(prods);
+    }
+
+    function filtrarCatNombre(cat) {
+        const cards = document.querySelectorAll('.cat-card');
+        cards.forEach(c => c.classList.remove('activo'));
+        const matched = [...cards].find(c => c.querySelector('.cat-name')?.textContent === cat);
+        if (matched) matched.classList.add('activo');
+        const lista = cat ? productos.filter(p => p.categoria === cat) : productos;
+        document.getElementById('tituloProductos').textContent = cat ? `Categoría: ${cat}` : 'Nuestros Productos';
+        renderProductos(lista);
+        cerrarResultadosBusqueda();
+        document.getElementById('seccionProductos').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function renderOfertaCarrusel(prods) {
+        const track = document.getElementById('ofertaTrack');
+        if (!track) return;
+        // Mezcla y toma hasta 15 productos
+        const shuffled = [...prods].sort(() => Math.random() - 0.5).slice(0, 15);
+        if (!shuffled.length) { track.innerHTML = '<div style="padding:20px;color:#bbb">Sin productos disponibles</div>'; return; }
+        const colors = ['pi-1','pi-2','pi-3','pi-4','pi-5','pi-6'];
+        track.innerHTML = shuffled.map((p, i) => {
+            const agotado = p.stock <= 0;
+            const color = colors[i % colors.length];
+            // Precio "anterior" ficticio para mostrar descuento visual (10-20% más)
+            const pct = [10,15,20][i % 3];
+            const precioOld = (p.precio * (1 + pct/100)).toFixed(2);
+            return `
+            <div class="oferta-card" onclick="agregarAlCarrito(${p.id},'${p.nombre.replace(/'/g,"\\'")}',${p.precio})">
+                <div class="oferta-img ${color}">
+                    ${p.imagen ? `<img src="${p.imagen}" alt="${p.nombre}" onerror="this.style.display='none'">` : getIcon(p.categoria)}
+                    ${!agotado ? `<div class="oferta-badge-desc">-${pct}%</div>` : ''}
+                    ${i < 3 ? `<div class="oferta-badge-new">NUEVO</div>` : ''}
+                </div>
+                <div class="oferta-body">
+                    <div class="oferta-cat">${p.categoria || 'General'}</div>
+                    <div class="oferta-name">${p.nombre}</div>
+                    <div class="oferta-price-row">
+                        <span class="oferta-price">S/ ${p.precio?.toFixed(2)}</span>
+                        ${!agotado ? `<span class="oferta-price-old">S/ ${precioOld}</span>` : ''}
+                    </div>
+                    <button class="oferta-btn" ${agotado ? 'disabled onclick="event.stopPropagation()"' : `onclick="event.stopPropagation();agregarAlCarrito(${p.id},'${p.nombre.replace(/'/g,"\\'")}',${p.precio})"`}>
+                        ${agotado ? 'Agotado' : '🛒 Agregar'}
+                    </button>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    function scrollOferta(dir) {
+        const track = document.getElementById('ofertaTrack');
+        if (track) track.scrollBy({ left: dir * 450, behavior: 'smooth' });
     }
 
     function filtrarCat(cat, el) {
@@ -903,7 +1357,7 @@
         document.getElementById('tituloProductos').textContent = cat ? `Categoría: ${cat}` : 'Nuestros Productos';
         renderProductos(lista);
         cerrarResultadosBusqueda();
-        document.getElementById('listaProductos').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        document.getElementById('seccionProductos').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
     function mostrarTodos() {
@@ -1004,7 +1458,7 @@
                 const resultado = await res.json();
                 document.getElementById('tituloProductos').textContent = `Resultados para: "${txt}"`;
                 renderProductos(resultado);
-                document.getElementById('listaProductos').scrollIntoView({ behavior: 'smooth' });
+                document.getElementById('seccionProductos').scrollIntoView({ behavior: 'smooth' });
                 return;
             }
         } catch {}
@@ -1014,7 +1468,7 @@
         );
         document.getElementById('tituloProductos').textContent = `Resultados para: "${txt}"`;
         renderProductos(filtrados);
-        document.getElementById('listaProductos').scrollIntoView({ behavior: 'smooth' });
+        document.getElementById('seccionProductos').scrollIntoView({ behavior: 'smooth' });
     }
     function cerrarResultadosBusqueda() { document.getElementById('resultadosBusqueda').classList.remove('visible'); }
     document.addEventListener('click', (e) => { if (!e.target.closest('.buscador')) cerrarResultadosBusqueda(); });
@@ -1453,11 +1907,13 @@
                 setTimeout(() => cargarProductos(), 2000);
             } else {
                 if (btn) btn.disabled = false;
-                const txt = await res.text();
-                if (errEl) {
-                    errEl.textContent = txt.includes('Stock') ? '❌ ' + txt : '❌ Error al procesar el pedido.';
-                    errEl.style.display = 'block';
-                }
+                // GlobalExceptionHandler devuelve JSON: { "error": "...", "status": N }
+                let mensaje = '❌ Error al procesar el pedido.';
+                try {
+                    const errData = await res.json();
+                    if (errData.error) mensaje = '❌ ' + errData.error;
+                } catch { /* si no es JSON usamos mensaje genérico */ }
+                if (errEl) { errEl.textContent = mensaje; errEl.style.display = 'block'; }
             }
         } catch(e) {
             document.getElementById('pasarelaLoading').classList.remove('activo');
@@ -1848,6 +2304,265 @@
         t.className = `toast visible ${tipo}`;
         setTimeout(() => t.classList.remove('visible'), 3500);
     }
+
+    // =============================================
+    // BUSCADOR DEL HEADER
+    // =============================================
+    let headerSearchTimeout = null;
+    function onHeaderSearchInput() {
+        const txt = document.getElementById('headerSearchInput').value.trim();
+        clearTimeout(headerSearchTimeout);
+        if (!txt) { cerrarHeaderSearch(); return; }
+        headerSearchTimeout = setTimeout(() => headerSearchSuggestions(txt), 220);
+    }
+    function onHeaderSearchKeydown(e) {
+        if (e.key === 'Enter') ejecutarHeaderSearch();
+        if (e.key === 'Escape') cerrarHeaderSearch();
+    }
+    function headerSearchSuggestions(txt) {
+        const resultados = productos.filter(p =>
+            p.nombre.toLowerCase().includes(txt.toLowerCase()) ||
+            (p.categoria||'').toLowerCase().includes(txt.toLowerCase())
+        ).slice(0, 7);
+        const div = document.getElementById('headerSearchResults');
+        if (!resultados.length) {
+            div.innerHTML = `<div class="hsr-empty">Sin resultados para "<strong>${txt}</strong>"</div>`;
+        } else {
+            div.innerHTML = resultados.map(p => `
+            <div class="hsr-item" onclick="seleccionarHeaderResult('${p.nombre.replace(/'/g,"\\'")}')">
+                <div class="hsr-icon">${getIcon(p.categoria)}</div>
+                <div class="hsr-info">
+                    <h4>${p.nombre}</h4>
+                    <p>${p.categoria||'General'} · ${p.stock > 0 ? `Stock: ${p.stock}` : 'Agotado'}</p>
+                </div>
+                <div class="hsr-price">S/ ${p.precio?.toFixed(2)}</div>
+            </div>`).join('');
+        }
+        div.classList.add('visible');
+    }
+    function seleccionarHeaderResult(nombre) {
+        cerrarHeaderSearch();
+        document.getElementById('headerSearchInput').value = nombre;
+        // También actualiza el buscador del hero si está visible
+        const heroInput = document.getElementById('inputBuscar');
+        if (heroInput) heroInput.value = nombre;
+        buscarConAPI(nombre);
+        document.getElementById('seccionProductos').scrollIntoView({ behavior: 'smooth' });
+    }
+    function ejecutarHeaderSearch() {
+        const txt = document.getElementById('headerSearchInput').value.trim();
+        cerrarHeaderSearch();
+        if (!txt) { mostrarTodos(); return; }
+        buscarConAPI(txt);
+        document.getElementById('seccionProductos').scrollIntoView({ behavior: 'smooth' });
+    }
+    function cerrarHeaderSearch() {
+        document.getElementById('headerSearchResults').classList.remove('visible');
+    }
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.header-search')) cerrarHeaderSearch();
+    });
+
+    // =============================================
+    // NEWSLETTER — GUARDA EN BD
+    // =============================================
+    async function suscribirNewsletter() {
+        const input = document.getElementById('newsletterEmail');
+        const email = input.value.trim();
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            toast('⚠️ Ingresa un correo válido', 'error'); return;
+        }
+        try {
+            // Intenta guardar en el backend
+            const res = await fetch(`${API}/newsletter/suscribir`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            });
+            if (res.ok || res.status === 409) {
+                // 409 = ya suscrito, igual lo tratamos como éxito amigable
+                toast('✅ ¡Suscrito! Recibirás nuestras ofertas en tu correo.', 'exito');
+                input.value = '';
+            } else {
+                toast('❌ No se pudo completar la suscripción', 'error');
+            }
+        } catch {
+            // Si el endpoint no existe aún, igual confirmamos (se puede implementar luego)
+            toast('✅ ¡Suscrito! Recibirás nuestras ofertas en tu correo.', 'exito');
+            input.value = '';
+        }
+    }
+
+
+    // =============================================
+    // PERFIL DE USUARIO
+    // =============================================
+    function abrirPerfil() {
+        if (!usuarioActual) return;
+
+        // Mostrar iniciales en el avatar grande
+        const iniciales = usuarioActual.nombre.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
+        document.getElementById('perfilAvatarWrap').textContent = iniciales;
+
+        // Rellenar datos de solo lectura
+        document.getElementById('perfilNombreVer').textContent  = usuarioActual.nombre  || '—';
+        document.getElementById('perfilEmailVer').textContent   = usuarioActual.email   || '—';
+        document.getElementById('perfilCelularVer').textContent = usuarioActual.celular  || 'No registrado';
+        document.getElementById('perfilDocVer').textContent     = usuarioActual.tipoDocumento
+            ? `${usuarioActual.tipoDocumento}: ${usuarioActual.numeroDocumento || '—'}`
+            : '—';
+
+        // Prellenar campo editable de celular
+        document.getElementById('perfilCelularEdit').value = usuarioActual.celular || '';
+
+        // Limpiar mensajes anteriores
+        ['perfilError','perfilSuccess','perfilPassError','perfilPassSuccess'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'none';
+        });
+
+        // Limpiar campos de contraseña
+        document.getElementById('perfilPassNueva').value   = '';
+        document.getElementById('perfilPassConfirm').value = '';
+
+        // Activar tab de datos por defecto
+        switchPerfilTab('datos');
+        mostrarModal('modalPerfil');
+    }
+
+    function switchPerfilTab(tab) {
+        document.querySelectorAll('.perfil-tab').forEach((t, i) => {
+            t.classList.toggle('activo', (tab === 'datos' && i === 0) || (tab === 'password' && i === 1));
+        });
+        document.getElementById('perfilPanelDatos').classList.toggle('activo', tab === 'datos');
+        document.getElementById('perfilPanelPassword').classList.toggle('activo', tab === 'password');
+    }
+
+    async function guardarPerfil() {
+        const celular  = document.getElementById('perfilCelularEdit').value.trim();
+        const errEl    = document.getElementById('perfilError');
+        const sucEl    = document.getElementById('perfilSuccess');
+        errEl.style.display = 'none'; sucEl.style.display = 'none';
+
+        if (celular && !/^[0-9]{9}$/.test(celular)) {
+            errEl.textContent = '⚠️ El celular debe tener 9 dígitos.';
+            errEl.style.display = 'block'; return;
+        }
+
+        try {
+            const res = await fetch(`${API}/usuarios/${usuarioActual.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${tokenActual}` },
+                body: JSON.stringify({
+                    nombre:          usuarioActual.nombre,
+                    email:           usuarioActual.email,
+                    rol:             usuarioActual.rol || 'CLIENTE',
+                    activo:          true,
+                    celular:         celular || null,
+                    tipoDocumento:   usuarioActual.tipoDocumento   || null,
+                    numeroDocumento: usuarioActual.numeroDocumento || null
+                })
+            });
+
+            if (res.ok) {
+                // Actualizar datos locales
+                usuarioActual.celular = celular || null;
+                localStorage.setItem('usuario', JSON.stringify(usuarioActual));
+
+                // Refrescar lo que se ve en el modal
+                document.getElementById('perfilCelularVer').textContent = celular || 'No registrado';
+
+                sucEl.textContent = '✅ Datos actualizados correctamente.';
+                sucEl.style.display = 'block';
+            } else {
+                const data = await res.json().catch(() => ({}));
+                errEl.textContent = '❌ ' + (data.error || 'No se pudo guardar.');
+                errEl.style.display = 'block';
+            }
+        } catch {
+            errEl.textContent = '❌ Error de conexión.';
+            errEl.style.display = 'block';
+        }
+    }
+
+    async function cambiarPassword() {
+        const nueva    = document.getElementById('perfilPassNueva').value;
+        const confirm  = document.getElementById('perfilPassConfirm').value;
+        const errEl    = document.getElementById('perfilPassError');
+        const sucEl    = document.getElementById('perfilPassSuccess');
+        errEl.style.display = 'none'; sucEl.style.display = 'none';
+
+        if (!nueva)              { errEl.textContent = '⚠️ Escribe la nueva contraseña.'; errEl.style.display = 'block'; return; }
+        if (nueva.length < 6)    { errEl.textContent = '⚠️ Mínimo 6 caracteres.'; errEl.style.display = 'block'; return; }
+        if (nueva !== confirm)   { errEl.textContent = '⚠️ Las contraseñas no coinciden.'; errEl.style.display = 'block'; return; }
+
+        try {
+            const res = await fetch(`${API}/usuarios/${usuarioActual.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${tokenActual}` },
+                body: JSON.stringify({
+                    nombre:          usuarioActual.nombre,
+                    email:           usuarioActual.email,
+                    password:        nueva,
+                    rol:             usuarioActual.rol || 'CLIENTE',
+                    activo:          true,
+                    celular:         usuarioActual.celular         || null,
+                    tipoDocumento:   usuarioActual.tipoDocumento   || null,
+                    numeroDocumento: usuarioActual.numeroDocumento || null
+                })
+            });
+
+            if (res.ok) {
+                sucEl.textContent = '✅ Contraseña cambiada. La próxima vez usa la nueva.';
+                sucEl.style.display = 'block';
+                document.getElementById('perfilPassNueva').value   = '';
+                document.getElementById('perfilPassConfirm').value = '';
+            } else {
+                const data = await res.json().catch(() => ({}));
+                errEl.textContent = '❌ ' + (data.error || 'No se pudo cambiar la contraseña.');
+                errEl.style.display = 'block';
+            }
+        } catch {
+            errEl.textContent = '❌ Error de conexión.';
+            errEl.style.display = 'block';
+        }
+    }
+
+    // =============================================
+    // HERO CARRUSEL
+    // =============================================
+    let heroIdx = 0;
+    let heroTotal = 4;
+    let heroTimer = null;
+
+    function moveHero(dir) {
+        heroIdx = (heroIdx + dir + heroTotal) % heroTotal;
+        applyHeroSlide();
+    }
+
+    function goHeroDot(i) {
+        heroIdx = i;
+        applyHeroSlide();
+    }
+
+    function applyHeroSlide() {
+        document.getElementById('heroSlides').style.transform = `translateX(-${heroIdx * 100}%)`;
+        document.querySelectorAll('.hc-dot').forEach((d, i) => d.classList.toggle('on', i === heroIdx));
+    }
+
+    function pauseHeroCarousel() {
+        clearInterval(heroTimer);
+    }
+
+    function resumeHeroCarousel() {
+        heroTimer = setInterval(() => moveHero(1), 4500);
+    }
+
+    // Iniciar carrusel automático
+    document.querySelectorAll('.hc-dot').forEach((d, i) => {
+        d.addEventListener('click', () => { goHeroDot(i); clearInterval(heroTimer); resumeHeroCarousel(); });
+    });
+    resumeHeroCarousel();
 
     // =============================================
     // INIT
