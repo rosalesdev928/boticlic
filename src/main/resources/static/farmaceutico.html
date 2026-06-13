@@ -307,6 +307,32 @@
     <!-- PEDIDOS -->
     <div class="sec" id="sec-pedidos">
       <div class="sh"><div class="sh-title">Gestión de Pedidos</div><button class="btn btn-p btn-sm" onclick="cargarPedidos()">↻ Actualizar</button></div>
+
+      <!-- BUSCADOR -->
+      <div style="display:flex;gap:10px;margin-bottom:10px;align-items:center">
+        <input type="text" id="pedBusca" placeholder="🔍 Buscar por #ID, nombre o email del cliente..."
+               oninput="buscarPedido(this.value)"
+               style="flex:1;padding:8px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif;outline:none">
+        <select id="pedBuscaEstado" onchange="buscarPedidoFiltro()"
+                style="padding:8px 11px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:12px;font-family:'DM Sans',sans-serif;outline:none">
+          <option value="">Todos los estados</option>
+          <option value="PENDIENTE">⏳ Pendiente</option>
+          <option value="CONFIRMADO">✅ Confirmado</option>
+          <option value="EN_CAMINO">🚚 En camino</option>
+          <option value="ENTREGADO">📬 Entregado</option>
+          <option value="RECHAZADO">❌ Rechazado</option>
+        </select>
+        <select id="pedBuscaPago" onchange="buscarPedidoFiltro()"
+                style="padding:8px 11px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:12px;font-family:'DM Sans',sans-serif;outline:none">
+          <option value="">Todos los métodos</option>
+          <option value="YAPE">📱 Yape</option>
+          <option value="EFECTIVO">💵 Efectivo</option>
+          <option value="TARJETA">💳 Tarjeta</option>
+          <option value="PLIN">📲 Plin</option>
+        </select>
+      </div>
+
+      <!-- FILTROS POR ESTADO -->
       <div class="fb" id="fbPedidos">
         <button class="fbtn on" onclick="filtrarPed('TODOS',this)">Todos</button>
         <button class="fbtn" onclick="filtrarPed('PENDIENTE',this)">⏳ Pendiente</button>
@@ -315,8 +341,19 @@
         <button class="fbtn" onclick="filtrarPed('ENTREGADO',this)">📬 Entregado</button>
         <button class="fbtn" onclick="filtrarPed('RECHAZADO',this)">❌ Rechazado</button>
       </div>
+
       <div class="card">
         <table class="dt">
+          <colgroup>
+            <col style="width:60px">
+            <col style="width:200px">
+            <col style="width:160px">
+            <col style="width:90px">
+            <col style="width:100px">
+            <col style="width:120px">
+            <col style="width:130px">
+            <col style="width:130px">
+          </colgroup>
           <thead><tr><th>ID</th><th>Cliente</th><th>Dirección</th><th>Total</th><th>Pago</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr></thead>
           <tbody id="tblPed"><tr><td colspan="8" class="loading">Cargando...</td></tr></tbody>
         </table>
@@ -793,12 +830,33 @@
     }catch(e){ toast('Error pedidos',false); }
   }
 
+  // PAGINACIÓN
+  let pedPagActual = 1;
+  const PED_POR_PAG = 15;
+  let pedListaActual = [];
+
   function renderPed(lista){
-    document.getElementById('tblPed').innerHTML=lista.length
-            ? lista.sort((a,b)=>b.id-a.id).map(p=>`<tr>
+    pedListaActual = lista.sort((a,b)=>b.id-a.id);
+    pedPagActual = 1;
+    renderPedPagina();
+  }
+
+  function renderPedPagina(){
+    const lista = pedListaActual;
+    const total = lista.length;
+    const totalPags = Math.max(1, Math.ceil(total / PED_POR_PAG));
+    const desde = (pedPagActual-1)*PED_POR_PAG;
+    const hasta = Math.min(desde+PED_POR_PAG, total);
+    const pagina = lista.slice(desde, hasta);
+
+    document.getElementById('tblPed').innerHTML = pagina.length
+            ? pagina.map(p=>`<tr>
         <td class="mono" style="color:var(--text2)">#${p.id}</td>
         <td><b>${p.usuario?.nombre||'—'}</b><br><span style="font-size:10px;color:var(--text2)">${p.usuario?.email||''}</span></td>
-        <td style="font-size:11px;color:var(--text2);max-width:110px">${p.direccionEntrega||'—'}</td>
+        <td style="font-size:11px;color:var(--text2);max-width:110px">
+          ${(p.direccionEntrega||'—').split('||')[0].trim()}
+          ${p.direccionEntrega&&p.direccionEntrega.includes('|| RECOGE:')?'<br><span style="font-size:9px;background:rgba(59,127,255,.15);color:#60a5fa;padding:1px 5px;border-radius:4px;font-weight:600">👤 Otra persona</span>':''}
+        </td>
         <td class="mono" style="color:var(--teal);font-weight:600">S/ ${(p.total||0).toFixed(2)}</td>
         <td style="font-size:11px;color:var(--text2)">${p.metodoPago||'—'}</td>
         <td>${badgePed(p.estado)}</td>
@@ -808,12 +866,64 @@
           <button class="btn btn-p btn-sm" onclick="abrirEstado(${p.id},'${p.estado}')">🔄 Estado</button>
         </td></tr>`).join('')
             : '<tr><td colspan="8" class="empty">Sin pedidos</td></tr>';
+
+    // Paginación
+    let pag = document.getElementById('pedPaginacion');
+    if (!pag) {
+      pag = document.createElement('div');
+      pag.id = 'pedPaginacion';
+      pag.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-top:1px solid var(--border);font-size:12px;color:var(--text2)';
+      document.getElementById('tblPed').parentElement.appendChild(pag);
+    }
+    pag.innerHTML = `
+      <span>Mostrando ${desde+1}-${hasta} de ${total} pedidos</span>
+      <div style="display:flex;gap:6px;align-items:center">
+        <button onclick="cambiarPagPed(-1)" ${pedPagActual===1?'disabled':''} style="padding:4px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:${pedPagActual===1?'var(--text2)':'var(--text)'};cursor:${pedPagActual===1?'not-allowed':'pointer'};font-family:'DM Sans',sans-serif;font-size:12px">← Ant</button>
+        <span style="color:var(--accent);font-weight:600">${pedPagActual} / ${totalPags}</span>
+        <button onclick="cambiarPagPed(1)" ${pedPagActual===totalPags?'disabled':''} style="padding:4px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:${pedPagActual===totalPags?'var(--text2)':'var(--text)'};cursor:${pedPagActual===totalPags?'not-allowed':'pointer'};font-family:'DM Sans',sans-serif;font-size:12px">Sig →</button>
+      </div>`;
+  }
+
+  function cambiarPagPed(dir){
+    const totalPags = Math.ceil(pedListaActual.length / PED_POR_PAG);
+    pedPagActual = Math.max(1, Math.min(totalPags, pedPagActual + dir));
+    renderPedPagina();
   }
 
   function filtrarPed(est,btn){
     document.querySelectorAll('#fbPedidos .fbtn').forEach(b=>b.classList.remove('on'));
     btn.classList.add('on');
     renderPed(est==='TODOS'?pedData:pedData.filter(p=>p.estado===est));
+  }
+
+  function buscarPedidoFiltro(){
+    const est   = document.getElementById('pedBuscaEstado')?.value || '';
+    const pago  = document.getElementById('pedBuscaPago')?.value || '';
+    const txt   = (document.getElementById('pedBusca')?.value || '').toLowerCase().trim();
+    let res = [...pedData];
+    if (est)  res = res.filter(p => p.estado === est);
+    if (pago) res = res.filter(p => (p.metodoPago||'').includes(pago));
+    if (txt)  res = res.filter(p =>
+            String(p.id).includes(txt) ||
+            (p.usuario?.nombre||'').toLowerCase().includes(txt) ||
+            (p.usuario?.email||'').toLowerCase().includes(txt)
+    );
+    // Reset tab filter UI
+    document.querySelectorAll('#fbPedidos .fbtn').forEach(b=>b.classList.remove('on'));
+    document.querySelector('#fbPedidos .fbtn')?.classList.add('on');
+    renderPed(res);
+  }
+
+  function buscarPedido(txt){
+    txt = txt.toLowerCase().trim();
+    if (!txt) { renderPed(pedData); return; }
+    const res = pedData.filter(p =>
+            String(p.id).includes(txt) ||
+            (p.usuario?.nombre||'').toLowerCase().includes(txt) ||
+            (p.usuario?.email||'').toLowerCase().includes(txt) ||
+            (p.metodoPago||'').toLowerCase().includes(txt)
+    );
+    renderPed(res);
   }
 
   function verPedido(id){
@@ -823,7 +933,8 @@
     document.getElementById('mPedBody').innerHTML=`
     <div class="info-row"><span class="lbl">Cliente</span><span class="val">${p.usuario?.nombre||'—'}</span></div>
     <div class="info-row"><span class="lbl">Email</span><span class="val" style="font-size:11px">${p.usuario?.email||'—'}</span></div>
-    <div class="info-row"><span class="lbl">Dirección</span><span class="val" style="text-align:right;max-width:250px">${p.direccionEntrega||'—'}</span></div>
+    <div class="info-row"><span class="lbl">Dirección</span><span class="val" style="text-align:right;max-width:250px">${(p.direccionEntrega||'—').split('||')[0].trim()}</span></div>
+            ${renderRecogeInfo(p.direccionEntrega)}
     <div class="info-row"><span class="lbl">Método de pago</span><span class="val">${p.metodoPago||'—'}</span></div>
     <div class="info-row"><span class="lbl">Estado</span><span class="val">${badgePed(p.estado)}</span></div>
     <div class="info-row"><span class="lbl">Fecha</span><span class="val mono" style="font-size:11px">${fmtFecha(p.fechaCreacion)}</span></div>
@@ -1506,6 +1617,69 @@
       toast('❌ Error de conexión al subir imagen', false);
       return null;
     }
+  }
+
+
+  // ══════════════════════════════════════════════════
+  // VERIFICACIÓN DE PERSONA QUE RECOGE
+  // ══════════════════════════════════════════════════
+  function renderRecogeInfo(direccion) {
+    if (!direccion || !direccion.includes('|| RECOGE:')) return '';
+    const recogeRaw = direccion.split('|| RECOGE:')[1];
+    const partes = recogeRaw.split('|').map(s => s.trim());
+    const nombre = partes[0] || '—';
+    const docPart = partes.find(p => p.includes('DNI:') || p.includes('CE:') || p.includes('PASAPORTE:')) || '';
+    const celPart = partes.find(p => p.startsWith('Cel:')) || '';
+    const emailPart = partes.find(p => p.startsWith('Email:')) || '';
+    const doc = docPart.replace('DNI:','').replace('CE:','').replace('PASAPORTE:','').trim();
+    const tipoDoc = docPart.includes('DNI') ? 'DNI' : docPart.includes('CE') ? 'CE' : 'Pasaporte';
+    const cel = celPart.replace('Cel:','').trim();
+    const email = emailPart.replace('Email:','').trim();
+
+    return `
+        <div style="background:rgba(59,127,255,.08);border:1px solid rgba(59,127,255,.2);border-radius:10px;padding:14px 16px;margin:10px 0">
+            <div style="font-size:11px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">
+                👤 Persona autorizada a recoger
+            </div>
+            <div class="info-row"><span class="lbl">Nombre</span><span class="val" style="color:var(--text)">${nombre}</span></div>
+            ${docPart ? `<div class="info-row"><span class="lbl">${tipoDoc}</span><span class="val" style="color:var(--text)">${doc}</span></div>` : ''}
+            ${cel ? `<div class="info-row"><span class="lbl">Celular</span><span class="val">${cel}</span></div>` : ''}
+            ${email ? `<div class="info-row"><span class="lbl">Email</span><span class="val">${email}</span></div>` : ''}
+            <div style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(59,127,255,.15)">
+                <div style="font-size:11px;color:var(--text2);margin-bottom:8px">⚠️ Verificar identidad antes de entregar el pedido</div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap">
+                    <button class="btn btn-p btn-sm" onclick="marcarVerificado(this)" style="background:#2e7d32">
+                        ✅ Identidad verificada — Entregar
+                    </button>
+                    <button class="btn btn-r btn-sm" onclick="marcarNoVerificado(this)">
+                        ❌ No verificado — No entregar
+                    </button>
+                </div>
+                <div id="verificacionMsg" style="font-size:12px;margin-top:8px;display:none"></div>
+            </div>
+        </div>`;
+  }
+
+  function marcarVerificado(btn) {
+    btn.textContent = '✅ Verificado';
+    btn.disabled = true;
+    btn.nextElementSibling.disabled = true;
+    const msg = document.getElementById('verificacionMsg');
+    msg.style.display = 'block';
+    msg.style.color = '#00e5a0';
+    msg.textContent = '✅ Identidad verificada a las ' + new Date().toLocaleTimeString('es-PE') + ' — Pedido listo para entregar';
+    toast('✅ Identidad verificada — puedes entregar el pedido');
+  }
+
+  function marcarNoVerificado(btn) {
+    btn.textContent = '❌ No verificado';
+    btn.disabled = true;
+    btn.previousElementSibling.disabled = true;
+    const msg = document.getElementById('verificacionMsg');
+    msg.style.display = 'block';
+    msg.style.color = 'var(--red)';
+    msg.textContent = '❌ Identidad NO verificada — No entregar el pedido. Contactar al cliente.';
+    toast('⚠️ No se pudo verificar la identidad', false);
   }
 
 </script>

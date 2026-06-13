@@ -262,6 +262,9 @@
 
     <div class="sb-sec">Admin</div>
     <button class="nb" onclick="go('usuarios',this)"><span class="ic">👥</span> Usuarios</button>
+    <button class="nb" onclick="go('newsletter',this)"><span class="ic">📧</span> Newsletter
+        <span class="cnt info" id="cntNewsletter">0</span>
+    </button>
 
     <div class="sb-bot">
         <div class="u-row">
@@ -321,6 +324,18 @@
         <!-- ═══════════ PEDIDOS ═══════════ -->
         <div class="sec" id="sec-pedidos">
             <div class="sh"><div class="sh-title">Gestión de Pedidos</div><button class="btn btn-p btn-sm" onclick="cargarPedidos()">↻ Actualizar</button></div>
+            <div style="display:flex;gap:10px;margin-bottom:12px;align-items:center">
+                <input type="text" id="pedBusca" placeholder="🔍 Buscar por #ID, nombre, email o método de pago..." oninput="buscarPedidoAdmin(this.value)"
+                       style="flex:1;padding:8px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif;outline:none">
+                <select id="pedBuscaMetodo" onchange="buscarPedidoAdmin(document.getElementById('pedBusca').value)"
+                        style="padding:8px 11px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:12px;font-family:'DM Sans',sans-serif;outline:none">
+                    <option value="">Todos los métodos</option>
+                    <option value="YAPE">📱 Yape</option>
+                    <option value="EFECTIVO">💵 Efectivo</option>
+                    <option value="TARJETA">💳 Tarjeta</option>
+                    <option value="PLIN">📲 Plin</option>
+                </select>
+            </div>
             <div class="fb-row" id="fbPedidos">
                 <button class="fbtn on" onclick="filtrarPed('TODOS',this)">Todos</button>
                 <button class="fbtn" onclick="filtrarPed('PENDIENTE',this)">⏳ Pendiente</button>
@@ -331,6 +346,16 @@
             </div>
             <div class="card">
                 <table class="dt">
+                    <colgroup>
+                        <col style="width:60px">
+                        <col style="width:200px">
+                        <col style="width:150px">
+                        <col style="width:90px">
+                        <col style="width:140px">
+                        <col style="width:110px">
+                        <col style="width:130px">
+                        <col style="width:130px">
+                    </colgroup>
                     <thead><tr><th>ID</th><th>Cliente</th><th>Dirección</th><th>Total</th><th>Pago</th><th>Estado</th><th>Fecha</th><th>Acciones</th></tr></thead>
                     <tbody id="tPed"><tr><td colspan="8" class="loading">Cargando...</td></tr></tbody>
                 </table>
@@ -685,6 +710,41 @@
             </div>
         </div>
 
+
+        <!-- ===== NEWSLETTER ===== -->
+        <div class="sec" id="sec-newsletter">
+            <div class="sh"><div class="sh-title">Newsletter</div></div>
+
+            <!-- Stats row -->
+            <div class="kpis" style="margin-bottom:18px">
+                <div class="kpi"><div class="kpi-val" id="nlTotal">—</div><div class="kpi-lbl">Total suscriptores</div></div>
+                <div class="kpi"><div class="kpi-val" id="nlActivos">—</div><div class="kpi-lbl">Activos</div></div>
+                <div class="kpi"><div class="kpi-val" id="nlHoy">—</div><div class="kpi-lbl">Nuevos hoy</div></div>
+            </div>
+
+            <!-- Search + export bar -->
+            <div class="card">
+                <div class="sbar" style="margin-bottom:14px">
+                    <input type="text" id="nlBusca" placeholder="🔍 Buscar por email..." oninput="filtrarNewsletter(this.value)">
+                    <button class="btn btn-p btn-sm" onclick="exportarNewsletter()">⬇️ Exportar CSV</button>
+                </div>
+                <table class="dt">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Email</th>
+                        <th>Fecha suscripción</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                    </thead>
+                    <tbody id="tNewsletter">
+                    <tr><td colspan="5" class="loading">⏳ Cargando suscriptores...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
     </div><!-- /content -->
 </div><!-- /main -->
 
@@ -813,6 +873,7 @@
         'clientes-top':  { t:'Clientes Top',            s:'Clientes con mayor actividad' },
         'delivery-stats':{ t:'Stats Delivery',          s:'Rendimiento de repartidores' },
         usuarios:        { t:'Gestión de Usuarios',     s:'Administración de cuentas y roles' },
+        newsletter:      { t:'Newsletter',                 s:'Suscriptores registrados en el sistema' },
     };
 
     function go(id, btn){
@@ -838,6 +899,7 @@
         if(id==='clientes-top')     cargarClientesTop();
         if(id==='delivery-stats')   cargarDeliveryStats();
         if(id==='usuarios')         cargarUsuarios();
+        if(id==='newsletter')       cargarNewsletter();
     }
 
     // ── TOAST ─────────────────────────────────────────
@@ -998,22 +1060,81 @@
         }catch(e){ toast('Error pedidos',false); }
     }
 
+    let pedPagActual = 1;
+    const PED_POR_PAG = 15;
+    let pedListaActual = [];
+
+    function buscarPedidoAdmin(txt){
+        txt = (txt||'').toLowerCase().trim();
+        const metodo = document.getElementById('pedBuscaMetodo')?.value || '';
+        let res = [...pedData];
+        if (metodo) res = res.filter(p=>(p.metodoPago||'').includes(metodo));
+        if (txt) res = res.filter(p=>
+            String(p.id).includes(txt) ||
+            (p.usuario?.nombre||'').toLowerCase().includes(txt) ||
+            (p.usuario?.email||'').toLowerCase().includes(txt) ||
+            (p.metodoPago||'').toLowerCase().includes(txt)
+        );
+        // Reset tab filters
+        document.querySelectorAll('#fbPedidos .fbtn').forEach(b=>b.classList.remove('on'));
+        document.querySelector('#fbPedidos .fbtn')?.classList.add('on');
+        renderPed(res);
+    }
+
     function renderPed(lista){
-        document.getElementById('tPed').innerHTML = lista.length
-            ? lista.sort((a,b)=>b.id-a.id).map(p=>`<tr>
+        pedListaActual = lista.sort((a,b)=>b.id-a.id);
+        pedPagActual = 1;
+        renderPedPagina();
+    }
+
+    function renderPedPagina(){
+        const lista = pedListaActual;
+        const total = lista.length;
+        const totalPags = Math.max(1, Math.ceil(total/PED_POR_PAG));
+        const desde = (pedPagActual-1)*PED_POR_PAG;
+        const hasta = Math.min(desde+PED_POR_PAG, total);
+        const pagina = lista.slice(desde, hasta);
+        document.getElementById('tPed').innerHTML = pagina.length
+            ? pagina.map(p=>`<tr>
           <td class="mono" style="color:var(--text2)">#${p.id}</td>
           <td><b>${p.usuario?.nombre||'—'}</b><br><span style="font-size:10px;color:var(--text2)">${p.usuario?.email||''}</span></td>
-          <td style="font-size:11px;color:var(--text2);max-width:120px">${p.direccionEntrega||'—'}</td>
+          <td style="font-size:11px;color:var(--text2);max-width:120px">
+            ${(p.direccionEntrega||'—').split('||')[0].trim().substring(0,40)}${(p.direccionEntrega||'').split('||')[0].trim().length>40?'…':''}
+            ${p.direccionEntrega&&p.direccionEntrega.includes('|| RECOGE:')?'<br><span style="font-size:9px;background:rgba(59,127,255,.15);color:#60a5fa;padding:1px 5px;border-radius:4px;font-weight:600">👤 Otra persona</span>':''}
+          </td>
           <td class="mono" style="color:var(--accent);font-weight:600">S/ ${(p.total||0).toFixed(2)}</td>
           <td style="font-size:11px;color:var(--text2)">${p.metodoPago||'—'}</td>
           <td><span class="badge ${p.estado}">${p.estado}</span></td>
           <td class="mono" style="font-size:10px;color:var(--text2)">${fmtFecha(p.fechaCreacion)}</td>
           <td style="display:flex;gap:5px;flex-wrap:wrap">
-            <button class="btn btn-b btn-sm" onclick="abrirModalEst(${p.id},'${p.estado}')">Estado</button>
+            <button class="btn btn-b btn-sm" onclick="verDetallePedidoAdmin(${p.id})">👁 Ver</button>
+            <button class="btn btn-p btn-sm" onclick="abrirModalEst(${p.id},'${p.estado}')">Estado</button>
             ${p.estado==='CONFIRMADO'?`<button class="btn btn-y btn-sm" onclick="go('delivery',document.querySelectorAll('.nb')[3])">🚚</button>`:''}
           </td>
         </tr>`).join('')
             : '<tr><td colspan="8" class="empty">Sin pedidos</td></tr>';
+
+        // Paginación
+        let pag = document.getElementById('adminPedPaginacion');
+        if (!pag) {
+            pag = document.createElement('div');
+            pag.id = 'adminPedPaginacion';
+            pag.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-top:1px solid var(--border);font-size:12px;color:var(--text2)';
+            document.getElementById('tPed').parentElement.appendChild(pag);
+        }
+        pag.innerHTML = `
+            <span>Mostrando ${desde+1}-${hasta} de ${total} pedidos</span>
+            <div style="display:flex;gap:6px;align-items:center">
+                <button onclick="cambiarPagAdmin(-1)" ${pedPagActual===1?'disabled':''} style="padding:4px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:${pedPagActual===1?'var(--text2)':'var(--text)'};cursor:${pedPagActual===1?'not-allowed':'pointer'};font-family:'DM Sans',sans-serif;font-size:12px">← Ant</button>
+                <span style="color:var(--accent);font-weight:600">${pedPagActual} / ${totalPags}</span>
+                <button onclick="cambiarPagAdmin(1)" ${pedPagActual===totalPags?'disabled':''} style="padding:4px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:${pedPagActual===totalPags?'var(--text2)':'var(--text)'};cursor:${pedPagActual===totalPags?'not-allowed':'pointer'};font-family:'DM Sans',sans-serif;font-size:12px">Sig →</button>
+            </div>`;
+    }
+
+    function cambiarPagAdmin(dir){
+        const totalPags = Math.ceil(pedListaActual.length/PED_POR_PAG);
+        pedPagActual = Math.max(1, Math.min(totalPags, pedPagActual+dir));
+        renderPedPagina();
     }
 
     function filtrarPed(est,btn){
@@ -2114,7 +2235,21 @@
       </tbody>
     </table>
     <div class="footer">BotiClic — Farmacia & Botica · www.boticlic.pe · Documento generado electrónicamente</div>
-    </body></html>`;
+
+
+<!-- MODAL VER PEDIDO ADMIN -->
+<div class="ov" id="mPedAdmin">
+    <div class="modal" style="width:560px">
+        <div class="modal-head"><h3 id="mPedAdminTitle">Pedido #—</h3><button class="modal-close" onclick="closeModal()">×</button></div>
+        <div class="modal-body" id="mPedAdminBody"></div>
+        <div class="modal-foot">
+            <button class="btn btn-ghost btn-sm" onclick="closeModal()">Cerrar</button>
+            <button class="btn btn-p btn-sm" id="mPedAdminEstBtn">Cambiar estado</button>
+        </div>
+    </div>
+</div>
+
+</body></html>`;
         const blob=new Blob([html],{type:'text/html'});
         const url=URL.createObjectURL(blob);
         const win=window.open(url,'_blank','width=900,height=700');
@@ -2160,7 +2295,21 @@
     <div class="t-row"><span>IGV (18%)</span><span>S/ ${venta.igv.toFixed(2)}</span></div>
     <div class="t-row big"><span>TOTAL</span><span>S/ ${venta.total.toFixed(2)}</span></div>
     <div class="thanks"><hr class="line" style="margin-top:12px"><p>✅ ¡Gracias por su compra!</p><p>Conserve su comprobante.</p><hr class="line"><p style="font-size:10px">www.boticlic.pe | @BotiClic</p></div>
-    </body></html>`;
+
+
+<!-- MODAL VER PEDIDO ADMIN -->
+<div class="ov" id="mPedAdmin">
+    <div class="modal" style="width:560px">
+        <div class="modal-head"><h3 id="mPedAdminTitle">Pedido #—</h3><button class="modal-close" onclick="closeModal()">×</button></div>
+        <div class="modal-body" id="mPedAdminBody"></div>
+        <div class="modal-foot">
+            <button class="btn btn-ghost btn-sm" onclick="closeModal()">Cerrar</button>
+            <button class="btn btn-p btn-sm" id="mPedAdminEstBtn">Cambiar estado</button>
+        </div>
+    </div>
+</div>
+
+</body></html>`;
         const blob=new Blob([html],{type:'text/html'});
         const url=URL.createObjectURL(blob);
         const win=window.open(url,'_blank','width=420,height=700,toolbar=0,menubar=0');
@@ -2233,8 +2382,214 @@
         }
     }
 
+    function verDetallePedidoAdmin(id) {
+        const p = pedData.find(x => x.id === id);
+        if (!p) return;
+        document.getElementById('mPedAdminTitle').textContent = `Pedido #${p.id}`;
+        document.getElementById('mPedAdminEstBtn').onclick = () => { closeModal(); abrirModalEst(p.id, p.estado); };
+
+        const dirBase = (p.direccionEntrega || '—').split('||')[0].trim();
+        const tieneRecoge = p.direccionEntrega && p.direccionEntrega.includes('|| RECOGE:');
+
+        let recogeHtml = '';
+        if (tieneRecoge) {
+            const recogeRaw = p.direccionEntrega.split('|| RECOGE:')[1];
+            const partes = recogeRaw.split('|').map(s => s.trim());
+            const nombre = partes[0] || '—';
+            const docPart = partes.find(x => x.includes('DNI:') || x.includes('CE:') || x.includes('PASAPORTE:')) || '';
+            const celPart = partes.find(x => x.startsWith('Cel:')) || '';
+            const emailPart = partes.find(x => x.startsWith('Email:')) || '';
+            const doc = docPart.replace('DNI:','').replace('CE:','').replace('PASAPORTE:','').trim();
+            const tipoDoc = docPart.includes('DNI') ? 'DNI' : docPart.includes('CE') ? 'CE' : 'Pasaporte';
+
+            recogeHtml = `
+            <div style="background:rgba(59,127,255,.08);border:1px solid rgba(59,127,255,.2);border-radius:8px;padding:14px 16px;margin:10px 0">
+                <div style="font-size:10px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">
+                    👤 Persona autorizada a recoger
+                </div>
+                <div class="info-row"><span class="lbl">Nombre</span><span class="val">${nombre}</span></div>
+                ${docPart ? `<div class="info-row"><span class="lbl">${tipoDoc}</span><span class="val">${doc}</span></div>` : ''}
+                ${celPart ? `<div class="info-row"><span class="lbl">Celular</span><span class="val">${celPart.replace('Cel:','').trim()}</span></div>` : ''}
+                ${emailPart ? `<div class="info-row"><span class="lbl">Email</span><span class="val">${emailPart.replace('Email:','').trim()}</span></div>` : ''}
+                <div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(59,127,255,.15);font-size:11px;color:var(--text2)">
+                    ⚠️ Solicitar documento de identidad antes de entregar el pedido
+                </div>
+            </div>`;
+        }
+
+        const prods = (p.detalles || []).map(d =>
+            `<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(37,42,58,.5);font-size:12px">
+                <div><b>${d.producto?.nombre || '—'}</b><br><span style="font-size:10px;color:var(--text2)">x${d.cantidad} × S/ ${(d.precioUnitario||0).toFixed(2)}</span></div>
+                <div class="mono" style="color:var(--accent);font-weight:600">S/ ${((d.precioUnitario||0)*d.cantidad).toFixed(2)}</div>
+            </div>`).join('');
+
+        document.getElementById('mPedAdminBody').innerHTML = `
+            <div class="info-row"><span class="lbl">Cliente</span><span class="val">${p.usuario?.nombre || '—'}</span></div>
+            <div class="info-row"><span class="lbl">Email</span><span class="val">${p.usuario?.email || '—'}</span></div>
+            <div class="info-row"><span class="lbl">Dirección</span><span class="val">${dirBase}</span></div>
+            <div class="info-row"><span class="lbl">Método de pago</span><span class="val">${p.metodoPago || '—'}</span></div>
+            <div class="info-row"><span class="lbl">Estado</span><span class="val"><span class="badge ${p.estado}">${p.estado}</span></span></div>
+            <div class="info-row"><span class="lbl">Fecha</span><span class="val">${fmtFecha(p.fechaCreacion)}</span></div>
+            <div class="info-row"><span class="lbl">Total</span><span class="val mono" style="color:var(--accent);font-size:16px;font-weight:700">S/ ${(p.total||0).toFixed(2)}</span></div>
+            ${recogeHtml}
+            <div style="margin-top:14px;padding-top:10px;border-top:1px solid var(--border)">
+                <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;margin-bottom:8px">Productos</div>
+                ${prods || '<div style="color:var(--text2);font-size:12px">Sin detalles</div>'}
+            </div>`;
+
+        document.getElementById('mPedAdmin').classList.add('open');
+    }
+
+
     // ── INIT ──────────────────────────────────────────
     cargarDashboard();
+
+    // ═══════════════════════════════════════════════
+    // NEWSLETTER
+    // ═══════════════════════════════════════════════
+    let newsletterData = [];
+
+    async function cargarNewsletter() {
+        try {
+            const data = await fetch(`${API}/newsletter/suscriptores`, { headers: H() }).then(r => r.json());
+            newsletterData = data;
+
+            // Stats
+            const hoy = new Date().toISOString().slice(0, 10);
+            const activos = data.filter(s => s.activo).length;
+            const nuevosHoy = data.filter(s => s.fechaSuscripcion && s.fechaSuscripcion.startsWith(hoy)).length;
+
+            document.getElementById('nlTotal').textContent   = data.length;
+            document.getElementById('nlActivos').textContent = activos;
+            document.getElementById('nlHoy').textContent     = nuevosHoy;
+            document.getElementById('cntNewsletter').textContent = activos;
+
+            renderNewsletter(data);
+        } catch(e) {
+            document.getElementById('tNewsletter').innerHTML =
+                '<tr><td colspan="5" class="empty">❌ Error al cargar suscriptores</td></tr>';
+        }
+    }
+
+    function renderNewsletter(lista) {
+        const tbody = document.getElementById('tNewsletter');
+        if (!lista.length) {
+            tbody.innerHTML = '<tr><td colspan="5" class="empty">📭 No hay suscriptores aún</td></tr>';
+            return;
+        }
+        tbody.innerHTML = lista.map(s => `
+            <tr>
+                <td>${s.id}</td>
+                <td><strong>${s.email}</strong></td>
+                <td>${s.fechaSuscripcion ? s.fechaSuscripcion.replace('T', ' ').slice(0,16) : '—'}</td>
+                <td>
+                    <span class="badge ${s.activo ? 'bg-ok' : 'bg-warn'}">
+                        ${s.activo ? '✅ Activo' : '🔴 Inactivo'}
+                    </span>
+                </td>
+                <td>
+                    ${s.activo
+            ? `<button class="btn btn-ghost btn-sm" onclick="desuscribirAdmin('${s.email}')">🗑️ Dar de baja</button>`
+            : `<span style="color:var(--text2);font-size:11px">Inactivo</span>`
+        }
+                </td>
+            </tr>`).join('');
+    }
+
+    function filtrarNewsletter(txt) {
+        const filtrado = newsletterData.filter(s =>
+            s.email.toLowerCase().includes(txt.toLowerCase())
+        );
+        renderNewsletter(filtrado);
+    }
+
+    let nlEmailPendiente = null;
+
+    function desuscribirAdmin(email) {
+        nlEmailPendiente = email;
+        document.getElementById('mNlEmail').textContent = email;
+        document.getElementById('mNlBaja').classList.add('open');
+    }
+
+    async function confirmarBajaNl() {
+        if (!nlEmailPendiente) return;
+        const btn = document.getElementById('btnConfirmBaja');
+        btn.disabled = true;
+        btn.textContent = '⏳ Procesando...';
+        try {
+            const res = await fetch(`${API}/newsletter/desuscribir?email=${encodeURIComponent(nlEmailPendiente)}`, {
+                method: 'DELETE', headers: H()
+            });
+            closeModal();
+            if (res.ok) {
+                toast('✅ Suscriptor dado de baja correctamente');
+                cargarNewsletter();
+            } else {
+                toast('❌ No se pudo dar de baja', false);
+            }
+        } catch {
+            toast('❌ Error de conexión', false);
+            closeModal();
+        } finally {
+            btn.disabled = false;
+            btn.textContent = '🗑️ Sí, dar de baja';
+            nlEmailPendiente = null;
+        }
+    }
+
+    function exportarNewsletter() {
+        if (!newsletterData.length) { toast('No hay datos para exportar', false); return; }
+        const activos = newsletterData.filter(s => s.activo);
+        const csv = ['Email,Fecha Suscripción,Estado',
+            ...activos.map(s => `${s.email},${s.fechaSuscripcion ? s.fechaSuscripcion.slice(0,16) : ''},Activo`)
+        ].join('\n');
+
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url  = URL.createObjectURL(blob);
+        const a    = document.createElement('a');
+        a.href     = url;
+        a.download = `newsletter_suscriptores_${new Date().toISOString().slice(0,10)}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+        toast(`✅ Exportados ${activos.length} suscriptores activos`);
+    }
+
 </script>
+
+<!-- MODAL CONFIRMAR DAR DE BAJA NEWSLETTER -->
+<div class="ov" id="mNlBaja">
+    <div class="modal" style="width:380px">
+        <div class="modal-head">
+            <h3>🗑️ Dar de baja suscriptor</h3>
+            <button class="modal-close" onclick="closeModal()">×</button>
+        </div>
+        <div class="modal-body">
+            <div style="text-align:center;padding:10px 0 20px">
+                <div style="font-size:42px;margin-bottom:12px">📧</div>
+                <p style="font-size:14px;color:var(--text1);margin-bottom:6px">¿Dar de baja a este suscriptor?</p>
+                <p style="font-size:13px;color:var(--accent);font-weight:600" id="mNlEmail">email@ejemplo.com</p>
+                <p style="font-size:12px;color:var(--text2);margin-top:10px">El suscriptor quedará inactivo y dejará de recibir emails. Puedes volver a activarlo más adelante.</p>
+            </div>
+        </div>
+        <div class="modal-foot">
+            <button class="btn btn-ghost btn-sm" onclick="closeModal()">Cancelar</button>
+            <button class="btn btn-sm" style="background:#e53935;color:white;border:none" id="btnConfirmBaja" onclick="confirmarBajaNl()">🗑️ Sí, dar de baja</button>
+        </div>
+    </div>
+</div>
+
+
+<!-- MODAL VER PEDIDO ADMIN -->
+<div class="ov" id="mPedAdmin">
+    <div class="modal" style="width:560px">
+        <div class="modal-head"><h3 id="mPedAdminTitle">Pedido #—</h3><button class="modal-close" onclick="closeModal()">×</button></div>
+        <div class="modal-body" id="mPedAdminBody"></div>
+        <div class="modal-foot">
+            <button class="btn btn-ghost btn-sm" onclick="closeModal()">Cerrar</button>
+            <button class="btn btn-p btn-sm" id="mPedAdminEstBtn">Cambiar estado</button>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>

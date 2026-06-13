@@ -539,6 +539,18 @@
         .perfil-info-row:last-child { border-bottom: none; }
         .perfil-info-label { color: #888; font-weight: 500; display: flex; align-items: center; gap: 6px; }
         .perfil-info-value { font-weight: 600; color: #1a2332; }
+
+        /* ===== YAPE QR ===== */
+        .yape-qr-wrap { text-align: center; padding: 10px 0 20px; }
+        .yape-qr-img { width: 200px; height: 200px; border-radius: 14px; border: 3px solid #6c2d8f; margin: 0 auto 14px; display: block; background: white; padding: 8px; }
+        .yape-qr-number { font-size: 22px; font-weight: 800; color: #6c2d8f; letter-spacing: 2px; margin-bottom: 6px; }
+        .yape-qr-name { font-size: 14px; color: #555; margin-bottom: 4px; }
+        .yape-qr-amount { font-size: 28px; font-weight: 800; color: #1b5e20; margin: 12px 0; }
+        .yape-qr-steps { background: #f9f0ff; border-radius: 10px; padding: 14px 16px; margin: 14px 0; text-align: left; }
+        .yape-qr-steps p { font-size: 12px; color: #555; margin-bottom: 5px; line-height: 1.5; }
+        .yape-qr-steps p:last-child { margin-bottom: 0; }
+        .yape-confirm-btn { width: 100%; padding: 13px; background: #6c2d8f; color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: background .2s; margin-top: 8px; }
+        .yape-confirm-btn:hover { background: #5a2478; }
     </style>
 </head>
 <body>
@@ -1545,7 +1557,8 @@
     function renderResumenSidebar() {
         const subtotal = carrito.reduce((a,i) => a + i.precio*i.cantidad, 0);
         const envio = chkTipoEntrega === 'botica' ? 0 : (subtotal >= 50 ? 0 : 8);
-        const total = subtotal + envio;
+        const descuentoMonto = chkDescuento ? subtotal * (chkDescuento / 100) : 0;
+        const total = subtotal + envio - descuentoMonto;
         document.getElementById('resumenItems').innerHTML = carrito.map(i =>
             `<div class="resumen-item">
                 <span class="resumen-item-nombre">${i.nombre} ×${i.cantidad}</span>
@@ -1553,16 +1566,47 @@
             </div>`).join('');
         document.getElementById('resumenSubtotal').textContent = subtotal.toFixed(2);
         document.getElementById('resumenTotal').textContent = total.toFixed(2);
+        // Mostrar/ocultar fila de descuento
+        let descRow = document.getElementById('resumenDescuentoRow');
+        if (chkDescuento > 0) {
+            if (!descRow) {
+                const envioRow = document.getElementById('resumenEnvioRow');
+                descRow = document.createElement('div');
+                descRow.id = 'resumenDescuentoRow';
+                descRow.className = 'resumen-envio';
+                descRow.style.color = '#2e7d32';
+                descRow.style.fontWeight = '600';
+                envioRow.parentNode.insertBefore(descRow, envioRow);
+            }
+            descRow.innerHTML = `<span>🎉 Descuento ${chkDescuento}%</span><span>-S/ ${descuentoMonto.toFixed(2)}</span>`;
+        } else if (descRow) {
+            descRow.remove();
+        }
         const envioEl = document.getElementById('resumenEnvio');
         if (chkTipoEntrega === 'botica') envioEl.textContent = '🟢 Gratis (recojo)';
         else if (subtotal >= 50) envioEl.textContent = '🟢 Gratis';
         else envioEl.textContent = `S/ ${envio.toFixed(2)}`;
     }
 
+    // Cupones válidos: código → porcentaje de descuento
+    const CUPONES = {
+        'BOTICLIC10': 10,
+        'BOTICLIC20': 20,
+        'SALUD15':    15,
+    };
+    let chkDescuento = 0; // porcentaje activo
+
     function aplicarCupon() {
         const val = document.getElementById('couponInput').value.trim().toUpperCase();
-        if (val === 'BOTICLIC10') toast('✅ Cupón aplicado: 10% de descuento', 'exito');
-        else toast('❌ Cupón no válido', 'error');
+        if (CUPONES[val] !== undefined) {
+            chkDescuento = CUPONES[val];
+            toast('✅ Cupón aplicado: ' + chkDescuento + '% de descuento', 'exito');
+            renderResumenSidebar();
+        } else {
+            chkDescuento = 0;
+            toast('❌ Cupón no válido', 'error');
+            renderResumenSidebar();
+        }
     }
 
     function renderCheckoutStep() {
@@ -1672,7 +1716,7 @@
     // ---- PASO 2: Pago + Comprobante ----
     function renderStepPago() {
         const pagoOpciones = [
-            { val: 'TARJETA', icon: '💳', label: 'Pago Online', desc: 'Visa, Mastercard, Amex' },
+            { val: 'TARJETA', icon: '💳', label: 'Pago con Tarjeta', desc: 'Visa, Mastercard — Próximamente' },
             { val: 'YAPE',    icon: '📱', label: 'Yape',        desc: 'Pago rápido con Yape' },
             { val: 'PLIN',    icon: '📲', label: 'Plin',        desc: 'Pago rápido con Plin' },
             { val: 'EFECTIVO',icon: '💵', label: 'Efectivo',    desc: 'Pago al recibir / recoger' },
@@ -1711,10 +1755,63 @@
             <label style="display:block;font-size:12px;font-weight:600;color:#555;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:5px">Domicilio legal</label>
             <input type="text" id="factDomicilio" placeholder="Domicilio legal" value="${chkDomicilioLegal}" oninput="chkDomicilioLegal=this.value">
         </div>
+        ${chkMetodoPago === 'YAPE' ? renderYapeQR() : ''}
+        ${chkMetodoPago === 'TARJETA' ? renderTarjetaPlaceholder() : ''}
         <div style="display:flex;gap:12px;margin-top:20px">
             <button style="padding:13px 20px;background:transparent;color:#888;border:1.5px solid #e0e0e0;border-radius:8px;cursor:pointer;font-size:14px;font-family:'DM Sans',sans-serif" onclick="chkStep=1;renderCheckoutStep()">← Volver</button>
-            <button class="btn-finalizar" style="margin-top:0;flex:1" onclick="irAPaso3()">Ver resumen →</button>
+            ${chkMetodoPago === 'YAPE' ? '' : '<button class="btn-finalizar" style="margin-top:0;flex:1" onclick="irAPaso3()">Ver resumen →</button>'}
         </div>`;
+    }
+
+    function renderYapeQR() {
+        const subtotal = carrito.reduce((a,i) => a + i.precio*i.cantidad, 0);
+        const envio = chkTipoEntrega === 'botica' ? 0 : (subtotal >= 50 ? 0 : 8);
+        const total = (subtotal + envio).toFixed(2);
+        // QR generado con api.qrserver.com apuntando al número de Yape
+        const yapeNum = '933406222';
+        const yapeName = 'BotiClic Farmacia';
+        const qrData = encodeURIComponent(`yape://transfer?phone=${yapeNum}&amount=${total}&description=Pedido BotiClic`);
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${qrData}`;
+        return `
+        <div class="yape-qr-wrap" style="background:#faf5ff;border-radius:14px;padding:20px;margin-top:16px;border:2px solid #e9d5ff">
+            <div style="font-size:13px;font-weight:700;color:#6c2d8f;margin-bottom:14px;text-transform:uppercase;letter-spacing:.5px">📱 Paga con Yape</div>
+            <img class="yape-qr-img" src="${qrUrl}" alt="QR Yape" onerror="this.src='https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=Yape+${yapeNum}'">
+            <div class="yape-qr-number">${yapeNum.replace(/(\d{3})(\d{3})(\d{3})/, '$1 $2 $3')}</div>
+            <div class="yape-qr-name">${yapeName}</div>
+            <div class="yape-qr-amount">S/ ${total}</div>
+            <div class="yape-qr-steps">
+                <p>1️⃣ Abre tu app Yape</p>
+                <p>2️⃣ Escanea el QR o busca el número <strong>${yapeNum.replace(/(\d{3})(\d{3})(\d{3})/, '$1 $2 $3')}</strong></p>
+                <p>3️⃣ Envía exactamente <strong>S/ ${total}</strong></p>
+                <p>4️⃣ Haz clic en "Ya pagué con Yape" para confirmar tu pedido</p>
+            </div>
+            <button class="yape-confirm-btn" onclick="confirmarPagoYape()">✅ Ya pagué con Yape →</button>
+        </div>`;
+    }
+
+    function renderTarjetaPlaceholder() {
+        return `
+        <div style="background:#f0f4ff;border:2px dashed #90a4e8;border-radius:14px;padding:28px 20px;margin-top:16px;text-align:center">
+            <div style="font-size:42px;margin-bottom:12px">💳</div>
+            <div style="font-size:16px;font-weight:700;color:#3b5bdb;margin-bottom:8px">Pago con tarjeta</div>
+            <div style="font-size:13px;color:#666;margin-bottom:16px;line-height:1.6">
+                Esta opción estará disponible próximamente.<br>
+                Mientras tanto puedes pagar con <strong>Yape</strong> o <strong>Efectivo</strong>.
+            </div>
+            <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" style="height:24px;opacity:.4" alt="Visa">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" style="height:24px;opacity:.4" alt="Mastercard">
+            </div>
+            <button style="margin-top:16px;padding:10px 24px;background:#e8ecff;border:1.5px solid #90a4e8;border-radius:8px;color:#3b5bdb;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif" onclick="selMetodoPago('YAPE');renderCheckoutStep()">
+                📱 Pagar con Yape mejor
+            </button>
+        </div>`;
+    }
+
+    function confirmarPagoYape() {
+        // El cliente confirma que ya pagó — el pedido se crea con estado PENDIENTE
+        // El admin verifica el pago en Yape y cambia el estado a CONFIRMADO
+        irAPaso3();
     }
 
     // ---- PASO 3: Resumen final ----
@@ -1865,6 +1962,15 @@
             if (chkDireccion.referencia) direccionFinal += ` (Ref: ${chkDireccion.referencia})`;
         } else {
             direccionFinal = 'Recojo en botica BotiClic';
+        }
+
+        // Agregar datos de quien recoge al campo de dirección
+        if (chkRecogePor === 'otro' && chkOtraPersona) {
+            const op = chkOtraPersona;
+            direccionFinal += ` || RECOGE: ${op.nombre}`;
+            if (op.tipoDoc && op.doc) direccionFinal += ` | ${op.tipoDoc}: ${op.doc}`;
+            if (op.celular) direccionFinal += ` | Cel: ${op.celular}`;
+            if (op.email) direccionFinal += ` | Email: ${op.email}`;
         }
 
         let metodoFinal = chkMetodoPago;
